@@ -4,6 +4,4 @@ const todoRouter = express();
 
 export default todoRouter;
 
-todoRouter.get("/", () => {
-  console.log("here");
-});
+todoRouter.get("/", () => {});

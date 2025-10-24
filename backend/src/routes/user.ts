@@ -12,7 +12,7 @@ const userSchema = z.object({
 
 type user = z.infer<typeof userSchema>;
 
-userRouter.get("/", async (req, res) => {
+userRouter.post("/signup", async (req, res) => {
   const { data, success, error } = userSchema.safeParse(req.body);
 
   if (!success) {
@@ -41,8 +41,47 @@ userRouter.get("/", async (req, res) => {
         password,
       },
     });
-    return res.json({
+    return res.status(200).json({
       msg: "user created sucessfully",
+    });
+  } catch (error) {
+    console.error("error inserting user", error);
+    return res.status(400).json({
+      msg: error,
+    });
+  }
+});
+
+userRouter.post("/signin", async (req, res) => {
+  const { data, success, error } = userSchema.safeParse(req.body);
+
+  if (!success) {
+    return res.status(400).json({
+      msg: "send valid data",
+      error,
+    });
+  }
+
+  const { username, password } = data;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+    if (!user) {
+      return res.status(400).json({
+        msg: "User does not exist",
+      });
+    }
+
+    if (password != user.password) {
+      return res.status(400).json({
+        msg: "Please Enter a Valid password",
+      });
+    }
+    return res.status(200).json({
+      msg: "Logged in successfully",
     });
   } catch (error) {
     console.error("error inserting user", error);

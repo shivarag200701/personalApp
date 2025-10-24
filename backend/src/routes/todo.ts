@@ -15,6 +15,10 @@ const todoSchema = z.object({
   category: z.string(),
 });
 
+const getTodoSchema = z.object({
+  id: z.number(),
+});
+
 todoRouter.post("/", requireLogin, async (req, res) => {
   const { data, success, error } = todoSchema.safeParse(req.body);
   if (!success) {
@@ -57,6 +61,10 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "internal Server Error",
     });
   }
+});
+
+todoRouter.get("/", requireLogin, (req, res) => {
+  const;
 });
 
 export default todoRouter;

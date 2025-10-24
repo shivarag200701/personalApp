@@ -5,7 +5,7 @@ export function requireLogin(
   res: Response,
   next: NextFunction
 ): void {
-  if (req.session.userId) {
+  if (req.session?.userId) {
     next();
   } else {
     res.status(401).json({

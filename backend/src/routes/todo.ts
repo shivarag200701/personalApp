@@ -15,10 +15,6 @@ const todoSchema = z.object({
   category: z.string(),
 });
 
-const getTodoSchema = z.object({
-  id: z.number(),
-});
-
 todoRouter.post("/", requireLogin, async (req, res) => {
   const { data, success, error } = todoSchema.safeParse(req.body);
   if (!success) {
@@ -64,7 +60,33 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 });
 
 todoRouter.get("/", requireLogin, (req, res) => {
-  const;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({
+      msg: "Not authorises",
+    });
+  }
+  try {
+    const todos = prisma.todo.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    if (!todos) {
+      return res.status(200).json({
+        msg: "No todo found",
+      });
+    }
+    return res.status(200).json({
+      todos,
+    });
+  } catch (error) {
+    console.error("Failed getting todos", error);
+    return res.status(500).json({
+      msg: "Failed to get todos",
+    });
+  }
 });
 
 export default todoRouter;

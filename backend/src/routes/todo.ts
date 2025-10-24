@@ -59,7 +59,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   }
 });
 
-todoRouter.get("/", requireLogin, (req, res) => {
+todoRouter.get("/", requireLogin, async (req, res) => {
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({
@@ -67,7 +67,7 @@ todoRouter.get("/", requireLogin, (req, res) => {
     });
   }
   try {
-    const todos = prisma.todo.findMany({
+    const todos = await prisma.todo.findMany({
       where: {
         userId,
       },

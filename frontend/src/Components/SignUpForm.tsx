@@ -18,10 +18,10 @@ const SignUpForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<Inputs> = (data) => {};
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -70,7 +70,7 @@ const SignUpForm = () => {
             {errors.password && (
               <p className="text-red-500">{errors.password.message}</p>
             )}
-            <Button />
+            <Button isSubmitting={isSubmitting} />
           </form>
         </div>
       </div>

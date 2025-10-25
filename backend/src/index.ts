@@ -5,6 +5,7 @@ import todoRouter from "./routes/todo.js";
 import { createClient } from "redis";
 import { RedisStore } from "connect-redis";
 import session from "express-session";
+import { requireLogin } from "./middleware.js";
 
 const app = express();
 const redisConnectionString = process.env.REDIS_URL || "";
@@ -48,6 +49,12 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 //routes
+app.get("/api/auth-check", requireLogin, (req, res) => {
+  res.status(200).json({
+    isAuthenticated: "true",
+  });
+});
+
 app.use("/v1/user", userRouter);
 app.use("/v1/todo", todoRouter);
 

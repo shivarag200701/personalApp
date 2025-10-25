@@ -9,7 +9,7 @@ export function requireLogin(
     next();
   } else {
     res.status(401).json({
-      msg: "Unauthorized. Please log in.",
+      isAuthenticated: "false",
     });
   }
 }

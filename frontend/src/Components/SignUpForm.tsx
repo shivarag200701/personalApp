@@ -1,4 +1,4 @@
-import axios, { AxiosError, isAxiosError } from "axios";
+import axios, { isAxiosError } from "axios";
 import { useState } from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
@@ -90,10 +90,20 @@ const SignUpForm = () => {
             {errors.password && (
               <p className="text-red-500">{errors.password.message}</p>
             )}
-            <Button isSubmitting={isSubmitting} />
+            <Button
+              isSubmitting={isSubmitting}
+              Initial="Create Account"
+              Loading="Creating Account..."
+            />
           </form>
           <div className="text-center text-red-500 mt-2">
             {error ? error : ""}
+          </div>
+          <div className="text-center text-gray-600 mt-8 font-light">
+            Already have an account?{" "}
+            <a href="/signin" className="text-blue-600 hover:underline">
+              Sign in
+            </a>
           </div>
         </div>
       </div>

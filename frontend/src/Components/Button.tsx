@@ -1,18 +1,21 @@
-import React from "react";
-
 interface ButtonProps {
   isSubmitting: boolean;
+  Initial: string;
+  Loading: string;
 }
 
-const Button = ({ isSubmitting }: ButtonProps) => {
+const Button = ({ isSubmitting, Initial, Loading }: ButtonProps) => {
   return (
-    <div className="flex items-center justify-center bg-linear-to-r from-purple-500 to-pink-400 rounded-md hover:opacity-90 transition-opacity ">
-      <button type="submit" className="cursor-pointer" disabled={isSubmitting}>
-        <div className="py-2 text-white">
-          {isSubmitting ? "Creating Account" : "Create Account"}
-        </div>
-      </button>
-    </div>
+    <button
+      type="submit"
+      disabled={isSubmitting}
+      className="w-full py-2 text-white font-semibold rounded-md
+                 bg-gradient-to-r from-purple-500 to-pink-400
+                 hover:opacity-90 transition-opacity cursor-pointer
+                 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isSubmitting ? Loading : Initial}
+    </button>
   );
 };
 

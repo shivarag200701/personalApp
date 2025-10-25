@@ -6,17 +6,24 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const userSchema = z.object({
+const signUpSchema = z.object({
+  username: z.string().min(3, "less than 3 letters"),
+  password: z.string(),
+  email: z.email(),
+});
+
+const signInSchema = z.object({
   username: z.string().min(3, "less than 3 letters"),
   password: z.string(),
 });
 
 userRouter.use(express.json());
 
-type user = z.infer<typeof userSchema>;
+type SignUp = z.infer<typeof signUpSchema>;
+type SignIn = z.infer<typeof signInSchema>;
 
 userRouter.post("/signup", async (req, res) => {
-  const { data, success, error } = userSchema.safeParse(req.body);
+  const { data, success, error } = signUpSchema.safeParse(req.body);
 
   if (!success) {
     return res.status(400).json({
@@ -25,7 +32,7 @@ userRouter.post("/signup", async (req, res) => {
     });
   }
 
-  const { username, password } = data;
+  const { username, password, email } = data;
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -42,6 +49,7 @@ userRouter.post("/signup", async (req, res) => {
       data: {
         username,
         password,
+        email,
       },
     });
     //create session for user
@@ -58,7 +66,7 @@ userRouter.post("/signup", async (req, res) => {
 });
 
 userRouter.post("/signin", async (req, res) => {
-  const { data, success, error } = userSchema.safeParse(req.body);
+  const { data, success, error } = signInSchema.safeParse(req.body);
 
   if (!success) {
     return res.status(400).json({

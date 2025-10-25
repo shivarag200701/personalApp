@@ -34,15 +34,22 @@ userRouter.post("/signup", async (req, res) => {
 
   const { username, password, email } = data;
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        username,
+        OR: [{ username }, { email }],
       },
     });
     if (user) {
-      return res.status(400).json({
-        msg: "username already taken",
-      });
+      if (username == user.username) {
+        return res.status(400).json({
+          msg: "username already taken",
+        });
+      }
+      if (email == user.email) {
+        return res.status(400).json({
+          msg: "email already taken",
+        });
+      }
     }
 
     const newUser = await prisma.user.create({

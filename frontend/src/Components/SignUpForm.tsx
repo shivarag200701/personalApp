@@ -1,3 +1,4 @@
+import axios, { AxiosError, isAxiosError } from "axios";
 import { useState } from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
@@ -21,7 +22,26 @@ const SignUpForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {};
+  const [error, setError] = useState("");
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/v1/user/signup",
+        data
+      );
+      console.log(res.data.msg);
+    } catch (error) {
+      // console.error("error signing in", error);
+      if (isAxiosError(error)) {
+        console.log(error.response?.data.msg);
+
+        setError(error.response?.data.msg);
+      } else {
+        setError(String(error));
+      }
+    }
+  };
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -72,6 +92,9 @@ const SignUpForm = () => {
             )}
             <Button isSubmitting={isSubmitting} />
           </form>
+          <div className="text-center text-red-500 mt-2">
+            {error ? error : ""}
+          </div>
         </div>
       </div>
     </div>

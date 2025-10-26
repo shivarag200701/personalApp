@@ -46,11 +46,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
       maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: false,
-      sameSite: "strict",
-      path: "/", // Add this
+      httpOnly: true,
+      sameSite: "lax",
     },
   })
 );

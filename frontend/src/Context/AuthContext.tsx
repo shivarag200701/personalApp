@@ -28,7 +28,7 @@ export function AuthProvider({ children }: AuthProps) {
 
     async function fetchUserSession() {
       try {
-        const user = await axios.get("http://localhost:3000/api/auth-check", {
+        const user = await axios.get("/api/api/auth-check", {
           withCredentials: true,
         });
         console.log("user", user.data);

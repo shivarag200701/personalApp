@@ -24,10 +24,7 @@ const SignInForm = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const res = await axios.post(
-        "http://localhost:3000/v1/user/signin",
-        data
-      );
+      const res = await axios.post("api/v1/user/signin", data);
       console.log("signed in");
     } catch (error) {
       // console.error("error signing in", error);

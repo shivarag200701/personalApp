@@ -31,6 +31,13 @@ redisClient.on("error", (error) =>
   console.error("Error connecting to upstash", error)
 );
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 //session middleware
 app.use(
   session({
@@ -39,14 +46,23 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: "auto", // Use 'true' in production with HTTPS
-      maxAge: 1000 * 60 * 60 * 24, // Session expiration time (24 hours)
+      secure: true,
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: false,
+      sameSite: "strict",
+      path: "/", // Add this
     },
   })
 );
 
-app.use(cors({ origin: "*" }));
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  req.session.userId = 1;
+  res.status(200).json({
+    msg: "Session set",
+  });
+});
 
 //routes
 app.get("/api/auth-check", requireLogin, (req, res) => {

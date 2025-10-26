@@ -5,6 +5,8 @@ export function requireLogin(
   res: Response,
   next: NextFunction
 ): void {
+  console.log("session", req.session);
+  console.log("cookies", req.headers.cookie)
   if (req.session?.userId) {
     next();
   } else {

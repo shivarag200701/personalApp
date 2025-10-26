@@ -11,40 +11,47 @@ interface AuthProps {
   children: ReactNode;
 }
 interface ContextProps {
-  isAuntenticated: boolean;
+  isAuthenticated: boolean;
   isLoading: boolean;
 }
 const AuthContext = createContext<ContextProps>({
-  isAuntenticated: false,
+  isAuthenticated: false,
   isLoading: true,
 });
 
 export function AuthProvider({ children }: AuthProps) {
-  const [isAuntenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log("here");
+
     async function fetchUserSession() {
       try {
-        const user = await axios.get("https://localhost:3000/api/auth-check");
-        if (user.data.isAuntenticated == true) {
+        const user = await axios.get("http://localhost:3000/api/auth-check", {
+          withCredentials: true,
+        });
+        console.log("user", user.data);
+        if (user.data.isAuthenticated == "true") {
           setIsAuthenticated(true);
         }
-        if (user.data.isAuntenticated == true) {
+        if (user.data.isAuthenticated == "false") {
           setIsAuthenticated(false);
         }
         setIsLoading(false);
       } catch (error) {
         console.error("error while checking validation", error);
         setIsAuthenticated(false);
+        setIsLoading(false);
       }
     }
     fetchUserSession();
   }, []);
 
-  const value = { isAuntenticated, isLoading };
+  const value = { isAuthenticated, isLoading };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+//for cretaing protected routes
 export const Auth = () => useContext(AuthContext);

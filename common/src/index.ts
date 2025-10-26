@@ -6,13 +6,13 @@ export const signUpSchema = z.object({
   email: z.email(),
 });
 
-enum Priority {
+export enum Priority {
   high,
   medium,
   low,
 }
 
-enum CompleteAt {
+export enum CompleteAt {
   Today,
   Tomorrow,
   Someday,
@@ -23,7 +23,7 @@ export const signInSchema = z.object({
   password: z.string(),
 });
 
-const todoSchema = z.object({
+export const todoSchema = z.object({
   title: z.string(),
   description: z.string(),
   priority: z.enum(Priority),

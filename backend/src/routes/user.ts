@@ -3,24 +3,11 @@ import { z } from "zod";
 const userRouter = express();
 import prisma from "../db/index.js";
 import dotenv from "dotenv";
+import { signUpSchema, signInSchema } from "@shiva200701/todotypes";
 
 dotenv.config();
 
-const signUpSchema = z.object({
-  username: z.string().min(3, "less than 3 letters"),
-  password: z.string(),
-  email: z.email(),
-});
-
-const signInSchema = z.object({
-  username: z.string().min(3, "less than 3 letters"),
-  password: z.string(),
-});
-
 userRouter.use(express.json());
-
-type SignUp = z.infer<typeof signUpSchema>;
-type SignIn = z.infer<typeof signInSchema>;
 
 userRouter.post("/signup", async (req, res) => {
   const { data, success, error } = signUpSchema.safeParse(req.body);

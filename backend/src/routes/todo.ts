@@ -2,18 +2,9 @@ import express from "express";
 import { z } from "zod";
 import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
-import { Priority } from "@prisma/client";
-import { CompleteAt } from "@prisma/client";
+import { todoSchema, Priority } from "@shiva200701/todotypes";
 
 const todoRouter = express();
-
-const todoSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  priority: z.enum(Priority),
-  completeAt: z.enum(CompleteAt),
-  category: z.string(),
-});
 
 todoRouter.post("/", requireLogin, async (req, res) => {
   const { data, success, error } = todoSchema.safeParse(req.body);
@@ -37,8 +28,8 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       data: {
         title,
         description,
-        priority,
-        completeAt,
+        priority: priority as any, // Ensure compatibility between the two types
+        completeAt: completeAt as any, // Ensure compatibility between the two types
         category,
         user: {
           connect: {

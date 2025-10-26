@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AppBar from "../Components/AppBar";
 import axios from "axios";
-import { CalendarDays, Clock, Sparkles } from "lucide-react";
+import { CalendarDays, Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import StatsCard from "../Components/StatsCard";
 import type { Todo } from "@shiva200701/todotypes";
 import TaskCard from "../Components/TaskCard";
@@ -69,7 +69,12 @@ const Dashboard = () => {
         {todayTodos.length != 0 ? (
           <TaskCard todos={todayTodos} />
         ) : (
-          <div>Hello</div>
+          <NoTodo
+            icon={CheckCircle2}
+            heading="All done for today!"
+            description="You've completed all your tasks. Take a moment to relax or plan ahead for tomorrow."
+            button="Add New Task"
+          />
         )}
         <Day
           icon={Clock}
@@ -83,11 +88,12 @@ const Dashboard = () => {
             icon={Clock}
             heading="Nothing planned yet"
             description="Your tomorrow is wide open. Add tasks to plan ahead."
+            button="Plan Tomorrow"
           />
         )}
 
         <Day
-          icon={CalendarDays}
+          icon={Sparkles}
           heading="Someday"
           tasks={`${todayTodos?.length.toString()} tasks`}
         />

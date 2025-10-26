@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ensure body/html takes full height */
+  /* background-color: #131315; Example background color */
+  /* Or for a background image: */
+  /* background-image: url('./path/to/your/image.jpg'); */
+  /* background-size: cover; */
+  /* background-position: center; */
+  /* background-repeat: no-repeat; */
+}

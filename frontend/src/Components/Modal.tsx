@@ -1,32 +1,64 @@
-import React, { useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Tag } from "lucide-react";
+import axios from "axios";
+// import type { Todo } from "@shiva200701/todotypes";
+
+export interface Todo {
+  title: string;
+  description: string;
+  priority: string;
+  completeAt: string;
+  category: string;
+}
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  children: ReactNode;
+  addTodo: (task: Todo) => void;
 }
 
-const Modal = ({ isOpen, onClose }: ModalProps) => {
+const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
   const [title, setTitle] = useState("");
-  const [timeSelection, setTimeSelection] = useState("today");
+  const [description, setDescription] = useState("");
+  const [timeSelection, setTimeSelection] = useState("Today");
   const [priority, setPriority] = useState("high");
+  const [category, setCategory] = useState("");
 
-  const handleClick = (e: MouseEvent) => {
-    e.stopPropagation();
+  const handleClick = () => {
     setTitle("");
-    onclose();
+    onClose();
+  };
+  const createTodo = async () => {
+    try {
+      await axios.post("/api/v1/todo/", {
+        title,
+        description,
+        completeAt: timeSelection,
+        category,
+        priority,
+      });
+      console.log("Todo created");
+      addTodo({
+        title,
+        description,
+        completeAt: timeSelection,
+        category,
+        priority,
+      });
+    } catch (error) {
+      console.error("error while creating todo", error);
+    }
   };
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0  z-50 flex items-center justify-center">
       <div
         className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3">
+      <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3 lg:w-1/3 2xl:w-1/4">
         <button
           onClick={handleClick}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl cursor-pointer"
@@ -46,7 +78,7 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What needs to be done?"
-              className="bg-[#141415] rounded-sm p-2 pl-4 placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full"
+              className="bg-[#141415] rounded-sm p-2 pl-4 placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full text-white"
             />
           </div>
           <div className="text-white text-md font-extralight mb-3">
@@ -54,16 +86,17 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
           </div>
           <div className="mb-6">
             <textarea
-              className="text-[#A2A2A9] border-[0.1px] rounded-sm border-gray-600 w-full font-extralight p-3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="text-white border-[0.1px] rounded-sm border-gray-600 w-full font-extralight p-3 "
               rows={3}
-            >
-              Add more details...
-            </textarea>
+              placeholder="Add more details..."
+            ></textarea>
           </div>
 
           <div className="text-white text-md font-extralight mb-3">When?</div>
           <div className="flex gap-2 mb-6">
-            {(["today", "tomorrow", "someday"] as const).map((time) => (
+            {(["Today", "Tomorrow", "Someday"] as const).map((time) => (
               <Button
                 key={time}
                 variant={time == timeSelection ? "default" : "outline"}
@@ -98,9 +131,11 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
           <div className="mb-6 relative">
             <Tag className="absolute text-gray-500 top-3 left-3 w-5 h-5" />
             <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
               type="text"
               placeholder="e.g., Work, Personal, Health"
-              className="bg-[#141415] rounded-sm p-2 pl-10 placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full"
+              className="bg-[#141415] rounded-sm p-2 pl-10 text-white placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -111,7 +146,13 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
             >
               Cancel
             </Button>
-            <Button disabled={!title}>Add Task</Button>
+            <Button
+              disabled={!title}
+              onClick={createTodo}
+              className="cursor-pointer"
+            >
+              Add Task
+            </Button>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import AppBar from "../Components/AppBar";
 import axios from "axios";
 import { CalendarDays, Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import StatsCard from "../Components/StatsCard";
-import type { Todo } from "@shiva200701/todotypes";
+import type { Todo } from "@/Components/Modal";
 import TaskCard from "../Components/TaskCard";
 import Day from "../Components/Day";
 import NoTodo from "@/Components/NoTodo";
@@ -16,6 +16,11 @@ const Dashboard = () => {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  function addTodo(newTask: Todo) {
+    setTodos((prev) => [...prev, newTask]);
+  }
+
   useEffect(() => {
     async function fetchTodo() {
       try {
@@ -51,13 +56,14 @@ const Dashboard = () => {
     return todos.filter((todo) => todo?.completeAt?.toString() === "Someday");
   }, [todos]);
   console.log("tomorrow todos", tomorrowTodos);
+  console.log("Someday todos", somedayTodos);
 
   return (
     <>
       <button onClick={openModal} className="text-white">
         click me
       </button>
-      <Modal isOpen={isModalOpen} onClose={closeModal} />
+      <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} />
       <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
         <AppBar />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -89,10 +95,10 @@ const Dashboard = () => {
           <Day
             icon={Clock}
             heading="Tomorrow"
-            tasks={`${todayTodos?.length.toString()} tasks`}
+            tasks={`${tomorrowTodos?.length.toString()} tasks`}
           />
           {tomorrowTodos.length != 0 ? (
-            <TaskCard todos={todayTodos} />
+            <TaskCard todos={tomorrowTodos} />
           ) : (
             <NoTodo
               icon={Clock}
@@ -105,10 +111,10 @@ const Dashboard = () => {
           <Day
             icon={Sparkles}
             heading="Someday"
-            tasks={`${todayTodos?.length.toString()} tasks`}
+            tasks={`${somedayTodos?.length.toString()} tasks`}
           />
-          {tomorrowTodos.length != 0 ? (
-            <TaskCard todos={todayTodos} />
+          {somedayTodos.length != 0 ? (
+            <TaskCard todos={somedayTodos} />
           ) : (
             <NoTodo
               icon={Sparkles}

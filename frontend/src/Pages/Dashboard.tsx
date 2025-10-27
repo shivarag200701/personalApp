@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);

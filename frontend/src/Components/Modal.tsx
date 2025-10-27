@@ -13,7 +13,8 @@ const Modal = ({ isOpen, onClose }: ModalProps) => {
   const [timeSelection, setTimeSelection] = useState("today");
   const [priority, setPriority] = useState("high");
 
-  const handleClick = () => {
+  const handleClick = (e: MouseEvent) => {
+    e.stopPropagation();
     setTitle("");
     onclose();
   };

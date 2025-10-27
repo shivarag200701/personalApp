@@ -7,10 +7,15 @@ import type { Todo } from "@shiva200701/todotypes";
 import TaskCard from "../Components/TaskCard";
 import Day from "../Components/Day";
 import NoTodo from "@/Components/NoTodo";
+import Modal from "@/Components/Modal";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   useEffect(() => {
     async function fetchTodo() {
       try {
@@ -48,67 +53,73 @@ const Dashboard = () => {
   console.log("tomorrow todos", tomorrowTodos);
 
   return (
-    <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
-      <AppBar />
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatsCard value={totalTodoCount} label="Total Tasks" />
-        <StatsCard
-          value={3}
-          trend={`${todayTodos?.length.toString()} today`}
-          label="Completed Today"
-        />
-        <StatsCard label="Streak" />
-        <StatsCard label="Completion" />
-      </div>
-      <div className="flex-col">
-        <Day
-          icon={CalendarDays}
-          heading="Today"
-          tasks={`${todayTodos?.length.toString()} tasks`}
-        />
-        {todayTodos.length != 0 ? (
-          <TaskCard todos={todayTodos} />
-        ) : (
-          <NoTodo
-            icon={CheckCircle2}
-            heading="All done for today!"
-            description="You've completed all your tasks. Take a moment to relax or plan ahead for tomorrow."
-            button="Add New Task"
+    <>
+      <button onClick={openModal} className="text-white">
+        click me
+      </button>
+      <Modal isOpen={isModalOpen} onClose={closeModal} />
+      <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
+        <AppBar />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatsCard value={totalTodoCount} label="Total Tasks" />
+          <StatsCard
+            value={3}
+            trend={`${todayTodos?.length.toString()} today`}
+            label="Completed Today"
           />
-        )}
-        <Day
-          icon={Clock}
-          heading="Tomorrow"
-          tasks={`${todayTodos?.length.toString()} tasks`}
-        />
-        {tomorrowTodos.length != 0 ? (
-          <TaskCard todos={todayTodos} />
-        ) : (
-          <NoTodo
+          <StatsCard label="Streak" />
+          <StatsCard label="Completion" />
+        </div>
+        <div className="flex-col">
+          <Day
+            icon={CalendarDays}
+            heading="Today"
+            tasks={`${todayTodos?.length.toString()} tasks`}
+          />
+          {todayTodos.length != 0 ? (
+            <TaskCard todos={todayTodos} />
+          ) : (
+            <NoTodo
+              icon={CheckCircle2}
+              heading="All done for today!"
+              description="You've completed all your tasks. Take a moment to relax or plan ahead for tomorrow."
+              button="Add New Task"
+            />
+          )}
+          <Day
             icon={Clock}
-            heading="Nothing planned yet"
-            description="Your tomorrow is wide open. Add tasks to plan ahead."
-            button="Plan Tomorrow"
+            heading="Tomorrow"
+            tasks={`${todayTodos?.length.toString()} tasks`}
           />
-        )}
+          {tomorrowTodos.length != 0 ? (
+            <TaskCard todos={todayTodos} />
+          ) : (
+            <NoTodo
+              icon={Clock}
+              heading="Nothing planned yet"
+              description="Your tomorrow is wide open. Add tasks to plan ahead."
+              button="Plan Tomorrow"
+            />
+          )}
 
-        <Day
-          icon={Sparkles}
-          heading="Someday"
-          tasks={`${todayTodos?.length.toString()} tasks`}
-        />
-        {tomorrowTodos.length != 0 ? (
-          <TaskCard todos={todayTodos} />
-        ) : (
-          <NoTodo
+          <Day
             icon={Sparkles}
-            heading="Your future awaits"
-            description="Add tasks here for things you'd like to do eventually, without the pressure of a deadline."
-            button="Add Future Task"
+            heading="Someday"
+            tasks={`${todayTodos?.length.toString()} tasks`}
           />
-        )}
+          {tomorrowTodos.length != 0 ? (
+            <TaskCard todos={todayTodos} />
+          ) : (
+            <NoTodo
+              icon={Sparkles}
+              heading="Your future awaits"
+              description="Add tasks here for things you'd like to do eventually, without the pressure of a deadline."
+              button="Add Future Task"
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

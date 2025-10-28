@@ -5,11 +5,13 @@ import axios from "axios";
 // import type { Todo } from "@shiva200701/todotypes";
 
 export interface Todo {
+  id?: number;
   title: string;
   description: string;
   priority: string;
   completeAt: string;
   category: string;
+  completed: boolean;
 }
 
 interface ModalProps {
@@ -45,6 +47,7 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
         completeAt: timeSelection,
         category,
         priority,
+        completed: false,
       });
     } catch (error) {
       console.error("error while creating todo", error);

@@ -1,5 +1,5 @@
 import React from "react";
-import type { Todo } from "@shiva200701/todotypes";
+import type { Todo } from "./Modal";
 import { Tag, Calendar } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
 
@@ -20,7 +20,17 @@ const priorityColors = {
 
 type PriorityKey = keyof typeof priorityColors;
 
-const TaskCard = ({ todos }: { todos: Todo[] }) => {
+type TaskCardProps = {
+  todos: Todo[];
+  completed?: boolean;
+  onToggleComplete: (todoId: string | number) => void; // 🔑 NEW PROP
+};
+
+const TaskCard = ({
+  todos,
+  completed = false,
+  onToggleComplete,
+}: TaskCardProps) => {
   return (
     <div className="w-full flex-col ">
       {todos.map((todo, index) => {
@@ -28,17 +38,33 @@ const TaskCard = ({ todos }: { todos: Todo[] }) => {
           priorityColors[
             todo.priority.toString().toLowerCase() as PriorityKey
           ] || priorityColors.low;
+        const handleComplete = () => {
+          if (!todo.id) {
+            return;
+          }
+          onToggleComplete(todo.id);
+        };
         return (
           <div
             key={index}
-            className="p-5 border border-gray-800  bg-[#1B1B1E] my-4  rounded-2xl"
+            className={`p-5 border border-gray-800  bg-[#1B1B1E] my-4  rounded-2xl ${
+              completed ? "brightness-80" : ""
+            }`}
           >
             <div className="flex gap-5">
-              <div>
-                <Checkbox className="p-3 border-blue-600" />
+              <div className="">
+                <Checkbox
+                  className="p-3 border-blue-600 flex items-center justify-center cursor-pointer transform transition-transform duration-100 hover:scale-[1.1]"
+                  defaultChecked={completed}
+                  onClick={handleComplete}
+                />
               </div>
               <div className="flex-col">
-                <div className="text-white text-md font-medium">
+                <div
+                  className={`text-white text-md font-medium ${
+                    completed ? "line-through" : ""
+                  }`}
+                >
                   {todo.title}
                 </div>
                 <div className="mt-1 text-[#A2A2A9] text-sm">

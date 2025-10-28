@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AppBar from "../Components/AppBar";
 import axios from "axios";
-import { CalendarDays, Clock, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  Sparkles,
+  CheckCircle2,
+  CheckCircle,
+} from "lucide-react";
 import StatsCard from "../Components/StatsCard";
 import type { Todo } from "@/Components/Modal";
 import TaskCard from "../Components/TaskCard";
@@ -13,7 +19,6 @@ const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -21,6 +26,18 @@ const Dashboard = () => {
   function addTodo(newTask: Todo) {
     setTodos((prev) => [...prev, newTask]);
   }
+
+  const toggleTodoCompletion = (todoId: string | number) => {
+    setTodos((prev) => {
+      return prev.map((todo) => {
+        if (todo.id == todoId) {
+          return { ...todo, completed: !todo.completed };
+        }
+        return todo;
+      });
+    });
+    //implement complete API call
+  };
 
   useEffect(() => {
     async function fetchTodo() {
@@ -41,23 +58,36 @@ const Dashboard = () => {
     }
     fetchTodo();
   }, []);
+
+  const completedTodos = useMemo(() => {
+    return todos.filter((todo) => todo?.completed === true);
+  }, [todos]);
+
   const todayTodos = useMemo(() => {
     console.log("firsdt todo", todos[0]);
 
-    return todos.filter((todo) => todo?.completeAt?.toString() === "Today");
+    return todos.filter(
+      (todo) =>
+        todo?.completeAt?.toString() === "Today" && todo?.completed == false
+    );
   }, [todos]);
   const tomorrowTodos = useMemo(() => {
     console.log("firsdt todo", todos[0]);
 
-    return todos.filter((todo) => todo?.completeAt?.toString() === "Tomorrow");
+    return todos.filter(
+      (todo) =>
+        todo?.completeAt?.toString() === "Tomorrow" && todo?.completed == false
+    );
   }, [todos]);
   const somedayTodos = useMemo(() => {
     console.log("firsdt todo", todos[0]);
 
-    return todos.filter((todo) => todo?.completeAt?.toString() === "Someday");
+    return todos.filter(
+      (todo) =>
+        todo?.completeAt?.toString() === "Someday" && todo?.completed == false
+    );
   }, [todos]);
-  console.log("tomorrow todos", tomorrowTodos);
-  console.log("Someday todos", somedayTodos);
+  console.log("completed todos", completedTodos);
 
   return (
     <>
@@ -84,7 +114,10 @@ const Dashboard = () => {
             tasks={`${todayTodos?.length.toString()} tasks`}
           />
           {todayTodos.length != 0 ? (
-            <TaskCard todos={todayTodos} />
+            <TaskCard
+              todos={todayTodos}
+              onToggleComplete={toggleTodoCompletion}
+            />
           ) : (
             <NoTodo
               icon={CheckCircle2}
@@ -99,7 +132,10 @@ const Dashboard = () => {
             tasks={`${tomorrowTodos?.length.toString()} tasks`}
           />
           {tomorrowTodos.length != 0 ? (
-            <TaskCard todos={tomorrowTodos} />
+            <TaskCard
+              todos={tomorrowTodos}
+              onToggleComplete={toggleTodoCompletion}
+            />
           ) : (
             <NoTodo
               icon={Clock}
@@ -115,7 +151,10 @@ const Dashboard = () => {
             tasks={`${somedayTodos?.length.toString()} tasks`}
           />
           {somedayTodos.length != 0 ? (
-            <TaskCard todos={somedayTodos} />
+            <TaskCard
+              todos={somedayTodos}
+              onToggleComplete={toggleTodoCompletion}
+            />
           ) : (
             <NoTodo
               icon={Sparkles}
@@ -123,6 +162,20 @@ const Dashboard = () => {
               description="Add tasks here for things you'd like to do eventually, without the pressure of a deadline."
               button="Add Future Task"
             />
+          )}
+          {completedTodos && (
+            <div>
+              <Day
+                icon={CheckCircle}
+                heading="Completed"
+                tasks={`${completedTodos?.length.toString()} tasks`}
+              />
+              <TaskCard
+                todos={completedTodos}
+                completed={true}
+                onToggleComplete={toggleTodoCompletion}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -32,6 +32,10 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
     onClose();
   };
   const createTodo = async () => {
+    console.log(timeSelection);
+
+    console.log(priority);
+    console.log(category);
     try {
       await axios.post("/api/v1/todo/", {
         title,

@@ -4,16 +4,6 @@ export declare const signUpSchema: z.ZodObject<{
     password: z.ZodString;
     email: z.ZodEmail;
 }, z.core.$strip>;
-export declare enum Priority {
-    high = 0,
-    medium = 1,
-    low = 2
-}
-export declare enum CompleteAt {
-    Today = 0,
-    Tomorrow = 1,
-    Someday = 2
-}
 export declare const signInSchema: z.ZodObject<{
     username: z.ZodString;
     password: z.ZodString;
@@ -21,8 +11,8 @@ export declare const signInSchema: z.ZodObject<{
 export declare const todoSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
-    priority: z.ZodEnum<typeof Priority>;
-    completeAt: z.ZodEnum<typeof CompleteAt>;
+    priority: z.ZodString;
+    completeAt: z.ZodString;
     category: z.ZodString;
 }, z.core.$strip>;
 export type SignUp = z.infer<typeof signUpSchema>;

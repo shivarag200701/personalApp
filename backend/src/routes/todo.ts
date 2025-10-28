@@ -2,11 +2,12 @@ import express from "express";
 import { z } from "zod";
 import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
-import { todoSchema, Priority } from "@shiva200701/todotypes";
+import { todoSchema } from "@shiva200701/todotypes";
 
 const todoRouter = express();
 
 todoRouter.post("/", requireLogin, async (req, res) => {
+  console.log(req.body);
   const { data, success, error } = todoSchema.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
@@ -23,13 +24,15 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   }
   const { title, description, priority, completeAt, category } = data;
 
+  console.log(priority, completeAt);
+
   try {
     const todo = await prisma.todo.create({
       data: {
         title,
         description,
-        priority: priority as any, // Ensure compatibility between the two types
-        completeAt: completeAt as any, // Ensure compatibility between the two types
+        priority,
+        completeAt, // Ensure compatibility between the two types
         category,
         user: {
           connect: {
@@ -52,6 +55,8 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 
 todoRouter.get("/", requireLogin, async (req, res) => {
   const userId = req.session.userId;
+  console.log("user get");
+
   if (!userId) {
     return res.status(401).json({
       msg: "Not authorises",
@@ -63,6 +68,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
         userId,
       },
     });
+    console.log(todos);
 
     if (!todos) {
       return res.status(200).json({

@@ -13,17 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Priority{
-  high
-  medium
-  low
-}
-
-enum CompleteAt{
-  Today
-  Tomorrow
-  Someday
-}
 
 model User {
   id        Int       @id @default(autoincrement())
@@ -39,8 +28,8 @@ model Todo {
   id            Int         @id @default(autoincrement())
   title         String
   description   String
-  priority      Priority    @default(low)
-  completeAt    CompleteAt  @default(Today)
+  priority      String    @default("low")
+  completeAt    String    @default("Today")
   category      String
   user          User        @relation(fields: [userId], references: [id])
   userId        Int    

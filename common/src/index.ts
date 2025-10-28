@@ -6,18 +6,6 @@ export const signUpSchema = z.object({
   email: z.email(),
 });
 
-export enum Priority {
-  high,
-  medium,
-  low,
-}
-
-export enum CompleteAt {
-  Today,
-  Tomorrow,
-  Someday,
-}
-
 export const signInSchema = z.object({
   username: z.string().min(3, "less than 3 letters"),
   password: z.string(),
@@ -26,8 +14,8 @@ export const signInSchema = z.object({
 export const todoSchema = z.object({
   title: z.string(),
   description: z.string(),
-  priority: z.enum(Priority),
-  completeAt: z.enum(CompleteAt),
+  priority: z.string(),
+  completeAt: z.string(),
   category: z.string(),
 });
 

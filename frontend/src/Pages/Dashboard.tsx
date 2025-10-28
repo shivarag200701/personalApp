@@ -59,9 +59,9 @@ const Dashboard = () => {
         });
         const todos = res.data.todos;
         setTodos(todos);
+        console.log("all todos", todos);
 
         const totalTodos = todos.length;
-        console.log(totalTodos);
 
         setTotalCount(totalTodos);
       } catch (error) {
@@ -99,7 +99,15 @@ const Dashboard = () => {
         todo?.completeAt?.toString() === "Someday" && todo?.completed == false
     );
   }, [todos]);
-  console.log("completed todos", completedTodos);
+  const todayCompletedTodos = useMemo(() => {
+    return todos.filter(
+      (todo) =>
+        todo?.completed == true && todo?.completeAt?.toString() === "Today"
+    );
+  }, [todos]);
+  console.log("today todos", todayTodos);
+
+  console.log("today completed todos", todayCompletedTodos);
 
   return (
     <>
@@ -112,7 +120,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatsCard value={totalTodoCount} label="Total Tasks" />
           <StatsCard
-            value={3}
+            value={todayCompletedTodos.length}
             trend={`${todayTodos?.length.toString()} today`}
             label="Completed Today"
           />

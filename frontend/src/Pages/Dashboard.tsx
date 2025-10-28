@@ -105,6 +105,10 @@ const Dashboard = () => {
         todo?.completed == true && todo?.completeAt?.toString() === "Today"
     );
   }, [todos]);
+
+  const notCompletedTodos = useMemo(() => {
+    return todos.filter((todo) => todo.completed == false);
+  }, [todos]);
   console.log("today todos", todayTodos);
 
   console.log("today completed todos", todayCompletedTodos);
@@ -118,7 +122,11 @@ const Dashboard = () => {
       <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
         <AppBar />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatsCard value={totalTodoCount} label="Total Tasks" />
+          <StatsCard
+            value={totalTodoCount}
+            label="Total Tasks"
+            trend={`${notCompletedTodos?.length.toString()} active`}
+          />
           <StatsCard
             value={todayCompletedTodos.length}
             trend={`${todayTodos?.length.toString()} today`}

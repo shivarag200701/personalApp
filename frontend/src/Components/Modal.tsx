@@ -29,6 +29,10 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
 
   const handleClick = () => {
     setTitle("");
+    setDescription("");
+    setTimeSelection("Today");
+    setCategory("high");
+    setCategory("");
     onClose();
   };
   const createTodo = async () => {
@@ -53,6 +57,7 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
         priority,
         completed: false,
       });
+      onClose();
     } catch (error) {
       console.error("error while creating todo", error);
     }

@@ -80,4 +80,38 @@ todoRouter.get("/", requireLogin, async (req, res) => {
   }
 });
 
+todoRouter.post("/completed", async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({
+      msg: "Not authorises",
+    });
+  }
+  const todoId = req.body;
+  try {
+    const todo = await prisma.todo.update({
+      where: {
+        id: todoId,
+      },
+      data: {
+        completed: true,
+      },
+    });
+
+    if (!todo) {
+      return res.status(200).json({
+        msg: "No todo found",
+      });
+    }
+    return res.status(200).json({
+      msg: "todo completed",
+    });
+  } catch (error) {
+    console.error("Failed getting todos", error);
+    return res.status(500).json({
+      msg: "Failed to get todos",
+    });
+  }
+});
+
 export default todoRouter;

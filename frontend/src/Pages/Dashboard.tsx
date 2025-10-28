@@ -27,7 +27,7 @@ const Dashboard = () => {
     setTodos((prev) => [...prev, newTask]);
   }
 
-  const toggleTodoCompletion = (todoId: string | number) => {
+  const toggleTodoCompletion = async (todoId: string | number) => {
     setTodos((prev) => {
       return prev.map((todo) => {
         if (todo.id == todoId) {
@@ -36,7 +36,13 @@ const Dashboard = () => {
         return todo;
       });
     });
-    //implement complete API call
+    try {
+      await axios.post("/api/v1/todo/", {
+        todoId,
+      });
+    } catch (error) {
+      console.error("Error cant mark as completed", error);
+    }
   };
 
   useEffect(() => {

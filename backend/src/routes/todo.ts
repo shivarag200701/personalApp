@@ -80,21 +80,33 @@ todoRouter.get("/", requireLogin, async (req, res) => {
   }
 });
 
-todoRouter.post("/completed", async (req, res) => {
+todoRouter.post("/:id/completed", async (req, res) => {
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({
       msg: "Not authorises",
     });
   }
-  const todoId = req.body;
+  const todoId = req.params.id;
+  const body = req.body;
+  if (!todoId) {
+    console.error("No path param ID");
+    return res.status(400).json({ msg: "No todo id found in path" });
+  }
+
+  // 2. Safely parse the ID
+  const todoIdInt = parseInt(todoId);
+  if (isNaN(todoIdInt)) {
+    return res.status(400).json({ msg: "Invalid todo id format" });
+  }
+
   try {
     const todo = await prisma.todo.update({
       where: {
-        id: todoId,
+        id: parseInt(todoId),
       },
       data: {
-        completed: true,
+        completed: body.completed,
       },
     });
 

@@ -28,6 +28,12 @@ const Dashboard = () => {
   }
 
   const toggleTodoCompletion = async (todoId: string | number) => {
+    const todoToUpdate = todos.find((todo) => todo.id == todoId);
+    if (!todoToUpdate) {
+      return;
+    }
+    // Determine the new status
+    const newCompletedStatus = !todoToUpdate.completed;
     setTodos((prev) => {
       return prev.map((todo) => {
         if (todo.id == todoId) {
@@ -37,8 +43,8 @@ const Dashboard = () => {
       });
     });
     try {
-      await axios.post("/api/v1/todo/", {
-        todoId,
+      await axios.post(`/api/v1/todo/${todoId}/completed`, {
+        completed: newCompletedStatus,
       });
     } catch (error) {
       console.error("Error cant mark as completed", error);
@@ -178,7 +184,6 @@ const Dashboard = () => {
               />
               <TaskCard
                 todos={completedTodos}
-                completed={true}
                 onToggleComplete={toggleTodoCompletion}
               />
             </div>

@@ -22,18 +22,13 @@ type PriorityKey = keyof typeof priorityColors;
 
 type TaskCardProps = {
   todos: Todo[];
-  completed?: boolean;
   onToggleComplete: (todoId: string | number) => void; // 🔑 NEW PROP
 };
 
-const TaskCard = ({
-  todos,
-  completed = false,
-  onToggleComplete,
-}: TaskCardProps) => {
+const TaskCard = ({ todos, onToggleComplete }: TaskCardProps) => {
   return (
     <div className="w-full flex-col ">
-      {todos.map((todo, index) => {
+      {todos.map((todo) => {
         const colors =
           priorityColors[
             todo.priority.toString().toLowerCase() as PriorityKey
@@ -46,23 +41,23 @@ const TaskCard = ({
         };
         return (
           <div
-            key={index}
+            key={todo.id}
             className={`p-5 border border-gray-800  bg-[#1B1B1E] my-4  rounded-2xl ${
-              completed ? "brightness-80" : ""
+              todo.completed ? "brightness-80" : ""
             }`}
           >
             <div className="flex gap-5">
               <div className="">
                 <Checkbox
                   className="p-3 border-blue-600 flex items-center justify-center cursor-pointer transform transition-transform duration-100 hover:scale-[1.1]"
-                  defaultChecked={completed}
+                  defaultChecked={todo.completed}
                   onClick={handleComplete}
                 />
               </div>
               <div className="flex-col">
                 <div
                   className={`text-white text-md font-medium ${
-                    completed ? "line-through" : ""
+                    todo.completed ? "line-through" : ""
                   }`}
                 >
                   {todo.title}

@@ -125,7 +125,7 @@ const Dashboard = () => {
           <StatsCard
             value={totalTodoCount}
             label="Total Tasks"
-            trend={`${notCompletedTodos?.length.toString()} active`}
+            trend={`${notCompletedTodos?.length.toString()} actives`}
           />
           <StatsCard
             value={todayCompletedTodos.length}

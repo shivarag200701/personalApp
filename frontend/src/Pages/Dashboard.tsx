@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import AppBar from "../Components/AppBar";
-import axios from "axios";
 import {
   CalendarDays,
   Clock,
@@ -19,7 +18,8 @@ import NoTodo from "@/Components/NoTodo";
 import Modal from "@/Components/Modal";
 import { calculateStreak } from "@/utils/calculateStreak";
 import NewSection from "@/Components/NewSection";
-import LoadingSkeleton from "@/Components/loadingSkeleton";
+import LoadingSkeleton from "@/Components/LoadingSkeleton";
+import api from "../utils/api";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
@@ -51,7 +51,7 @@ const Dashboard = () => {
       });
     });
     try {
-      await axios.post(`/api/v1/todo/${todoId}/completed`, {
+      await api.post(`/v1/todo/${todoId}/completed`, {
         completed: newCompletedStatus,
       });
     } catch (error) {
@@ -62,9 +62,7 @@ const Dashboard = () => {
   useEffect(() => {
     async function fetchTodo() {
       try {
-        const res = await axios.get("/api/v1/todo/", {
-          withCredentials: true,
-        });
+        const res = await api.get("/v1/todo/");
         const todos = res.data.todos;
         setTodos(todos);
         setLoading(false);

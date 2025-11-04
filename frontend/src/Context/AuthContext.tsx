@@ -5,7 +5,7 @@ import {
   useState,
   useEffect,
 } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 interface AuthProps {
   children: ReactNode;
@@ -13,24 +13,24 @@ interface AuthProps {
 interface ContextProps {
   isAuthenticated: boolean;
   isLoading: boolean;
+  refreshAuth: () => Promise<void>;
 }
 const AuthContext = createContext<ContextProps>({
   isAuthenticated: false,
   isLoading: true,
+  refreshAuth: async () => {},
+
 });
 
 export function AuthProvider({ children }: AuthProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    console.log("here");
+
 
     async function fetchUserSession() {
       try {
-        const user = await axios.get("/api/api/auth-check", {
-          withCredentials: true,
-        });
+        const user = await api.get("/v1/auth-check")
         console.log("user", user.data);
         if (user.data.isAuthenticated == "true") {
           setIsAuthenticated(true);
@@ -45,10 +45,18 @@ export function AuthProvider({ children }: AuthProps) {
         setIsLoading(false);
       }
     }
-    fetchUserSession();
-  }, []);
+    useEffect(() => {
+      console.log("here");
+      fetchUserSession();
+    }, []);
+    
+    const refreshAuth = async () => {
+      setIsLoading(true);
+      await fetchUserSession();
+    };
+    
 
-  const value = { isAuthenticated, isLoading };
+  const value = { isAuthenticated, isLoading, refreshAuth };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

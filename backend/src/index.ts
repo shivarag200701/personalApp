@@ -11,6 +11,11 @@ const app = express();
 const redisConnectionString = process.env.REDIS_URL || "";
 const secretString = process.env.SESSION_SECRET || "";
 
+// Get environment variables
+const NODE_ENV = process.env.NODE_ENV || "development";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const PORT = process.env.PORT || 3000;
+
 //upstash client
 const redisClient = createClient({
   url: redisConnectionString,
@@ -33,8 +38,10 @@ redisClient.on("error", (error) =>
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
@@ -46,9 +53,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
+      secure: NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
@@ -63,7 +71,7 @@ app.get("/", (req, res) => {
 });
 
 //routes
-app.get("/api/auth-check", requireLogin, (req, res) => {
+app.get("/v1/auth-check", requireLogin, (req, res) => {
   res.status(200).json({
     isAuthenticated: "true",
   });

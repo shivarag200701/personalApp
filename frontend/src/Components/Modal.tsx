@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Tag } from "lucide-react";
-import axios from "axios";
+import api from "../utils/api";
 // import type { Todo } from "@shiva200701/todotypes";
 
 export interface Todo {
@@ -42,7 +42,7 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
     console.log(priority);
     console.log(category);
     try {
-      await axios.post("/api/v1/todo/", {
+      await api.post("/v1/todo/", {
         title,
         description,
         completeAt: timeSelection,

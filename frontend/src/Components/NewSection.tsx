@@ -6,8 +6,8 @@ interface NewSectionProps {
 
 const NewSection = ({ onClick }: NewSectionProps) => {
   return (
-    <button onClick={onClick} className="w-full">
-      <div className="text-white my-10 bg-[#1b1a22] p-8 rounded-2xl cursor-pointer bg-opacity-100 hover:bg-transparent ring-[0.3px] ring-blue-500">
+
+      <div className="text-white my-10 bg-[#1b1a22] p-8 rounded-2xl cursor-pointer bg-opacity-100 hover:bg-transparent ring-[0.3px] ring-blue-500" onClick={onClick}>
         <div className="flex justify-between">
           <div className="flex gap-5">
             <div className="bg-linear-to-r from-purple-500 to-pink-400 w-10 h-10 flex items-center justify-center p-2 rounded-sm">
@@ -27,7 +27,6 @@ const NewSection = ({ onClick }: NewSectionProps) => {
           </div>
         </div>
       </div>
-    </button>
   );
 };
 

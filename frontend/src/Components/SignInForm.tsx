@@ -1,4 +1,4 @@
-import axios, { isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { useState } from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/api";
+import { Auth } from "@/Context/AuthContext";
 
 type Inputs = {
   username: string;
@@ -23,11 +25,13 @@ const SignInForm = () => {
 
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { refreshAuth } = Auth();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const res = await axios.post("api/v1/user/signin", data);
+      const res = await api.post("/v1/user/signin", data);
       console.log("signed in");
+      await refreshAuth();
       navigate("/dashboard");
     } catch (error) {
       // console.error("error signing in", error);

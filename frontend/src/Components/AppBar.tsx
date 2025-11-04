@@ -7,9 +7,11 @@ const AppBar = () => {
   const navigate = useNavigate();
   async function logout() {
     try {
-      await axios.post("/api/v1/user/logout", {
+      await axios.post("/v1/user/logout", {
         withCredentials: true,
       });
+      console.log("logged out");
+      
       navigate("/signin");
     } catch (err) {
       console.log(err);

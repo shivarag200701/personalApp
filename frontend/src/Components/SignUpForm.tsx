@@ -1,5 +1,5 @@
-import axios, { isAxiosError } from "axios";
-import { useState } from "react";
+import { isAxiosError } from "axios";
+import { useEffect, useState } from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
 import { User } from "lucide-react";
@@ -9,6 +9,8 @@ import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/api";
+import { Auth } from "@/Context/AuthContext";
 
 type Inputs = {
   username: string;
@@ -25,11 +27,18 @@ const SignUpForm = () => {
 
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated, refreshAuth } = Auth();
 
+  useEffect(() => {
+    if(isAuthenticated){
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated]);
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const res = await axios.post("/api/v1/user/signup", data);
+      const res = await api.post("/v1/user/signup", data);
       console.log(res.data.msg);
+      await refreshAuth();
       navigate("/dashboard");
     } catch (error) {
       // console.error("error signing in", error);

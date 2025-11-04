@@ -25,7 +25,6 @@ const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const openModal = () => setIsModalOpen(true);
@@ -98,8 +97,7 @@ const Dashboard = () => {
   const currentStreak = useMemo(() => {
     console.log("completed Dates", completedDates);
 
-    const streak = calculateStreak(completedDates);
-    setStreak(streak);
+    return calculateStreak(completedDates);
   }, [completedDates]);
 
   const todayTodos = useMemo(() => {
@@ -160,7 +158,7 @@ const Dashboard = () => {
           />
           <StatsCard
             label="Streak"
-            value={`${streak}d`}
+            value={`${currentStreak}d`}
             trend="Keep it up!"
             icon={Flame}
           />

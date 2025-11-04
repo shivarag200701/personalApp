@@ -29,7 +29,7 @@ const SignInForm = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const res = await api.post("/v1/user/signin", data);
+      await api.post("/v1/user/signin", data);
       console.log("signed in");
       await refreshAuth();
       navigate("/dashboard");

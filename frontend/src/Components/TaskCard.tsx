@@ -1,4 +1,3 @@
-import React from "react";
 import type { Todo } from "./Modal";
 import { Tag, Calendar } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";

@@ -1,4 +1,3 @@
-import React from "react";
 import LogoCard from "./LogoCard";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";

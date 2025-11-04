@@ -1,8 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useState} from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Tag } from "lucide-react";
 import api from "../utils/api";
-// import type { Todo } from "@shiva200701/todotypes";
 
 export interface Todo {
   id?: number;

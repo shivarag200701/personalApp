@@ -1,5 +1,3 @@
-import React from "react";
-import { Clock } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Button from "./Button";
 
@@ -14,7 +12,7 @@ const NoTodo = ({ icon: Icon, heading, description, button }: NoTodoProps) => {
   return (
     <div className="flex-col items-center justify-center py-20">
       <div className="flex justify-center mb-6">
-        <div className="flex justify-center items-center bg-gradient-to-b from-[#4b3a75] text-blue-500 to-[#2a243a] p-3 rounded-2xl w-24 h-24 ">
+        <div className="flex justify-center items-center bg-linear-to-r from-[#4b3a75] text-blue-500 to-[#2a243a] p-3 rounded-2xl w-24 h-24 ">
           <Icon className="w-12 h-12" />
         </div>
       </div>

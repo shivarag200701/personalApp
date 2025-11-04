@@ -6,6 +6,7 @@ import { User, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
+import { useNavigate } from "react-router-dom";
 
 type Inputs = {
   username: string;
@@ -21,11 +22,13 @@ const SignInForm = () => {
   } = useForm<Inputs>();
 
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       const res = await axios.post("api/v1/user/signin", data);
       console.log("signed in");
+      navigate("/dashboard");
     } catch (error) {
       // console.error("error signing in", error);
       if (isAxiosError(error)) {

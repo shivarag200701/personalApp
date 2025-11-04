@@ -8,6 +8,7 @@ import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
+import { useNavigate } from "react-router-dom";
 
 type Inputs = {
   username: string;
@@ -23,11 +24,13 @@ const SignUpForm = () => {
   } = useForm<Inputs>();
 
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       const res = await axios.post("/api/v1/user/signup", data);
       console.log(res.data.msg);
+      navigate("/dashboard");
     } catch (error) {
       // console.error("error signing in", error);
       if (isAxiosError(error)) {
@@ -41,7 +44,7 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center bg-white">
       <div className="flex-col">
         <LogoCard />
         <div className="shadow-2xl p-8 min-w-[500px]">

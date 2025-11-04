@@ -19,12 +19,14 @@ import NoTodo from "@/Components/NoTodo";
 import Modal from "@/Components/Modal";
 import { calculateStreak } from "@/utils/calculateStreak";
 import NewSection from "@/Components/NewSection";
+import LoadingSkeleton from "@/Components/loadingSkeleton";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -65,6 +67,7 @@ const Dashboard = () => {
         });
         const todos = res.data.todos;
         setTodos(todos);
+        setLoading(false);
         console.log("all todos", todos);
 
         const totalTodos = todos.length;
@@ -176,7 +179,9 @@ const Dashboard = () => {
             heading="Today"
             tasks={`${todayTodos?.length.toString()} tasks`}
           />
-          {todayTodos.length != 0 ? (
+          {loading ? (
+            <LoadingSkeleton />
+          ) : todayTodos.length != 0 ? (
             <TaskCard
               todos={todayTodos}
               onToggleComplete={toggleTodoCompletion}
@@ -194,7 +199,9 @@ const Dashboard = () => {
             heading="Tomorrow"
             tasks={`${tomorrowTodos?.length.toString()} tasks`}
           />
-          {tomorrowTodos.length != 0 ? (
+          {loading ? (
+            <LoadingSkeleton />
+          ) : tomorrowTodos.length != 0 ? (
             <TaskCard
               todos={tomorrowTodos}
               onToggleComplete={toggleTodoCompletion}
@@ -207,13 +214,14 @@ const Dashboard = () => {
               button="Plan Tomorrow"
             />
           )}
-
           <Day
             icon={Sparkles}
             heading="Someday"
             tasks={`${somedayTodos?.length.toString()} tasks`}
           />
-          {somedayTodos.length != 0 ? (
+          {loading ? (
+            <LoadingSkeleton />
+          ) : somedayTodos.length != 0 ? (
             <TaskCard
               todos={somedayTodos}
               onToggleComplete={toggleTodoCompletion}
@@ -226,19 +234,22 @@ const Dashboard = () => {
               button="Add Future Task"
             />
           )}
-          {completedTodos && (
-            <div>
-              <Day
-                icon={CheckCircle}
-                heading="Completed"
-                tasks={`${completedTodos?.length.toString()} tasks`}
-              />
-              <TaskCard
-                todos={completedTodos}
-                onToggleComplete={toggleTodoCompletion}
-              />
-            </div>
-          )}
+          {completedTodos &&
+            (loading ? (
+              <LoadingSkeleton />
+            ) : (
+              <div>
+                <Day
+                  icon={CheckCircle}
+                  heading="Completed"
+                  tasks={`${completedTodos?.length.toString()} tasks`}
+                />
+                <TaskCard
+                  todos={completedTodos}
+                  onToggleComplete={toggleTodoCompletion}
+                />
+              </div>
+            ))}
         </div>
       </div>
       <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} />

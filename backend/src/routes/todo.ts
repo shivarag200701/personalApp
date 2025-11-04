@@ -90,7 +90,7 @@ todoRouter.post("/:id/completed", async (req, res) => {
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({
-      msg: "Not authorises",
+      msg: "Not authorized",
     });
   }
   const todoId = req.params.id;
@@ -107,23 +107,42 @@ todoRouter.post("/:id/completed", async (req, res) => {
   }
 
   try {
-    const todo = await prisma.todo.update({
-      where: {
-        id: parseInt(todoId),
-      },
-      data: {
-        completed: body.completed,
-      },
-    });
-
-    if (!todo) {
+    if (body.completed == true) {
+      const todo = await prisma.todo.update({
+        where: {
+          id: parseInt(todoId),
+        },
+        data: {
+          completed: body.completed,
+          completedAt: new Date(),
+        },
+      });
+      if (!todo) {
+        return res.status(200).json({
+          msg: "No todo found",
+        });
+      }
       return res.status(200).json({
-        msg: "No todo found",
+        msg: "todo completed",
+      });
+    } else {
+      const todo = await prisma.todo.update({
+        where: {
+          id: parseInt(todoId),
+        },
+        data: {
+          completed: body.completed,
+        },
+      });
+      if (!todo) {
+        return res.status(200).json({
+          msg: "No todo found",
+        });
+      }
+      return res.status(200).json({
+        msg: "todo marked as not complete",
       });
     }
-    return res.status(200).json({
-      msg: "todo completed",
-    });
   } catch (error) {
     console.error("Failed getting todos", error);
     return res.status(500).json({

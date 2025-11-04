@@ -7,6 +7,9 @@ import {
   Sparkles,
   CheckCircle2,
   CheckCircle,
+  Flame,
+  ListTodo,
+  TrendingUp,
 } from "lucide-react";
 import StatsCard from "../Components/StatsCard";
 import type { Todo } from "@/Components/Modal";
@@ -14,11 +17,13 @@ import TaskCard from "../Components/TaskCard";
 import Day from "../Components/Day";
 import NoTodo from "@/Components/NoTodo";
 import Modal from "@/Components/Modal";
+import { calculateStreak } from "@/utils/calculateStreak";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [streak, setStreak] = useState(0);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -75,6 +80,23 @@ const Dashboard = () => {
     return todos.filter((todo) => todo?.completed === true);
   }, [todos]);
 
+  const percentage = useMemo(() => {
+    return (completedTodos.length / todos.length) * 100;
+  });
+
+  const completedDates = useMemo(() => {
+    return completedTodos
+      .map((todo) => todo.completedAt)
+      .filter((date) => date != null);
+  }, [completedTodos]);
+
+  const currentStreak = useMemo(() => {
+    console.log("completed Dates", completedDates);
+
+    const streak = calculateStreak(completedDates);
+    setStreak(streak);
+  }, [completedDates]);
+
   const todayTodos = useMemo(() => {
     console.log("firsdt todo", todos[0]);
 
@@ -126,14 +148,26 @@ const Dashboard = () => {
             value={totalTodoCount}
             label="Total Tasks"
             trend={`${notCompletedTodos?.length.toString()} actives`}
+            icon={ListTodo}
           />
           <StatsCard
-            value={todayCompletedTodos.length}
+            value={todayCompletedTodos.length.toString()}
             trend={`${todayTodos?.length.toString()} today`}
             label="Completed Today"
+            icon={CheckCircle2}
           />
-          <StatsCard label="Streak" />
-          <StatsCard label="Completion" />
+          <StatsCard
+            label="Streak"
+            value={`${streak}d`}
+            trend="Keep it up!"
+            icon={Flame}
+          />
+          <StatsCard
+            label="Completion"
+            value={`${percentage} %`}
+            trend="Overall"
+            icon={TrendingUp}
+          />
         </div>
         <div className="flex-col">
           <Day

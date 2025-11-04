@@ -38,10 +38,10 @@ const SignInForm = () => {
     }
   };
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center bg-white">
       <div className="flex-col">
         <LogoCard />
-        <div className="shadow-2xl p-8 min-w-[500px]">
+        <div className="shadow-2xl p-8 min-w-[500px] bg-white rounded-xl ">
           <div className="text-3xl font-semibold">Welcome Back</div>
           <div className="mt-2 text-gray-400">
             Sign in to continue to FlowTask

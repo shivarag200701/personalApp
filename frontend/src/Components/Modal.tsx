@@ -12,6 +12,7 @@ export interface Todo {
   completeAt: string;
   category: string;
   completed: boolean;
+  completedAt: Date | null;
 }
 
 interface ModalProps {
@@ -56,6 +57,7 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
         category,
         priority,
         completed: false,
+        completedAt: null,
       });
       onClose();
     } catch (error) {

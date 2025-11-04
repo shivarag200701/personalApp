@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppBar from "../Components/AppBar";
 import axios from "axios";
 import {
@@ -18,6 +18,7 @@ import Day from "../Components/Day";
 import NoTodo from "@/Components/NoTodo";
 import Modal from "@/Components/Modal";
 import { calculateStreak } from "@/utils/calculateStreak";
+import NewSection from "@/Components/NewSection";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
@@ -137,12 +138,9 @@ const Dashboard = () => {
 
   return (
     <>
-      <button onClick={openModal} className="text-white">
-        click me
-      </button>
-      <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} />
       <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
         <AppBar />
+        <NewSection onClick={openModal} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatsCard
             value={totalTodoCount}
@@ -240,6 +238,7 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} />
     </>
   );
 };

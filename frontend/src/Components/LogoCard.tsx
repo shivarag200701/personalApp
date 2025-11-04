@@ -7,7 +7,7 @@ const LogoCard = () => {
       <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-400 flex items-center justify-center text-white">
         <CheckCircle2 className="w-7 h-7 text-primary-foreground" />
       </div>
-      <h1 className="text-2xl font-bold tracking-tight">FlowTask</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-white">FlowTask</h1>
     </div>
   );
 };

@@ -13,7 +13,7 @@ const secretString = process.env.SESSION_SECRET || "";
 
 // Get environment variables
 const NODE_ENV = process.env.NODE_ENV || "development";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
 const PORT = process.env.PORT || 3000;
 
 //upstash client
@@ -38,7 +38,24 @@ redisClient.on("error", (error) =>
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin:  (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      // Normalize origin by removing trailing slash
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      const normalizedFrontendUrl = FRONTEND_URL.replace(/\/$/, "");
+      
+      // Check if origin matches (with or without trailing slash)
+      if (normalizedOrigin === normalizedFrontendUrl || origin === FRONTEND_URL) {
+        callback(null, true);
+      } else {
+        console.error(`CORS blocked origin: ${origin}, expected: ${FRONTEND_URL}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

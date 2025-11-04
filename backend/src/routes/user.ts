@@ -100,4 +100,20 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
+userRouter.post("/logout", async (req, res) => {
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) {
+        res.status(500).json({ msg: "Failed to logout" });
+      }
+
+      res.status(200).json({ msg: "Logged out successfully" });
+    });
+  } else {
+    res.status(401).json({
+      msg: "No active session to log out from",
+    });
+  }
+});
+
 export default userRouter;

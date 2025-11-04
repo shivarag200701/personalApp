@@ -82,8 +82,11 @@ const Dashboard = () => {
   }, [todos]);
 
   const percentage = useMemo(() => {
+    if (todos.length == 0) {
+      return 0;
+    }
     return (completedTodos.length / todos.length) * 100;
-  });
+  }, [completedTodos, todos]);
 
   const completedDates = useMemo(() => {
     return completedTodos
@@ -143,7 +146,7 @@ const Dashboard = () => {
         <NewSection onClick={openModal} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatsCard
-            value={totalTodoCount}
+            value={totalTodoCount.toString()}
             label="Total Tasks"
             trend={`${notCompletedTodos?.length.toString()} actives`}
             icon={ListTodo}

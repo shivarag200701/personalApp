@@ -4,6 +4,7 @@ const userRouter = express();
 import prisma from "../db/index.js";
 import dotenv from "dotenv";
 import { signUpSchema, signInSchema } from "@shiva200701/todotypes";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -103,7 +104,6 @@ userRouter.post("/signin", async (req, res) => {
         }
         
         // Manually set cookie since express-session isn't doing it
-        const crypto = require('crypto');
         const secret = process.env.SESSION_SECRET || '';
         
         // Sign the session ID (express-session format)

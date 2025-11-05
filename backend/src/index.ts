@@ -68,7 +68,8 @@ app.use(
     store: redisStore,
     secret: secretString,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Change to true - this will create session even if not modified
+    name: 'connect.sid', // Explicitly set cookie name
     cookie: {
       secure: NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,

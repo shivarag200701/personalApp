@@ -151,4 +151,34 @@ todoRouter.post("/:id/completed", async (req, res) => {
   }
 });
 
+todoRouter.delete("/:id", requireLogin, async (req, res) => {
+  console.log("delete todo");
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({
+      msg: "Not authorized",
+    });
+  }
+  const todoId = req.params.id;
+  if (!todoId) {
+    return res.status(400).json({
+      msg: "No todo id found in path",
+    });
+  }
+  try {
+    await prisma.todo.delete({
+      where: {
+        id: parseInt(todoId),
+      },
+    });
+    return res.status(200).json({
+      msg: "Todo deleted",
+    });
+  } catch (error) {
+    console.error("Failed to delete todo", error);
+    return res.status(500).json({
+      msg: "Failed to delete todo",
+    });
+  }
+});
 export default todoRouter;

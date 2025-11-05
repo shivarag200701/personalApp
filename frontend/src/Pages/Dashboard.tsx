@@ -58,6 +58,20 @@ const Dashboard = () => {
     }
   };
 
+  const deleteTodo = async (todoId: string | number) => {
+    if (!todoId) {
+      return;
+    }
+    setTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+    setTotalCount((prev) => prev - 1);
+    try {
+      await api.delete(`/v1/todo/${todoId}`);
+      console.log("Todo deleted");
+    } catch (error) {
+      console.error("Error deleting todo", error);
+    }
+  }
+
   useEffect(() => {
     async function fetchTodo() {
       try {
@@ -181,6 +195,7 @@ const Dashboard = () => {
             <TaskCard
               todos={todayTodos}
               onToggleComplete={toggleTodoCompletion}
+              onDelete={deleteTodo}
             />
           ) : (
             <NoTodo
@@ -201,6 +216,7 @@ const Dashboard = () => {
             <TaskCard
               todos={tomorrowTodos}
               onToggleComplete={toggleTodoCompletion}
+              onDelete={deleteTodo}
             />
           ) : (
             <NoTodo
@@ -221,6 +237,7 @@ const Dashboard = () => {
             <TaskCard
               todos={somedayTodos}
               onToggleComplete={toggleTodoCompletion}
+              onDelete={deleteTodo}
             />
           ) : (
             <NoTodo
@@ -243,6 +260,7 @@ const Dashboard = () => {
                 <TaskCard
                   todos={completedTodos}
                   onToggleComplete={toggleTodoCompletion}
+                  onDelete={deleteTodo}
                 />
               </div>
             ))}

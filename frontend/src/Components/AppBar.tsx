@@ -19,7 +19,7 @@ const AppBar = () => {
       <LogoCard />
 
       <div className="text-white text-sm flex items-center justify-center bg-red-500 rounded-xl p-2 h-full cursor-pointer ">
-        <button className="cursor-pointer" onClick={logout}>
+        <button className="cursor-pointer bg-opacity-50 hover:bg-opacity-100 transition-opacity hover:text-black" onClick={logout}>
           Logout
         </button>
       </div>

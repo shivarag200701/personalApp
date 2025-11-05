@@ -5,6 +5,7 @@ import Signup from "./Pages/signup";
 import { AuthProvider } from "./Context/AuthContext";
 import RequireAuth from "./Components/RequireAuth";
 import Dashboard from "./Pages/Dashboard";
+import Landing from "./Pages/Landing";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<Signup />} />
             <Route

@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useEffect, useState} from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Tag } from "lucide-react";
 import api from "../utils/api";
@@ -26,6 +26,14 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
   const [timeSelection, setTimeSelection] = useState("Today");
   const [priority, setPriority] = useState("high");
   const [category, setCategory] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+  }, [isOpen]);
 
   const handleClick = () => {
     setTitle("");

@@ -1,0 +1,10 @@
+/* Add this to your existing CSS */
+@keyframes jiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+  }
+  
+  .hover\:animate-jiggle:hover {
+    animation: jiggle 0.3s ease-in-out infinite;
+  }

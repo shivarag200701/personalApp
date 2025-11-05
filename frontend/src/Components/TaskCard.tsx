@@ -1,6 +1,7 @@
 import type { Todo } from "./Modal";
-import { Tag, Calendar } from "lucide-react";
+import { Tag, Calendar, Trash } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
+import api from "@/utils/api";
 
 const priorityColors = {
   high: {
@@ -22,9 +23,10 @@ type PriorityKey = keyof typeof priorityColors;
 type TaskCardProps = {
   todos: Todo[];
   onToggleComplete: (todoId: string | number) => void; // 🔑 NEW PROP
+  onDelete: (todoId: string | number) => void;
 };
 
-const TaskCard = ({ todos, onToggleComplete }: TaskCardProps) => {
+const TaskCard = ({ todos, onToggleComplete, onDelete }: TaskCardProps) => {
   return (
     <div className="w-full flex-col ">
       {todos.map((todo) => {
@@ -32,6 +34,12 @@ const TaskCard = ({ todos, onToggleComplete }: TaskCardProps) => {
           priorityColors[
             todo.priority.toString().toLowerCase() as PriorityKey
           ] || priorityColors.low;
+          const handleDelete = async () => {
+            if (!todo.id) {
+              return;
+            }
+            onDelete(todo.id);
+          }
         const handleComplete = () => {
           if (!todo.id) {
             return;
@@ -41,10 +49,13 @@ const TaskCard = ({ todos, onToggleComplete }: TaskCardProps) => {
         return (
           <div
             key={todo.id}
-            className={`p-5 border border-gray-800  bg-[#1B1B1E] my-4  rounded-2xl ${
+            className={`p-5 border border-gray-800 relative  bg-[#1B1B1E] my-4  rounded-2xl ${
               todo.completed ? "brightness-80" : ""
             }`}
           >
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" onClick={handleDelete}>
+              <Trash className="w-5 h-5" />
+            </button>
             <div className="flex gap-5">
               <div className="">
                 <Checkbox

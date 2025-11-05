@@ -99,7 +99,9 @@ const Dashboard = () => {
     if (todos.length == 0) {
       return 0;
     }
-    return (completedTodos.length / todos.length) * 100;
+    let percentage = (completedTodos.length / todos.length) * 100;
+    let roundedPercentage = Math.round(percentage);
+    return roundedPercentage;
   }, [completedTodos, todos]);
 
   const completedDates = useMemo(() => {

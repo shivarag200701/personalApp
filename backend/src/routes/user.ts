@@ -102,13 +102,37 @@ userRouter.post("/signin", async (req, res) => {
           return res.status(500).json({ msg: "Session error" });
         }
         
-        // Check if cookie is now set
-        const setCookie = res.getHeader('Set-Cookie');
-        console.log("After regenerate - Set-Cookie:", setCookie);
+        // Manually set cookie since express-session isn't doing it
+        const crypto = require('crypto');
+        const secret = process.env.SESSION_SECRET || '';
         
-        if (!setCookie) {
-          console.error("⚠️ Still no cookie after regenerate!");
+        // Sign the session ID (express-session format)
+        const signature = crypto
+          .createHmac('sha256', secret)
+          .update(req.sessionID)
+          .digest('base64')
+          .replace(/=+$/, '');
+        
+        const signedId = `s:${req.sessionID}.${signature}`;
+        
+        // Build cookie string
+        const cookieParts = [
+          `connect.sid=${encodeURIComponent(signedId)}`,
+          `Path=/`,
+          `HttpOnly`,
+          `Max-Age=86400`, // 24 hours
+        ];
+        
+        // Add production-specific attributes
+        if (process.env.NODE_ENV === "production") {
+          cookieParts.push(`Secure`);
+          cookieParts.push(`Domain=.shiva-raghav.com`);
         }
+        
+        cookieParts.push(`SameSite=Lax`);
+        
+        res.setHeader('Set-Cookie', cookieParts.join('; '));
+        console.log("✅ Manually set cookie");
         
         return res.status(200).json({
           msg: "Logged in successfully",

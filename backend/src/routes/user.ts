@@ -87,32 +87,34 @@ userRouter.post("/signin", async (req, res) => {
         msg: "Please Enter a Valid password",
       });
     }
-
-    req.session.userId = user.id;
-
-req.session.save((err) => {
-  if (err) {
-    console.error("Session save error:", err);
-    return res.status(500).json({ msg: "Session error" });
-  }
-   // Log before sending response
-   console.log("Session ID:", req.sessionID);
-   console.log("Response headers before send:", res.getHeaders());
-   
-   // Ensure cookie header exists
-   const setCookie = res.getHeader('Set-Cookie');
-   console.log("Set-Cookie header:", setCookie);
-   
-   if (!setCookie) {
-     console.error("⚠️ Cookie not set by express-session!");
-     // Don't send response yet - let express-session handle it
-   }
-
-   // Send response only after session is saved
-  return res.status(200).json({
-    msg: "Logged in successfully",
-  });
-});
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Session regenerate error:", err);
+        return res.status(500).json({ msg: "Session error" });
+      }
+      
+      // Set userId after regeneration
+      req.session.userId = user.id;
+      
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ msg: "Session error" });
+        }
+        
+        // Check if cookie is now set
+        const setCookie = res.getHeader('Set-Cookie');
+        console.log("After regenerate - Set-Cookie:", setCookie);
+        
+        if (!setCookie) {
+          console.error("⚠️ Still no cookie after regenerate!");
+        }
+        
+        return res.status(200).json({
+          msg: "Logged in successfully",
+        });
+      });
+    });
   } catch (error) {
     console.error("error inserting user", error);
     return res.status(400).json({

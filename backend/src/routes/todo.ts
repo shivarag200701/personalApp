@@ -181,4 +181,61 @@ todoRouter.delete("/:id", requireLogin, async (req, res) => {
     });
   }
 });
+
+todoRouter.put("/:id", requireLogin, async (req, res) => {
+  const userId = req.session.userId;
+  if(!userId) {
+    return res.status(401).json({
+      msg: "Not authorized",
+    });
+  }
+
+  const todoId = req.params.id;
+  if(!todoId) {
+    return res.status(400).json({
+      msg: "No todo id found in path",
+    });
+  }
+
+  const {data, success, error} = todoSchema.safeParse(req.body);
+  if(!success) {
+    return res.status(400).json({
+      msg: "Send proper data",
+      error,
+    });
+  }
+  const {title, description, priority, completeAt, category} = data;
+  try {
+    const existingTodo = await prisma.todo.findFirst({
+      where :{
+        id: parseInt(todoId),
+        userId,
+      },
+    });
+    if(!existingTodo) {
+      return res.status(400).json({
+        msg: "No todo found",
+      });
+    }
+    const updatedTodo = await prisma.todo.update({
+      where: {id: parseInt(todoId)},
+      data: {
+        title,
+        description,
+        priority,
+        completeAt,
+        category,
+      },
+    })
+    return res.status(200).json({
+      msg: "Todo updated successfully",
+      todo: updatedTodo,
+    });
+  }catch(error){
+    console.error("Error while updating todo",error);
+    return res.status(500).json({
+      msg: "Failed to update todo, internal server error",
+    });
+  }
+})
 export default todoRouter;

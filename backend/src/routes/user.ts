@@ -95,6 +95,20 @@ req.session.save((err) => {
     console.error("Session save error:", err);
     return res.status(500).json({ msg: "Session error" });
   }
+   // Log before sending response
+   console.log("Session ID:", req.sessionID);
+   console.log("Response headers before send:", res.getHeaders());
+   
+   // Ensure cookie header exists
+   const setCookie = res.getHeader('Set-Cookie');
+   console.log("Set-Cookie header:", setCookie);
+   
+   if (!setCookie) {
+     console.error("⚠️ Cookie not set by express-session!");
+     // Don't send response yet - let express-session handle it
+   }
+
+   // Send response only after session is saved
   return res.status(200).json({
     msg: "Logged in successfully",
   });

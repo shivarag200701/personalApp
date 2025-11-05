@@ -154,10 +154,12 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="h-full bg-[#131315] max-w-6xl mx-auto p-4 md:p-8">
-        <AppBar />
+      <div className="min-h-screen bg-[#131315] max-w-6xl mx-auto p-4 md:p-8 pb-12">
+        <div className="mb-8">
+          <AppBar />
+        </div>
         <NewSection onClick={openModal} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatsCard
             value={totalTodoCount.toString()}
             label="Total Tasks"
@@ -183,7 +185,7 @@ const Dashboard = () => {
             icon={TrendingUp}
           />
         </div>
-        <div className="flex-col">
+        <div className="flex-col space-y-8">
           <Day
             icon={CalendarDays}
             heading="Today"
@@ -251,7 +253,7 @@ const Dashboard = () => {
             (loading ? (
               <LoadingSkeleton />
             ) : (
-              <div>
+              <div className="mt-8">
                 <Day
                   icon={CheckCircle}
                   heading="Completed"

@@ -74,7 +74,8 @@ app.use(
       secure: NODE_ENV === "production",
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      sameSite: NODE_ENV === "production" ? "none" : "lax",
+      sameSite:"lax",
+      domain: NODE_ENV === "production" ? ".shiva-raghav.com" : undefined,
     },
   })
 );

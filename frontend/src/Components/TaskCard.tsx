@@ -1,7 +1,6 @@
 import type { Todo } from "./Modal";
 import { Tag, Calendar, Trash } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
-import api from "@/utils/api";
 
 const priorityColors = {
   high: {

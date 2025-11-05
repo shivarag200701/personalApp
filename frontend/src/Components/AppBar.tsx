@@ -1,14 +1,12 @@
 import LogoCard from "./LogoCard";
-import axios from "axios";
+import api from "../utils/api";
 import { useNavigate } from "react-router-dom";
 
 const AppBar = () => {
   const navigate = useNavigate();
   async function logout() {
     try {
-      await axios.post("/v1/user/logout", {
-        withCredentials: true,
-      });
+      await api.post("/v1/user/logout");
       console.log("logged out");
       
       navigate("/signin");

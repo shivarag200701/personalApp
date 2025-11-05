@@ -89,9 +89,16 @@ userRouter.post("/signin", async (req, res) => {
     }
 
     req.session.userId = user.id;
-    return res.status(200).json({
-      msg: "Logged in successfully",
-    });
+
+req.session.save((err) => {
+  if (err) {
+    console.error("Session save error:", err);
+    return res.status(500).json({ msg: "Session error" });
+  }
+  return res.status(200).json({
+    msg: "Logged in successfully",
+  });
+});
   } catch (error) {
     console.error("error inserting user", error);
     return res.status(400).json({

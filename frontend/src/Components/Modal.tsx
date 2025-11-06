@@ -49,7 +49,9 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       setIsRecurring(todoToEdit.isRecurring || false);
       setRecurrencePattern(todoToEdit.recurrencePattern || "daily");
       setRecurrenceInterval(todoToEdit.recurrenceInterval || 1);
-      setRecurrenceEndDate(todoToEdit.recurrenceEndDate ? todoToEdit.recurrenceEndDate.toISOString().split("T")[0] : "");
+      setRecurrenceEndDate(todoToEdit.recurrenceEndDate 
+        ? new Date(todoToEdit.recurrenceEndDate).toISOString().split("T")[0]
+        : "");
     } else {
       // Reset form for new todo
       setTitle("");

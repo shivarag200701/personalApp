@@ -39,6 +39,7 @@ export async function createRecurringTask(
             isRecurring: true,
         }
     })
+    console.log("recurring task template",template);
 
     if(!template){
         throw new Error("Recurring task template not found");
@@ -97,7 +98,7 @@ export async function processRecurringTasks(): Promise<void> {
             ]
         }
     })
-
+    console.log("templates to process",templatesToProcess);
     for (const template of templatesToProcess) {
         try{await createRecurringTask(template.id, template.userId);
         }catch(error){

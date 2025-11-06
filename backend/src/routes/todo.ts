@@ -80,20 +80,61 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     });
   }
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Single query to get all tasks we need
     const todos = await prisma.todo.findMany({
       where: {
         userId,
+        OR: [
+          // Non-recurring tasks
+          { isRecurring: false },
+          // Child instances (actual recurring tasks to do)
+          { isRecurring: true, parentRecurringId: { not: null } },
+          // Parent templates created today
+          {
+            isRecurring: true,
+            parentRecurringId: null,
+            createdAt: {
+              gte: today,
+              lt: tomorrow
+            }
+          }
+        ]
       },
     });
-    console.log(todos);
 
-    if (!todos) {
+    // Filter out parent templates that already have instances (in-memory filtering)
+    const childInstanceParentIds = new Set(
+      todos
+        .filter(t => t.isRecurring && t.parentRecurringId !== null)
+        .map(t => t.parentRecurringId)
+        .filter(id => id !== null)
+    );
+
+    const filteredTodos = todos.filter(todo => {
+      // If it's a parent template, only show if no instance exists yet
+      if (todo.isRecurring && todo.parentRecurringId === null) {
+        return !childInstanceParentIds.has(todo.id);
+      }
+      // Show all other tasks (non-recurring and child instances)
+      return true;
+    });
+
+    console.log(filteredTodos);
+
+    if (!filteredTodos || filteredTodos.length === 0) {
       return res.status(200).json({
         msg: "No todo found",
+        todos: [],
       });
     }
     return res.status(200).json({
-      todos,
+      todos: filteredTodos,
     });
   } catch (error) {
     console.error("Failed getting todos", error);

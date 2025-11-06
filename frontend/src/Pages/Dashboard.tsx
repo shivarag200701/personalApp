@@ -222,6 +222,7 @@ const Dashboard = () => {
               heading="All done for today!"
               description="You've completed all your tasks. Take a moment to relax or plan ahead for tomorrow."
               button="Add New Task"
+              onClick={openModal}
             />
           )}
           <Day
@@ -244,6 +245,7 @@ const Dashboard = () => {
               heading="Nothing planned yet"
               description="Your tomorrow is wide open. Add tasks to plan ahead."
               button="Plan Tomorrow"
+              onClick={openModal}
             />
           )}
           <Day
@@ -266,6 +268,7 @@ const Dashboard = () => {
               heading="Your future awaits"
               description="Add tasks here for things you'd like to do eventually, without the pressure of a deadline."
               button="Add Future Task"
+              onClick={openModal}
             />
           )}
           {completedTodos &&

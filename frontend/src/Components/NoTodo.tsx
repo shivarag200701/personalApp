@@ -1,14 +1,14 @@
 import type { LucideIcon } from "lucide-react";
-import Button from "./Button";
 
 interface NoTodoProps {
   icon: LucideIcon;
   heading: string;
   description: string;
   button: string;
+  onClick: () => void;
 }
 
-const NoTodo = ({ icon: Icon, heading, description, button }: NoTodoProps) => {
+const NoTodo = ({ icon: Icon, heading, description, button, onClick }: NoTodoProps) => {
   return (
     <div className="flex-col items-center justify-center py-12 md:py-16">
       <div className="flex justify-center mb-6">
@@ -26,7 +26,12 @@ const NoTodo = ({ icon: Icon, heading, description, button }: NoTodoProps) => {
       </div>
       <div className="flex items-center justify-center">
         <div className="min-w-50">
-          <Button Initial={button} />
+          <button className="w-full py-2 text-white font-semibold rounded-md
+                 bg-linear-to-r from-purple-500 to-pink-400
+                 hover:opacity-90 transition-opacity cursor-pointer
+                 disabled:opacity-50 disabled:cursor-not-allowed" onClick={onClick}>
+            {button}
+          </button>
         </div>
       </div>
     </div>

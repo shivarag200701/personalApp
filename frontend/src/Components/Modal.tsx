@@ -109,9 +109,9 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         priority,
         completed: false,
         completedAt: null,
-        isRecurring: false,
-        recurrencePattern: "daily",
-        recurrenceInterval: 1,
+        isRecurring,
+        recurrencePattern,
+        recurrenceInterval,
         recurrenceEndDate: null,
         parentRecurringId: null,
       });

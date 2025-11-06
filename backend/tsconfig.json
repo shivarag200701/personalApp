@@ -46,6 +46,6 @@
     "dist",
     "**/*.spec.ts",
     // 💡 Add the problematic file here
-    "prisma.config.ts"
+    "prisma.config.ts.bak"
   ]
 }

@@ -18,14 +18,34 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   addTodo: (task: Todo) => void;
+  editTodo?: (task: Todo) => void;
+  todoToEdit?: Todo | null;
 }
 
-const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
+const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [timeSelection, setTimeSelection] = useState("Today");
   const [priority, setPriority] = useState("high");
   const [category, setCategory] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (todoToEdit) {
+      setTitle(todoToEdit.title);
+      setDescription(todoToEdit.description);
+      setTimeSelection(todoToEdit.completeAt);
+      setPriority(todoToEdit.priority);
+      setCategory(todoToEdit.category);
+    } else {
+      // Reset form for new todo
+      setTitle("");
+      setDescription("");
+      setTimeSelection("Today");
+      setPriority("high");
+      setCategory("");
+    }
+  }, [todoToEdit, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,6 +68,7 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
 
     console.log(priority);
     console.log(category);
+    setIsSubmitting(true);
     try {
       await api.post("/v1/todo/", {
         title,
@@ -67,11 +88,54 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
         completedAt: null,
       });
       onClose();
+      handleClick();
     } catch (error) {
       console.error("error while creating todo", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const updateTodo = async () => {
+    if (!todoToEdit?.id) return;
+    
+    setIsSubmitting(true);
+    try {
+      await api.put(`/v1/todo/${todoToEdit.id}`, {
+        title,
+        description,
+        completeAt: timeSelection,
+        category,
+        priority,
+      });
+      console.log("Todo updated");
+      if (editTodo) {
+        editTodo({
+          ...todoToEdit,
+          title,
+          description,
+          completeAt: timeSelection,
+          category,
+          priority,
+        });
+      }
+      handleClick();
+    } catch (error) {
+      console.error("error while updating todo", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const handleSubmit = () =>{
+    if(todoToEdit) {
+      updateTodo();
+    } else {
+      createTodo();
+    }
+  }
   if (!isOpen) return null;
+
+  const isEditMode = !!todoToEdit;
 
   return (
     <div className="fixed inset-0  z-50 flex items-center justify-center">
@@ -168,11 +232,13 @@ const Modal = ({ isOpen, onClose, addTodo }: ModalProps) => {
               Cancel
             </Button>
             <Button
-              disabled={!title}
-              onClick={createTodo}
+              disabled={!title || isSubmitting}
+              onClick={handleSubmit}
               className="cursor-pointer"
             >
-              Add Task
+              {isSubmitting
+              ? (isEditMode ? "Updating..." : "Adding...")
+              : (isEditMode ? "Update Task" : "Add Task")}
             </Button>
           </div>
         </div>

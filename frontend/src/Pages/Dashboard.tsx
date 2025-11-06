@@ -26,13 +26,27 @@ const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+    setTodoToEdit(null);
+  }
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTodoToEdit(null);
+  }
 
   function addTodo(newTask: Todo) {
     setTodos((prev) => [...prev, newTask]);
   }
+  function updateTodo(updatedTask: Todo) {
+    setTodos((prev) => prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo));
+  }
+  const handleEdit = (todo: Todo) => {
+    setTodoToEdit(todo);
+    setIsModalOpen(true);
+  };
 
   const toggleTodoCompletion = async (todoId: string | number) => {
     const todoToUpdate = todos.find((todo) => todo.id == todoId);
@@ -200,6 +214,7 @@ const Dashboard = () => {
               todos={todayTodos}
               onToggleComplete={toggleTodoCompletion}
               onDelete={deleteTodo}
+              onEdit={handleEdit}
             />
           ) : (
             <NoTodo
@@ -221,6 +236,7 @@ const Dashboard = () => {
               todos={tomorrowTodos}
               onToggleComplete={toggleTodoCompletion}
               onDelete={deleteTodo}
+              onEdit={handleEdit}
             />
           ) : (
             <NoTodo
@@ -242,6 +258,7 @@ const Dashboard = () => {
               todos={somedayTodos}
               onToggleComplete={toggleTodoCompletion}
               onDelete={deleteTodo}
+              onEdit={handleEdit}
             />
           ) : (
             <NoTodo
@@ -265,12 +282,13 @@ const Dashboard = () => {
                   todos={completedTodos}
                   onToggleComplete={toggleTodoCompletion}
                   onDelete={deleteTodo}
+                  onEdit={handleEdit}
                 />
               </div>
             ))}
         </div>
       </div>
-      <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} />
+      <Modal isOpen={isModalOpen} onClose={closeModal} addTodo={addTodo} editTodo={updateTodo} todoToEdit={todoToEdit} />
     </>
   );
 };

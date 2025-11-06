@@ -1,5 +1,5 @@
 import type { Todo } from "./Modal";
-import { Tag, Calendar, Trash } from "lucide-react";
+import { Tag, Calendar, Trash, Pencil } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
 
 const priorityColors = {
@@ -23,9 +23,10 @@ type TaskCardProps = {
   todos: Todo[];
   onToggleComplete: (todoId: string | number) => void; // 🔑 NEW PROP
   onDelete: (todoId: string | number) => void;
+  onEdit?: (todo: Todo) => void; 
 };
 
-const TaskCard = ({ todos, onToggleComplete, onDelete }: TaskCardProps) => {
+const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) => {
   return (
     <div className="w-full flex-col ">
       {todos.map((todo) => {
@@ -45,6 +46,11 @@ const TaskCard = ({ todos, onToggleComplete, onDelete }: TaskCardProps) => {
           }
           onToggleComplete(todo.id);
         };
+        const handleEdit = () =>{
+          if (onEdit){
+            onEdit(todo);
+          }
+        }
         return (
           <div
             key={todo.id}
@@ -52,9 +58,22 @@ const TaskCard = ({ todos, onToggleComplete, onDelete }: TaskCardProps) => {
               todo.completed ? "brightness-80" : ""
             }`}
           >
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" onClick={handleDelete}>
-              <Trash className="w-5 h-5" />
-            </button>
+             <div className="absolute top-2 right-2 flex gap-2">
+              <button 
+                className="text-gray-500 hover:text-purple-400 text-xl cursor-pointer transition-colors" 
+                onClick={handleEdit}
+                title="Edit task"
+              >
+                <Pencil className="w-5 h-5" />
+              </button>
+              <button 
+                className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" 
+                onClick={handleDelete}
+                title="Delete task"
+              >
+                <Trash className="w-5 h-5" />
+              </button>
+            </div>
             <div className="flex gap-5">
               <div className="">
                 <Checkbox

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
 import { todoSchema } from "@shiva200701/todotypes";
+import { calculateNextOccurence } from "../utils/recurringTasks.js";
 
 const todoRouter = express();
 
@@ -22,9 +23,8 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "unauthorized",
     });
   }
-  const { title, description, priority, completeAt, category } = data;
+  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
 
-  console.log(priority, completeAt);
 
   try {
     const todo = await prisma.todo.create({
@@ -34,6 +34,11 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         priority,
         completeAt, // Ensure compatibility between the two types
         category,
+        isRecurring: isRecurring || false,
+        recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
+        recurrenceInterval: isRecurring ? (recurrenceInterval ?? 1) : null,
+        recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
+        nextOccurrence:null,
         user: {
           connect: {
             id: userId,
@@ -41,6 +46,18 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         },
       },
     });
+    if(isRecurring && recurrencePattern){
+      const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, todo.createdAt);
+
+      await prisma.todo.update({
+        where: {
+          id: todo.id,
+        },
+        data: {
+          nextOccurrence: nextOccurrence,
+        },
+      });
+    }
 
     return res.status(200).json({
       msg: "Todo added sucessfully",
@@ -204,7 +221,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       error,
     });
   }
-  const {title, description, priority, completeAt, category} = data;
+  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate} = data;
   try {
     const existingTodo = await prisma.todo.findFirst({
       where :{
@@ -225,6 +242,10 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         priority,
         completeAt,
         category,
+        isRecurring: isRecurring || false,
+        recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
+        recurrenceInterval: isRecurring ? (recurrenceInterval ?? 1) : null,
+        recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
       },
     })
     return res.status(200).json({

@@ -6,6 +6,8 @@ import { createClient } from "redis";
 import { RedisStore } from "connect-redis";
 import session from "express-session";
 import { requireLogin } from "./middleware.js";
+import { processRecurringTasks } from "./utils/recurringTasks.js";
+import cron from "node-cron";
 
 const app = express();
 const redisConnectionString = process.env.REDIS_URL || "";
@@ -102,5 +104,33 @@ app.use("/v1/todo", todoRouter);
 app.listen(3000, () => {
   console.log("running in port 3000");
 });
+
+//cron job to process recurring tasks every day at 12:00 AM
+
+cron.schedule("0 0 * * *", async()=>{
+  console.log("Processing recurring tasks");
+  try{
+    await processRecurringTasks();
+  }catch(error){
+    console.error("Error processing recurring tasks", error);
+  }
+});
+
+processRecurringTasks()
+  .then(()=>{
+    console.log("Recurring tasks processed successfully");
+  })
+  .catch((error)=>{
+    console.error("Error processing recurring tasks", error);
+  });
+
+cron.schedule("0 * * * *",async()=>{
+  try{
+    await processRecurringTasks();
+  }catch(error){
+    console.error("Error processing recurring tasks", error);
+  }
+})
+
 
 export default app;

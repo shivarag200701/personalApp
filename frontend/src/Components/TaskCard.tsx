@@ -1,5 +1,5 @@
 import type { Todo } from "./Modal";
-import { Tag, Calendar, Trash, Pencil } from "lucide-react";
+import { Tag, Calendar, Trash, Pencil, Repeat } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
 
 const priorityColors = {
@@ -51,6 +51,8 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
             onEdit(todo);
           }
         }
+        console.log(todo);
+        
         return (
           <div
             key={todo.id}
@@ -105,6 +107,14 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
                     </div>
                     <div>{todo.category}</div>
                   </div>
+                  {todo.isRecurring && (
+                    <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
+                      <div className="flex justify-center items-center">
+                        <Repeat className="w-3 h-3" />
+                      </div>
+                      <div>{todo.recurrencePattern}</div>
+                    </div>
+                  )}
                   <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
                     <div className="flex justify-center items-center">
                       <Calendar className="w-3 h-3" />

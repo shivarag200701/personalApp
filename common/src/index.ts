@@ -17,6 +17,11 @@ export const todoSchema = z.object({
   priority: z.string(),
   completeAt: z.string(),
   category: z.string(),
+  isRecurring: z.boolean().optional(),
+  recurrencePattern: z.enum(["daily", "weekly", "monthly", "yearly"]).optional(),
+  recurrenceInterval: z.number().int().positive().optional(),
+  recurrenceEndDate: z.string().optional(),
+  nextOccurrence: z.string().optional(),
 });
 
 export type SignUp = z.infer<typeof signUpSchema>;

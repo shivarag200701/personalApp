@@ -12,6 +12,11 @@ export interface Todo {
   category: string;
   completed: boolean;
   completedAt: Date | null;
+  isRecurring?: boolean;
+  recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
+  recurrenceInterval?: number;
+  recurrenceEndDate?: Date | null;
+  parentRecurringId?: number | null;
 }
 
 interface ModalProps {
@@ -29,6 +34,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
   const [priority, setPriority] = useState("high");
   const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly">("daily");
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
 
   useEffect(() => {
     if (todoToEdit) {
@@ -37,6 +46,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       setTimeSelection(todoToEdit.completeAt);
       setPriority(todoToEdit.priority);
       setCategory(todoToEdit.category);
+      setIsRecurring(todoToEdit.isRecurring || false);
+      setRecurrencePattern(todoToEdit.recurrencePattern || "daily");
+      setRecurrenceInterval(todoToEdit.recurrenceInterval || 1);
+      setRecurrenceEndDate(todoToEdit.recurrenceEndDate ? todoToEdit.recurrenceEndDate.toISOString().split("T")[0] : "");
     } else {
       // Reset form for new todo
       setTitle("");
@@ -44,6 +57,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       setTimeSelection("Today");
       setPriority("high");
       setCategory("");
+      setIsRecurring(false);
+      setRecurrencePattern("daily");
+      setRecurrenceInterval(1);
+      setRecurrenceEndDate("");
     }
   }, [todoToEdit, isOpen]);
 
@@ -76,6 +93,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         completeAt: timeSelection,
         category,
         priority,
+        isRecurring,
+        recurrencePattern,
+        recurrenceInterval,
+        recurrenceEndDate,
       });
       console.log("Todo created");
       addTodo({
@@ -86,6 +107,11 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         priority,
         completed: false,
         completedAt: null,
+        isRecurring: false,
+        recurrencePattern: "daily",
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        parentRecurringId: null,
       });
       onClose();
       handleClick();
@@ -107,6 +133,11 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         completeAt: timeSelection,
         category,
         priority,
+        isRecurring,
+        recurrencePattern,
+        recurrenceInterval,
+        recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate) : null,
+        parentRecurringId: null,
       });
       console.log("Todo updated");
       if (editTodo) {
@@ -117,6 +148,11 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
           completeAt: timeSelection,
           category,
           priority,
+          isRecurring,
+          recurrencePattern,
+          recurrenceInterval,
+          recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate) : null,
+          parentRecurringId: null,
         });
       }
       handleClick();
@@ -223,6 +259,63 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
               className="bg-[#141415] rounded-sm p-2 pl-10 text-white placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full"
             />
           </div>
+          <div className="text-white text-md font-extralight mb-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={(e) => setIsRecurring(e.target.checked)}
+              className="w-4 h-4"
+            />
+            Make this task recurring
+          </label>
+        </div>
+        {isRecurring && (
+  <>
+    <div className="text-white text-md font-extralight mb-3">
+      How often should this repeat?
+    </div>
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-[#A2A2A9] text-sm">Every</span>
+      <input
+        type="number"
+        min="1" 
+        value={recurrenceInterval}
+        onChange={(e) => setRecurrenceInterval(parseInt(e.target.value))}
+        className="bg-[#141415] rounded-sm p-2 w-24 text-white border-[0.1px] border-gray-600 text-center"
+      />
+      <select
+        value={recurrencePattern}
+        onChange={(e) => setRecurrencePattern(e.target.value as any)}
+        className="bg-[#141415] rounded-sm p-2 flex-1 text-white border-[0.1px] border-gray-600"
+      >
+        <option value="daily">Day(s)</option>
+        <option value="weekly">Week(s)</option>
+        <option value="monthly">Month(s)</option>
+        <option value="yearly">Year(s)</option>
+      </select>
+    </div>
+    <div className="text-[#A2A2A9] text-sm mb-4 italic">
+      ✓ Repeats every {recurrenceInterval} {recurrencePattern === 'daily' ? 'day' : recurrencePattern === 'weekly' ? 'week' : recurrencePattern === 'monthly' ? 'month' : 'year'}{recurrenceInterval > 1 ? 's' : ''}
+    </div>
+    <div className="text-white text-md font-extralight mb-3">
+      End Date (Optional)
+    </div>
+    <div className="mb-6">
+      <input
+        type="date"
+        value={recurrenceEndDate}
+        onChange={(e) => setRecurrenceEndDate(e.target.value)}
+        className="bg-[#141415] rounded-sm p-2 w-full text-white border-[0.1px] border-gray-600"
+      />
+      {recurrenceEndDate && (
+        <div className="text-[#A2A2A9] text-xs mt-1">
+          Recurrence will stop on {new Date(recurrenceEndDate).toISOString().split("T")[0]}
+        </div>
+      )}
+    </div>
+  </>
+)}
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"

@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/middleware.ts","./src/types.d.ts","./src/db/index.ts","./src/routes/todo.ts","./src/routes/user.ts"],"version":"5.9.3"}
+{"root":["./src/index.ts","./src/middleware.ts","./src/types.d.ts","./src/db/index.ts","./src/routes/todo.ts","./src/routes/user.ts","./src/utils/recurringtasks.ts"],"version":"5.9.3"}

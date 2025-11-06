@@ -14,6 +14,16 @@ export declare const todoSchema: z.ZodObject<{
     priority: z.ZodString;
     completeAt: z.ZodString;
     category: z.ZodString;
+    isRecurring: z.ZodOptional<z.ZodBoolean>;
+    recurrencePattern: z.ZodOptional<z.ZodEnum<{
+        daily: "daily";
+        weekly: "weekly";
+        monthly: "monthly";
+        yearly: "yearly";
+    }>>;
+    recurrenceInterval: z.ZodOptional<z.ZodNumber>;
+    recurrenceEndDate: z.ZodOptional<z.ZodString>;
+    nextOccurrence: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export type SignUp = z.infer<typeof signUpSchema>;
 export type SignIn = z.infer<typeof signInSchema>;

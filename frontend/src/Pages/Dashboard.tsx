@@ -20,6 +20,7 @@ import { calculateStreak } from "@/utils/calculateStreak";
 import NewSection from "@/Components/NewSection";
 import LoadingSkeleton from "@/Components/LoadingSkeleton";
 import api from "../utils/api";
+import {isToday, isTomorrow, isThisWeek} from "@shiva200701/todotypes";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
@@ -38,9 +39,11 @@ const Dashboard = () => {
   }
 
   function addTodo(newTask: Todo) {
+    console.log("new task", newTask);
     setTodos((prev) => [...prev, newTask]);
   }
   function updateTodo(updatedTask: Todo) {
+    console.log("updated task", updatedTask);
     setTodos((prev) => prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo));
   }
   const handleEdit = (todo: Todo) => {
@@ -131,33 +134,24 @@ const Dashboard = () => {
   }, [completedDates]);
 
   const todayTodos = useMemo(() => {
-    console.log("firsdt todo", todos[0]);
-
     return todos.filter(
       (todo) =>
-        todo?.completeAt?.toString() === "Today" && todo?.completed == false
+        isToday(todo?.completeAt) && todo?.completed == false
     );
   }, [todos]);
   const tomorrowTodos = useMemo(() => {
-    console.log("firsdt todo", todos[0]);
-
     return todos.filter(
       (todo) =>
-        todo?.completeAt?.toString() === "Tomorrow" && todo?.completed == false
+        isTomorrow(todo?.completeAt) && todo?.completed == false
     );
   }, [todos]);
-  const somedayTodos = useMemo(() => {
-    console.log("firsdt todo", todos[0]);
-
-    return todos.filter(
-      (todo) =>
-        todo?.completeAt?.toString() === "Someday" && todo?.completed == false
-    );
+  const thisWeekTodos = useMemo(() => {
+    return todos.filter((todo) => isThisWeek(todo?.completeAt) && todo?.completed == false);
   }, [todos]);
   const todayCompletedTodos = useMemo(() => {
     return todos.filter(
       (todo) =>
-        todo?.completed == true && todo?.completeAt?.toString() === "Today"
+        todo?.completed == true && isToday(todo?.completeAt)
     );
   }, [todos]);
 
@@ -165,8 +159,8 @@ const Dashboard = () => {
     return todos.filter((todo) => todo.completed == false);
   }, [todos]);
   console.log("today todos", todayTodos);
-
-  console.log("today completed todos", todayCompletedTodos);
+  console.log("tomorrow todos", tomorrowTodos);
+  console.log("this week todos", thisWeekTodos);
 
   return (
     <>
@@ -250,14 +244,14 @@ const Dashboard = () => {
           )}
           <Day
             icon={Sparkles}
-            heading="Someday"
-            tasks={`${somedayTodos?.length.toString()} tasks`}
+            heading="This Week"
+            tasks={`${thisWeekTodos?.length.toString()} tasks`}
           />
           {loading ? (
             <LoadingSkeleton />
-          ) : somedayTodos.length != 0 ? (
+          ) : thisWeekTodos.length != 0 ? (
             <TaskCard
-              todos={somedayTodos}
+              todos={thisWeekTodos}
               onToggleComplete={toggleTodoCompletion}
               onDelete={deleteTodo}
               onEdit={handleEdit}

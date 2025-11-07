@@ -1,6 +1,7 @@
 import type { Todo } from "./Modal";
 import { Tag, Calendar, Trash, Pencil, Repeat } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
+import { formatCompleteAt } from "@shiva200701/todotypes";
 
 const priorityColors = {
   high: {
@@ -119,7 +120,7 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
                     <div className="flex justify-center items-center">
                       <Calendar className="w-3 h-3" />
                     </div>
-                    <div>{todo.completeAt}</div>
+                    <div>{formatCompleteAt(todo.completeAt)}</div>
                   </div>
                 </div>
               </div>

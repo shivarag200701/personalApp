@@ -2,20 +2,21 @@ import { useEffect, useState} from "react";
 import { Button } from "./ui/button";
 import { AlertCircle, Tag } from "lucide-react";
 import api from "../utils/api";
+import {dateToTimeSelection, timeSelectionToDate, type TimeSelection} from "@shiva200701/todotypes";
 
 export interface Todo {
   id?: number;
   title: string;
   description: string;
   priority: string;
-  completeAt: string;
+  completeAt: string | null;
   category: string;
   completed: boolean;
-  completedAt: Date | null;
+  completedAt: string | null;
   isRecurring?: boolean;
   recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
   recurrenceInterval?: number;
-  recurrenceEndDate?: Date | null;
+  recurrenceEndDate?: string | null;
   parentRecurringId?: number | null;
 }
 
@@ -30,7 +31,7 @@ interface ModalProps {
 const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [timeSelection, setTimeSelection] = useState("Today");
+  const [timeSelection, setTimeSelection] = useState<TimeSelection>("Today");
   const [priority, setPriority] = useState("high");
   const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
     if (todoToEdit) {
       setTitle(todoToEdit.title);
       setDescription(todoToEdit.description);
-      setTimeSelection(todoToEdit.completeAt);
+      setTimeSelection(dateToTimeSelection(todoToEdit.completeAt));
       setPriority(todoToEdit.priority);
       setCategory(todoToEdit.category);
       setIsRecurring(todoToEdit.isRecurring || false);
@@ -92,19 +93,19 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       await api.post("/v1/todo/", {
         title,
         description,
-        completeAt: timeSelection,
+        completeAt: timeSelectionToDate(timeSelection),
         category,
         priority,
         isRecurring,
         recurrencePattern,
         recurrenceInterval,
-        recurrenceEndDate,
+        recurrenceEndDate: recurrenceEndDate || undefined,
       });
       console.log("Todo created");
       addTodo({
         title,
         description,
-        completeAt: timeSelection,
+        completeAt: timeSelectionToDate(timeSelection),
         category,
         priority,
         completed: false,
@@ -112,7 +113,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         isRecurring,
         recurrencePattern,
         recurrenceInterval,
-        recurrenceEndDate: null,
+        recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
         parentRecurringId: null,
       });
       onClose();
@@ -132,13 +133,13 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       await api.put(`/v1/todo/${todoToEdit.id}`, {
         title,
         description,
-        completeAt: timeSelection,
+        completeAt: timeSelectionToDate(timeSelection),
         category,
         priority,
         isRecurring,
         recurrencePattern,
         recurrenceInterval,
-        recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate) : null,
+        recurrenceEndDate: recurrenceEndDate || undefined,
         parentRecurringId: null,
       });
       console.log("Todo updated");
@@ -147,13 +148,13 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
           ...todoToEdit,
           title,
           description,
-          completeAt: timeSelection,
+          completeAt: timeSelectionToDate(timeSelection),
           category,
           priority,
           isRecurring,
           recurrencePattern,
           recurrenceInterval,
-          recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate) : null,
+          recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: null,
         });
       }
@@ -219,12 +220,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
 
           <div className="text-white text-md font-extralight mb-3">When?</div>
           <div className="flex gap-2 mb-6">
-            {(["Today", "Tomorrow", "Someday"] as const).map((time) => (
+            {(["Today", "Tomorrow", "This Week"] as const).map((time) => (
               <Button
                 key={time}
                 variant={time == timeSelection ? "default" : "outline"}
                 size="sm"
-                onClick={() => setTimeSelection(time)}
+                onClick={() => setTimeSelection(time as TimeSelection)}
                 className="flex-1 capitalize"
               >
                 {time}

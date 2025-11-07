@@ -124,7 +124,8 @@ const Dashboard = () => {
   const completedDates = useMemo(() => {
     return completedTodos
       .map((todo) => todo.completedAt)
-      .filter((date) => date != null);
+      .filter((date) => date != null)
+      .map((date) => new Date(date));
   }, [completedTodos]);
 
   const currentStreak = useMemo(() => {

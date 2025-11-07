@@ -56,6 +56,9 @@ export async function createRecurringTask(
         lastOccurence
     );
 
+    const completeAtDate = new Date(nextOccurrence);
+    completeAtDate.setHours(23, 59, 59, 999);
+
     const newTask = await prisma.todo.create({
         data: {
             title: template.title,

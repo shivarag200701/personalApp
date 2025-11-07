@@ -2,7 +2,7 @@ import express from "express";
 import { z } from "zod";
 import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
-import { todoSchema } from "@shiva200701/todotypes";
+import { todoSchema, convertCompleteAtToDate } from "@shiva200701/todotypes";
 import { calculateNextOccurence } from "../utils/recurringTasks.js";
 
 const todoRouter = express();
@@ -25,14 +25,14 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   }
   const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
 
-
+  const completeAtDate = convertCompleteAtToDate(completeAt);
   try {
     const todo = await prisma.todo.create({
       data: {
         title,
         description,
         priority,
-        completeAt, // Ensure compatibility between the two types
+        completeAt: completeAtDate, // Ensure compatibility between the two types
         category,
         isRecurring: isRecurring || false,
         recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
@@ -47,7 +47,9 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       },
     });
     if(isRecurring && recurrencePattern){
-      const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, todo.createdAt);
+
+      const baseDate = completeAtDate || new Date();
+      const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
 
       await prisma.todo.update({
         where: {
@@ -86,7 +88,6 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Single query to get all tasks we need
     const todos = await prisma.todo.findMany({
       where: {
         userId,
@@ -134,7 +135,15 @@ todoRouter.get("/", requireLogin, async (req, res) => {
       });
     }
     return res.status(200).json({
-      todos: filteredTodos,
+      todos: filteredTodos.map(todo => ({
+        ...todo,
+        completeAt: todo.completeAt ? todo.completeAt.toISOString() : null,
+        completedAt: todo.completedAt ? todo.completedAt.toISOString() : null,
+        recurrenceEndDate: todo.recurrenceEndDate ? todo.recurrenceEndDate.toISOString() : null,
+        nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
+        createdAt: todo.createdAt.toISOString(),
+        updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
+      })),
     });
   } catch (error) {
     console.error("Failed getting todos", error);
@@ -263,6 +272,8 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
     });
   }
   const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate} = data;
+
+  const completeAtDate = convertCompleteAtToDate(completeAt);
   try {
     const existingTodo = await prisma.todo.findFirst({
       where :{
@@ -281,7 +292,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         title,
         description,
         priority,
-        completeAt,
+        completeAt: completeAtDate,
         category,
         isRecurring: isRecurring || false,
         recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
@@ -291,7 +302,15 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
     })
     return res.status(200).json({
       msg: "Todo updated successfully",
-      todo: updatedTodo,
+      todo: {
+        ...updatedTodo,
+        completeAt: updatedTodo.completeAt ? updatedTodo.completeAt.toISOString() : null,
+        completedAt: updatedTodo.completedAt ? updatedTodo.completedAt.toISOString() : null,
+        recurrenceEndDate: updatedTodo.recurrenceEndDate ? updatedTodo.recurrenceEndDate.toISOString() : null,
+        nextOccurrence: updatedTodo.nextOccurrence ? updatedTodo.nextOccurrence.toISOString() : null,
+        createdAt: updatedTodo.createdAt.toISOString(),
+        updatedAt: updatedTodo.updatedAt ? updatedTodo.updatedAt.toISOString() : null,
+      },
     });
   }catch(error){
     console.error("Error while updating todo",error);

@@ -29,7 +29,7 @@ model Todo {
   title         String
   description   String
   priority      String      @default("low")
-  completeAt    String      @default("Today")
+  completeAt    DateTime?
   category      String
   user          User        @relation(fields: [userId], references: [id])
   userId        Int    

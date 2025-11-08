@@ -2,6 +2,8 @@ import type { Todo } from "./Modal";
 import { Tag, Calendar, Trash, Pencil, Repeat } from "lucide-react";
 import { Checkbox } from "../Components/ui/checkbox";
 import { formatCompleteAt } from "@shiva200701/todotypes";
+import WarningModal from "./WarningModal";
+import { useState } from "react";
 
 const priorityColors = {
   high: {
@@ -28,20 +30,36 @@ type TaskCardProps = {
 };
 
 const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) => {
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
+  const handleDeleteConfirm = async () => {
+    if (!todoToDelete?.id) {
+      console.log("todo.id is not defined");
+      return;
+    }
+    onDelete(todoToDelete.id);
+    setTodoToDelete(null);
+    setIsWarningModalOpen(false);
+  }
+
+  const handleDeleteClick = (todo: Todo) => {
+    setTodoToDelete(todo);
+    setIsWarningModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsWarningModalOpen(false);
+    setTodoToDelete(null);
+  };
   return (
+    <>
     <div className="w-full flex-col ">
       {todos.map((todo, index) => {
         const colors =
           priorityColors[
             todo.priority.toString().toLowerCase() as PriorityKey
           ] || priorityColors.low;
-          const handleDelete = async () => {
-            if (!todo.id) {
-              console.log("todo.id is not defined");
-              return;
-            }
-            onDelete(todo.id);
-          }
+          
         const handleComplete = () => {
           if (!todo.id) {
             return;
@@ -53,8 +71,6 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
             onEdit(todo);
           }
         }
-        console.log(todo);
-        
         return (
           <div
             key={todo.id || `temp=${index}`}
@@ -73,7 +89,9 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
               {todo.id && (
               <button 
                 className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" 
-                onClick={handleDelete}
+                onClick={() => {
+                  handleDeleteClick(todo);
+                }}
                 title="Delete task"
               >
                 <Trash className="w-5 h-5" />
@@ -131,6 +149,11 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
         );
       })}
     </div>
+    <WarningModal 
+      isOpen={isWarningModalOpen}
+      onClose={handleCloseModal}
+      onDelete={handleDeleteConfirm}/>
+    </>
   );
 };
 

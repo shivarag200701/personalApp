@@ -4,7 +4,6 @@ import { AlertCircle, Tag } from "lucide-react";
 import api from "../utils/api";
 import {dateToTimeSelection, timeSelectionToDate, type TimeSelection} from "@shiva200701/todotypes";
 import {Checkbox} from "./ui/checkbox";
-import { ScrollArea } from "./ui/scroll-area";
 
 export interface Todo {
   id?: number;

@@ -30,13 +30,14 @@ type TaskCardProps = {
 const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) => {
   return (
     <div className="w-full flex-col ">
-      {todos.map((todo) => {
+      {todos.map((todo, index) => {
         const colors =
           priorityColors[
             todo.priority.toString().toLowerCase() as PriorityKey
           ] || priorityColors.low;
           const handleDelete = async () => {
             if (!todo.id) {
+              console.log("todo.id is not defined");
               return;
             }
             onDelete(todo.id);
@@ -56,7 +57,7 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
         
         return (
           <div
-            key={todo.id}
+            key={todo.id || `temp=${index}`}
             className={`p-5 border border-gray-800 relative  bg-[#1B1B1E] my-4  rounded-2xl ${
               todo.completed ? "brightness-80" : ""
             }`}
@@ -69,13 +70,14 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
               >
                 <Pencil className="w-5 h-5" />
               </button>
+              {todo.id && (
               <button 
                 className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" 
                 onClick={handleDelete}
                 title="Delete task"
               >
                 <Trash className="w-5 h-5" />
-              </button>
+              </button>)}
             </div>
             <div className="flex gap-5">
               <div className="">

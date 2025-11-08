@@ -8,7 +8,7 @@ import { calculateNextOccurence } from "../utils/recurringTasks.js";
 const todoRouter = express();
 
 todoRouter.post("/", requireLogin, async (req, res) => {
-  console.log(req.body);
+  console.log("post request body",req.body);
   const { data, success, error } = todoSchema.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
@@ -26,6 +26,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt);
+  console.log("completeAtDate",completeAtDate);
   try {
     const todo = await prisma.todo.create({
       data: {

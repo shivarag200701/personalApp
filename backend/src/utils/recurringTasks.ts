@@ -49,7 +49,7 @@ export async function createRecurringTask(
         return null;
     }
 
-    const lastOccurence = template.nextOccurrence || template.createdAt;
+    const lastOccurence = template.completeAt || template.createdAt;
     const nextOccurrence = calculateNextOccurence(
         template.recurrencePattern as RecurrencePattern,
         template.recurrenceInterval || 1,
@@ -64,7 +64,7 @@ export async function createRecurringTask(
             title: template.title,
             description: template.description,
             priority: template.priority,
-            completeAt: template.completeAt,
+            completeAt: completeAtDate,
             category: template.category,
             userId: template.userId,
             isRecurring: true,
@@ -90,13 +90,13 @@ export async function createRecurringTask(
 
 export async function processRecurringTasks(): Promise<void> {
     const now = new Date();
-
+    console.log("now",now);
     const templatesToProcess = await prisma.todo.findMany({
         where:{
             isRecurring: true,
             parentRecurringId: null,
             OR: [
-                {nextOccurrence: {lte: now}},
+                {completeAt: {lte: now}},
                 {nextOccurrence: null}
             ]
         }

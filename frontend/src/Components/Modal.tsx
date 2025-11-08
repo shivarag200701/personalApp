@@ -4,6 +4,7 @@ import { AlertCircle, Tag } from "lucide-react";
 import api from "../utils/api";
 import {dateToTimeSelection, timeSelectionToDate, type TimeSelection} from "@shiva200701/todotypes";
 import {Checkbox} from "./ui/checkbox";
+import { ScrollArea } from "./ui/scroll-area";
 
 export interface Todo {
   id?: number;
@@ -183,7 +184,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
         className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3 lg:w-1/3 2xl:w-1/4 max-h-[90vh] flex flex-col overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300 scroll-smooth ">
+      <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3 lg:w-1/3 2xl:w-1/4 max-h-[90vh] flex flex-col  animate-in fade-in-0 zoom-in-95 duration-300 overflow-y-auto ">
         <button
           onClick={handleClick}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700  cursor-pointer z-10 text-2xl"
@@ -339,7 +340,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
             </Button>
           </div>
         </div>
-      </div>
+        </div>
     </div>
   );
 };

@@ -49,7 +49,7 @@ export async function createRecurringTask(
         return null;
     }
 
-    const lastOccurence = template.completeAt || template.createdAt;
+    const lastOccurence = template.nextOccurrence || template.completeAt || template.createdAt;
     const nextOccurrence = calculateNextOccurence(
         template.recurrencePattern as RecurrencePattern,
         template.recurrenceInterval || 1,

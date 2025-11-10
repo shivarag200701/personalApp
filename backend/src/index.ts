@@ -107,15 +107,7 @@ app.listen(3000, () => {
 
 //cron job to process recurring tasks every day at 12:00 AM
 
-//daily cron job
-// cron.schedule("0 0 * * *", async()=>{
-//   console.log("Processing recurring tasks");
-//   try{
-//     await processRecurringTasks();
-//   }catch(error){
-//     console.error("Error processing recurring tasks", error);
-//   }
-// });
+
 
 processRecurringTasks()
   .then(()=>{

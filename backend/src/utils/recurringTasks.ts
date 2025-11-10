@@ -49,7 +49,7 @@ export async function createRecurringTask(
         return null;
     }
 
-    const lastOccurence = template.nextOccurrence || template.completeAt || template.createdAt;
+    const lastOccurence = template.nextOccurrence || (template.completeAt && template.completeAt <= new Date() ? template.completeAt : template.createdAt);
     const nextOccurrence = calculateNextOccurence(
         template.recurrencePattern as RecurrencePattern,
         template.recurrenceInterval || 1,
@@ -72,7 +72,7 @@ export async function createRecurringTask(
             recurrenceInterval: template.recurrenceInterval,
             recurrenceEndDate: template.recurrenceEndDate,
             parentRecurringId: template.parentRecurringId || template.id,
-            nextOccurrence: nextOccurrence,
+            nextOccurrence: null,
         }
     });
 
@@ -96,7 +96,7 @@ export async function processRecurringTasks(): Promise<void> {
             isRecurring: true,
             parentRecurringId: null,
             OR: [
-                {completeAt: {lte: now}},
+                {nextOccurrence: {lte: now}},
                 {nextOccurrence: null}
             ]
         }

@@ -1,12 +1,25 @@
 import { google } from "googleapis";
 import {encrypt, decrypt} from "../../utils/encryption.ts";
-import dotenv from "dotenv";
-dotenv.config();
+
+// Validate required environment variables before initializing OAuth2 client
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+
+if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === "") {
+    throw new Error("GOOGLE_CLIENT_ID is required but not set in environment variables");
+}
+if (!GOOGLE_CLIENT_SECRET || GOOGLE_CLIENT_SECRET.trim() === "") {
+    throw new Error("GOOGLE_CLIENT_SECRET is required but not set in environment variables");
+}
+if (!GOOGLE_REDIRECT_URI || GOOGLE_REDIRECT_URI.trim() === "") {
+    throw new Error("GOOGLE_REDIRECT_URI is required but not set in environment variables");
+}
 
 const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID || "",
-    process.env.GOOGLE_CLIENT_SECRET || "",
-    process.env.GOOGLE_REDIRECT_URI || "",
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI,
 )
 
 // generate url for google oauth
@@ -34,28 +47,47 @@ export async function getGoogleTokens(code: string): Promise<{
         name: string;
     }
 }> {
-    const {tokens}  = await oauth2Client.getToken(code);
+    try {
+        const {tokens} = await oauth2Client.getToken(code);
 
-    if(!tokens.access_token){
-        throw new Error("failed to get access token");
-    }
+        if (!tokens.access_token) {
+            throw new Error("Failed to get access token from Google OAuth response");
+        }
 
-    oauth2Client.setCredentials(tokens)
+        oauth2Client.setCredentials(tokens);
 
-    const oauth2 = google.oauth2({version: "v2", auth: oauth2Client});
-    const {data: userInfo} = await oauth2.userinfo.get();
+        const oauth2 = google.oauth2({version: "v2", auth: oauth2Client});
+        const {data: userInfo} = await oauth2.userinfo.get();
 
-    const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : new Date(Date.now() + 3600000); // 1 hour from now
+        // Validate required userInfo fields
+        if (!userInfo.id || userInfo.id.trim() === "") {
+            throw new Error("Google userinfo API did not return a valid user ID");
+        }
+        if (!userInfo.email || userInfo.email.trim() === "") {
+            throw new Error("Google userinfo API did not return a valid email address");
+        }
 
-    return {
-        accessToken: encrypt(tokens.access_token),
-        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
-        expiresAt: expiresAt,
-        userInfo: {
-            id: userInfo.id || "",
-            email: userInfo.email || "",
-            name: userInfo.name || "",
-        },
+        const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : new Date(Date.now() + 3600000); // 1 hour from now
+
+        return {
+            accessToken: encrypt(tokens.access_token),
+            refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
+            expiresAt: expiresAt,
+            userInfo: {
+                id: userInfo.id,
+                email: userInfo.email,
+                name: userInfo.name || "",
+            },
+        };
+    } catch (error) {
+        // Log the underlying error for debugging
+        console.error("Error in getGoogleTokens:", error);
+        
+        // Re-throw with descriptive message if it's not already an Error
+        if (error instanceof Error) {
+            throw error;
+        }
+        throw new Error(`Failed to exchange Google OAuth code for tokens: ${String(error)}`);
     }
 }
 

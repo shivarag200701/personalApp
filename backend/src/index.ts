@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+// Load environment variables first, before any other imports that depend on process.env
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import userRouter from "./routes/user.js";

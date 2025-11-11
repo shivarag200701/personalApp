@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy npx prisma generate --schema=./prisma/schema.prisma && tsc -b",
+    "build": "npx prisma generate --schema=./prisma/schema.prisma && tsc -b",
     "start": "node dist/index.js"
   },
   "keywords": [],
@@ -28,12 +28,12 @@
     "node-cron": "^4.2.1",
     "prisma": "^6.18.0",
     "redis": "^5.9.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.10.0",
-    "@types/node-cron": "^3.0.11",
-    "typescript": "^5.9.3"
+    "@types/node-cron": "^3.0.11"
   }
 }

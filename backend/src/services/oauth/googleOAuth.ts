@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import {encrypt, decrypt} from "../../utils/encryption.ts";
+import {encrypt, decrypt} from "../../utils/encryption.js";
 
 // Validate required environment variables before initializing OAuth2 client
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

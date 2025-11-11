@@ -1,4 +1,4 @@
-import {redisClient} from "../../index.ts";
+import {redisClient} from "../../index.js";
 
 // state data to be stored in redis between google oauth and our server
 export interface StateData {

@@ -11,6 +11,7 @@ import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 type Inputs = {
   username: string;
@@ -62,6 +63,17 @@ const SignUpForm = () => {
           <div className="text-3xl font-semibold text-white mb-2">Get Started</div>
           <div className="mt-2 text-[#A2A2A9] mb-6">
             Create your account to start organizing
+          </div>
+          {/* Google Sign-In Button */}
+          <div className="mb-6">
+            <GoogleSignInButton />
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-700"></div>
+            <span className="px-4 text-gray-500 text-sm">OR</span>
+            <div className="flex-1 border-t border-gray-700"></div>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <InputBox

@@ -120,6 +120,8 @@ cron.schedule("0 0 * * *", async()=>{
   }catch(error){
     console.error("Error processing recurring tasks", error);
   }
+},{
+  timezone: "UTC"
 });
 
 processRecurringTasks()

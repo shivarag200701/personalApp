@@ -9,18 +9,19 @@ export const calculateNextOccurence = (
     lastOccurence: Date
 ): Date => {
     const next = new Date(lastOccurence);
+    next.setUTCHours(0, 0, 0, 0);
     switch (pattern){
         case "daily":
-            next.setDate(next.getDate() + interval);
+            next.setUTCDate(next.getUTCDate() + interval);
             break;
         case "weekly":
-            next.setDate(next.getDate() + interval * 7);
+            next.setUTCDate(next.getUTCDate() + interval * 7);
             break;
         case "monthly":
-            next.setMonth(next.getMonth() + interval);
+            next.setUTCMonth(next.getUTCMonth() + interval);
             break;
         case "yearly":
-            next.setFullYear(next.getFullYear() + interval);
+            next.setUTCFullYear(next.getUTCFullYear() + interval);
             break;
         default:
             throw new Error(`Invalid recurrence pattern: ${pattern}`);

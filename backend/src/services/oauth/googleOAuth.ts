@@ -4,7 +4,7 @@ import {encrypt, decrypt} from "../../utils/encryption.js";
 // Validate required environment variables before initializing OAuth2 client
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI?.trim().replace(/^["']|["']$/g, '');
 
 if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === "") {
     throw new Error("GOOGLE_CLIENT_ID is required but not set in environment variables");
@@ -23,7 +23,7 @@ const oauth2Client = new google.auth.OAuth2(
 )
 
 // generate url for google oauth
-export function generateGoogleOAuthUrl(state?: string): string {
+export function generateGoogleOAuthUrl(state?: string): string {    
     const scopes = [
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",

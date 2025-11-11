@@ -1,14 +1,15 @@
 import { isAxiosError } from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
 import { User, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 type Inputs = {
   username: string;
@@ -25,7 +26,25 @@ const SignInForm = () => {
 
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { refreshAuth } = Auth();
+
+  // Handle OAuth errors from URL params
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      const errorMessages: Record<string, string> = {
+        'access_denied': 'You cancelled the sign-in process.',
+        'missing_code': 'Sign-in failed. Please try again.',
+        'invalid_state': 'Security verification failed. Please try again.',
+        'expired_state': 'Sign-in session expired. Please try again.',
+        'oauth_failed': 'Sign-in failed. Please try again.',
+      };
+      setError(errorMessages[oauthError] || 'Sign-in failed. Please try again.');
+      // Clear the error from URL
+      navigate('/signin', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
@@ -55,6 +74,19 @@ const SignInForm = () => {
           <div className="mt-2 text-[#A2A2A9] mb-6">
             Sign in to continue to FlowTask
           </div>
+          
+          {/* Google Sign-In Button */}
+          <div className="mb-6">
+            <GoogleSignInButton />
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-700"></div>
+            <span className="px-4 text-gray-500 text-sm">OR</span>
+            <div className="flex-1 border-t border-gray-700"></div>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)}>
             <InputBox
               label="Name"
@@ -88,7 +120,7 @@ const SignInForm = () => {
               Initial="Sign in"
             />
           </form>
-          <div className="text-center text-red-400 mt-2 min-h-[20px]">
+          <div className="text-center text-red-400 mt-2 min-h-[20px] mb-4">
             {error ? error : ""}
           </div>
           <div className="text-center text-[#A2A2A9] mt-8 font-light">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AppBar from "../Components/AppBar";
 import {
   CalendarDays,
@@ -21,6 +22,7 @@ import NewSection from "@/Components/NewSection";
 import LoadingSkeleton from "@/Components/LoadingSkeleton";
 import api from "../utils/api";
 import {isToday, isTomorrow, isThisWeek} from "@shiva200701/todotypes";
+import { Auth } from "@/Context/AuthContext";
 
 const Dashboard = () => {
   const [totalTodoCount, setTotalCount] = useState(0);
@@ -28,6 +30,20 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { refreshAuth } = Auth();
+
+  // Handle OAuth success redirect
+  useEffect(() => {
+    const success = searchParams.get('success');
+    if (success === 'google_sign_in') {
+      // Refresh auth to ensure session is recognized
+      refreshAuth().then(() => {
+        // Remove success param from URL
+        setSearchParams({}, { replace: true });
+      });
+    }
+  }, [searchParams, refreshAuth, setSearchParams]);
 
   const openModal = () => {
     setIsModalOpen(true);

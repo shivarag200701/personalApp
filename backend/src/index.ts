@@ -23,7 +23,7 @@ const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").repla
 const PORT = process.env.PORT || 3000;
 
 //upstash client
-const redisClient = createClient({
+export const redisClient = createClient({
   url: redisConnectionString,
 });
 

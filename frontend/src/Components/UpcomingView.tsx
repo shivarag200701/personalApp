@@ -29,6 +29,7 @@ const UpcomingView = ({
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | string | null>(null);
+  const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
 
@@ -347,7 +348,7 @@ const UpcomingView = ({
           return (
             <div
               key={date.toISOString()}
-              className={`flex flex-col bg-[#1B1B1E] border border-gray-800 rounded-2xl p-4 min-h-[400px] ${
+              className={`flex flex-col bg-[#1B1B1E] border border-gray-800 rounded-2xl p-4 min-h-[400px] shadow-lg shadow-black/50 ${
                 isToday ? "ring-2 ring-purple-500/50" : ""
               }`}
             >
@@ -367,18 +368,35 @@ const UpcomingView = ({
                   dayTasks.map((todo) => (
                     <div
                       key={todo.id || `temp-${index}-${todo.title}`}
-                      className="group p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer hover:border-purple-500/50 transition-all duration-300"
+                      className="p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer hover:border-purple-500/50 transition-all duration-300"
+                      onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
+                      onMouseLeave={() => setHoveredTodoId(null)}
                     >
                       {/* Three-dot Menu */}
                       {todo.id && (
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" ref={(el) => {
-                          if (el && todo.id) {
-                            dropdownRefs.current.set(todo.id, el);
-                          }
-                        }}>
+                        <div 
+                          className={`absolute top-2 right-2 z-20 transition-opacity duration-200 pointer-events-auto ${
+                            openDropdownId === todo.id || hoveredTodoId === todo.id ? 'opacity-100' : 'opacity-0'
+                          }`} 
+                          ref={(el) => {
+                            if (el && todo.id) {
+                              dropdownRefs.current.set(todo.id, el);
+                            }
+                          }}
+                          onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
+                          onMouseLeave={() => {
+                            if (openDropdownId !== todo.id) {
+                              setHoveredTodoId(null);
+                            }
+                          }}
+                        >
                           <button
                             className="text-gray-500 hover:text-white p-1 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
-                            onClick={(e) => toggleDropdown(todo.id!, e)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDropdown(todo.id!, e);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
                             title="More options"
                           >
                             <MoreHorizontal className="w-4 h-4" />

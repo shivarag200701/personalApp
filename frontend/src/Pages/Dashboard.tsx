@@ -9,6 +9,7 @@ import UpcomingView from "../Components/UpcomingView";
 import CompletedView from "../Components/CompletedView";
 import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
+import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -61,22 +62,89 @@ const Dashboard = () => {
     if (!todoToUpdate) {
       return;
     }
-    // Determine the new status
-    const newCompletedStatus = !todoToUpdate.completed;
+
+    const newCompletedStatus = !todoToUpdate?.completed;
+
+    //upadate parent task optimistically
     setTodos((prev) => {
       return prev.map((todo) => {
-        if (todo.id == todoId) {
-          return { ...todo, completed: !todo.completed };
+        if(todo.id === todoId){
+          return {...todo, completed: newCompletedStatus}
         }
         return todo;
-      });
-    });
+      })
+    })
+
+    if (todoToUpdate?.isRecurring && 
+      todoToUpdate?.recurrencePattern  && 
+      todoToUpdate?.recurrenceInterval  &&
+      todoToUpdate?.completeAt &&
+      !todoToUpdate.completed &&
+      newCompletedStatus) { 
+
+        const baseDate = new Date(todoToUpdate.completeAt);
+
+        const nextOccurrenceDate = calculateNextOccurence(todoToUpdate.recurrencePattern as RecurrencePattern, todoToUpdate.recurrenceInterval, baseDate);
+
+        const year = nextOccurrenceDate.getUTCFullYear();
+        const month = nextOccurrenceDate.getUTCMonth();
+        const day = nextOccurrenceDate.getUTCDate();
+        const nextOccurrenceEndOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999))
+
+        const tempId = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+        const childTask: Todo = {
+          ...todoToUpdate,
+          id: parseInt(tempId),
+          completeAt: nextOccurrenceEndOfDay.toISOString(),
+          parentRecurringId: todoToUpdate.id,
+          completed: false,
+          completedAt: null,
+          nextOccurrence: null,
+        }
+        //optimistic update to UI
+        setTodos((prev) => {
+          const newTodos = [...prev, childTask];
+          return newTodos;
+        });
+
+        try{
+          const res = await api.post(`/v1/todo/child_task`,{
+            parentId: todoToUpdate.id,
+            completeAt: nextOccurrenceEndOfDay.toISOString(),
+          })
+          const createdChildTask = res.data.childTask;
+          console.log("createdChildTask", createdChildTask);
+
+          //update UI with new child task
+          setTodos((prev) => {
+            return prev.map((todo) =>{
+              if(todo.id === parseInt(tempId)){
+                return createdChildTask
+              }
+              return todo;
+            })
+          })
+        }catch(error){
+          console.error("Error creating child task:", error);
+          // Remove temp task on error
+          setTodos((prev) => prev.filter((todo) => todo.id !== parseInt(tempId)));
+        }
+        
+  }
     try {
       await api.post(`/v1/todo/${todoId}/completed`, {
         completed: newCompletedStatus,
       });
     } catch (error) {
       console.error("Error cant mark as completed", error);
+      setTodos((prev) => {
+        return prev.map((todo) => {
+          if (todo.id == todoId) {
+            return { ...todo, completed: !newCompletedStatus };
+          }
+          return todo;
+        });
+      });
     }
   };
 
@@ -100,10 +168,8 @@ const Dashboard = () => {
         const todos = res.data.todos;
         setTodos(todos);
         setLoading(false);
-        console.log("all todos", todos);
-
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching todos", error);
       }
     }
     fetchTodo();

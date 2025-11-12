@@ -18,6 +18,7 @@ export interface Todo {
   recurrenceInterval?: number;
   recurrenceEndDate?: string | null;
   parentRecurringId?: number | null;
+  nextOccurrence?: string | null;
 }
 
 interface ModalProps {

@@ -14,7 +14,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.18.0",
-    "@shiva200701/todotypes": "^1.11.0",
+    "@shiva200701/todotypes": "^1.14.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
@@ -28,8 +28,8 @@
     "node-cron": "^4.2.1",
     "prisma": "^6.18.0",
     "redis": "^5.9.0",
-    "zod": "^4.1.12",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",

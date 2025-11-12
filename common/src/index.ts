@@ -70,6 +70,39 @@ export function convertCompleteAtToDate(completeAt: string| undefined): Date | n
 
 
 /**
+ * Calculates the next occurrence of a recurring task
+ * Used in backend to calculate the next occurrence of a recurring task and also in frontend to calculate the next occurrence of a recurring task to display in the upcoming view
+ */
+export type RecurrencePattern = "daily" | "weekly" | "monthly" | "yearly";
+
+export const calculateNextOccurence = (
+    pattern: RecurrencePattern,
+    interval: number,
+    lastOccurence: Date
+): Date => {
+    const next = new Date(lastOccurence);
+    next.setUTCHours(0, 0, 0, 0);
+    switch (pattern){
+        case "daily":
+            next.setUTCDate(next.getUTCDate() + interval);
+            break;
+        case "weekly":
+            next.setUTCDate(next.getUTCDate() + interval * 7);
+            break;
+        case "monthly":
+            next.setUTCMonth(next.getUTCMonth() + interval);
+            break;
+        case "yearly":
+            next.setUTCFullYear(next.getUTCFullYear() + interval);
+            break;
+        default:
+            throw new Error(`Invalid recurrence pattern: ${pattern}`);
+    }
+    return next;
+}
+
+
+/**
  * Converts date string (ISO) to "Today"/"Tomorrow"/"This Week"
  * Used in frontend to convert database DateTime to user-friendly selection
  */

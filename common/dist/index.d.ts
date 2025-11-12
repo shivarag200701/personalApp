@@ -35,6 +35,12 @@ export type TimeSelection = "Today" | "Tomorrow" | "This Week";
  */
 export declare function convertCompleteAtToDate(completeAt: string | undefined): Date | null;
 /**
+ * Calculates the next occurrence of a recurring task
+ * Used in backend to calculate the next occurrence of a recurring task and also in frontend to calculate the next occurrence of a recurring task to display in the upcoming view
+ */
+export type RecurrencePattern = "daily" | "weekly" | "monthly" | "yearly";
+export declare const calculateNextOccurence: (pattern: RecurrencePattern, interval: number, lastOccurence: Date) => Date;
+/**
  * Converts date string (ISO) to "Today"/"Tomorrow"/"This Week"
  * Used in frontend to convert database DateTime to user-friendly selection
  */

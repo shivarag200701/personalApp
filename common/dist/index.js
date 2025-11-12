@@ -197,4 +197,62 @@ export function formatCompleteAt(dateString) {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 }
+/**
+ * Gets an array of dates for the upcoming view (5-7 days starting from a given date)
+ */
+export function getUpcomingDateRange(startDate, days = 5) {
+    const dates = [];
+    const current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+    for (let i = 0; i < days; i++) {
+        const date = new Date(current);
+        date.setDate(current.getDate() + i);
+        dates.push(date);
+    }
+    return dates;
+}
+/**
+ * Formats a date for the upcoming view column header
+ * Returns format like "Nov 11 • Today" or "Nov 12 • Tomorrow" or "Nov 13 • Thursday"
+ */
+export function formatUpcomingDateHeader(date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const endToday = new Date(today);
+    endToday.setHours(23, 59, 59, 999);
+    const endTomorrow = new Date(tomorrow);
+    endTomorrow.setHours(23, 59, 59, 999);
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (date >= today && date <= endToday) {
+        return `${dateStr} • Today`;
+    }
+    else if (date >= tomorrow && date <= endTomorrow) {
+        return `${dateStr} • Tomorrow`;
+    }
+    else {
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        return `${dateStr} • ${dayName}`;
+    }
+}
+/**
+ * Checks if a task's completeAt date falls on a specific date (ignoring time)
+ */
+export function isTaskOnDate(taskDateString, targetDate) {
+    if (!taskDateString)
+        return false;
+    const taskDate = new Date(taskDateString);
+    const target = new Date(targetDate);
+    // Compare date components only (timezone-agnostic)
+    const taskYear = taskDate.getUTCFullYear();
+    const taskMonth = taskDate.getUTCMonth();
+    const taskDay = taskDate.getUTCDate();
+    const targetYear = target.getFullYear();
+    const targetMonth = target.getMonth();
+    const targetDay = target.getDate();
+    return taskYear === targetYear &&
+        taskMonth === targetMonth &&
+        taskDay === targetDay;
+}
 //# sourceMappingURL=index.js.map

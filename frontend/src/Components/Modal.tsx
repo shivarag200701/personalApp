@@ -1,8 +1,7 @@
 import { useEffect, useState} from "react";
 import { Button } from "./ui/button";
-import { AlertCircle, Tag } from "lucide-react";
+import { AlertCircle, Tag, Calendar } from "lucide-react";
 import api from "../utils/api";
-import {dateToTimeSelection, timeSelectionToDate, type TimeSelection} from "@shiva200701/todotypes";
 import {Checkbox} from "./ui/checkbox";
 
 export interface Todo {
@@ -27,12 +26,14 @@ interface ModalProps {
   addTodo: (task: Todo) => void;
   editTodo?: (task: Todo) => void;
   todoToEdit?: Todo | null;
+  preselectedDate?: string; // ISO date string
 }
 
-const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) => {
+const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate }: ModalProps) => {
+  console.log("preselectedDate",preselectedDate);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [timeSelection, setTimeSelection] = useState<TimeSelection>("Today");
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const [priority, setPriority] = useState("high");
   const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,11 +42,42 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
 
+  // Helper function to convert ISO date to YYYY-MM-DD format for input (using local timezone)
+  const isoToDateInput = (isoString: string | null | undefined): string => {
+    if (!isoString) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    // Parse the ISO string and get local date components
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper function to convert YYYY-MM-DD to ISO string (end of day in UTC)
+  const dateInputToIso = (dateInput: string): string => {
+    if (!dateInput) {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      return today.toISOString();
+    }
+    // Parse the date input (YYYY-MM-DD) and create UTC date at end of day
+    const [year, month, day] = dateInput.split('-').map(Number);
+    // Create date in UTC at end of day (23:59:59.999)
+    const date = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    return date.toISOString();
+  };
+
   useEffect(() => {
     if (todoToEdit) {
       setTitle(todoToEdit.title);
       setDescription(todoToEdit.description);
-      setTimeSelection(dateToTimeSelection(todoToEdit.completeAt));
+      setSelectedDate(isoToDateInput(todoToEdit.completeAt));
       setPriority(todoToEdit.priority);
       setCategory(todoToEdit.category);
       setIsRecurring(todoToEdit.isRecurring || false);
@@ -58,7 +90,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       // Reset form for new todo
       setTitle("");
       setDescription("");
-      setTimeSelection("Today");
+      // Use preselectedDate if provided, otherwise default to today
+      if (preselectedDate) {
+        setSelectedDate(isoToDateInput(preselectedDate));
+      } else {
+        setSelectedDate(isoToDateInput(null));
+      }
       setPriority("high");
       setCategory("");
       setIsRecurring(false);
@@ -66,7 +103,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       setRecurrenceInterval(1);
       setRecurrenceEndDate("");
     }
-  }, [todoToEdit, isOpen]);
+  }, [todoToEdit, isOpen, preselectedDate]);
 
   useEffect(() => {
     if (isOpen) {
@@ -79,22 +116,20 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
   const handleClick = () => {
     setTitle("");
     setDescription("");
-    setTimeSelection("Today");
-    setCategory("high");
+    setSelectedDate(isoToDateInput(null));
+    setPriority("high");
     setCategory("");
     onClose();
   };
   const createTodo = async () => {
-    console.log(timeSelection);
-
-    console.log(priority);
-    console.log(category);
+    const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
+    console.log("completeAtIso",completeAtIso);
     try {
       await api.post("/v1/todo/", {
         title,
         description,
-        completeAt: timeSelectionToDate(timeSelection),
+        completeAt: completeAtIso,
         category,
         priority,
         isRecurring,
@@ -106,7 +141,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
       addTodo({
         title,
         description,
-        completeAt: timeSelectionToDate(timeSelection),
+        completeAt: completeAtIso,
         category,
         priority,
         completed: false,
@@ -129,12 +164,13 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
   const updateTodo = async () => {
     if (!todoToEdit?.id) return;
     
+    const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
     try {
       await api.put(`/v1/todo/${todoToEdit.id}`, {
         title,
         description,
-        completeAt: timeSelectionToDate(timeSelection),
+        completeAt: completeAtIso,
         category,
         priority,
         isRecurring,
@@ -149,7 +185,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
           ...todoToEdit,
           title,
           description,
-          completeAt: timeSelectionToDate(timeSelection),
+          completeAt: completeAtIso,
           category,
           priority,
           isRecurring,
@@ -220,18 +256,18 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit }: ModalProps) =
           </div>
 
           <div className="text-white text-md font-extralight mb-3">When?</div>
-          <div className="flex gap-2 mb-6">
-            {(["Today", "Tomorrow", "This Week"] as const).map((time) => (
-              <Button
-                key={time}
-                variant={time == timeSelection ? "default" : "outline"}
-                size="sm"
-                onClick={() => setTimeSelection(time as TimeSelection)}
-                className="flex-1 capitalize"
-              >
-                {time}
-              </Button>
-            ))}
+          <div className="mb-6 relative">
+            <Calendar className="absolute text-gray-500 top-3 left-3 w-5 h-5" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-[#141415] rounded-sm p-2 pl-10 text-white border-[0.1px] border-gray-600 w-full cursor-pointer"
+              min={new Date().toISOString().split("T")[0]}
+            />
+            <div className="text-[#A2A2A9] text-xs mt-1">
+              Select a date for this task
+            </div>
           </div>
           <div className="text-white text-md font-extralight mb-3">
             Priority

@@ -61,4 +61,17 @@ export declare function isThisWeek(dateString: string | null | undefined): boole
  * Returns "Today", "Tomorrow", day name, or formatted date
  */
 export declare function formatCompleteAt(dateString: string | null | undefined): string;
+/**
+ * Gets an array of dates for the upcoming view (5-7 days starting from a given date)
+ */
+export declare function getUpcomingDateRange(startDate: Date, days?: number): Date[];
+/**
+ * Formats a date for the upcoming view column header
+ * Returns format like "Nov 11 • Today" or "Nov 12 • Tomorrow" or "Nov 13 • Thursday"
+ */
+export declare function formatUpcomingDateHeader(date: Date): string;
+/**
+ * Checks if a task's completeAt date falls on a specific date (ignoring time)
+ */
+export declare function isTaskOnDate(taskDateString: string | null | undefined, targetDate: Date): boolean;
 //# sourceMappingURL=index.d.ts.map

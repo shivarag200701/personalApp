@@ -28,7 +28,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   const completeAtDate = convertCompleteAtToDate(completeAt);
   console.log("completeAtDate",completeAtDate);
   try {
-    const todo = await prisma.todo.create({
+     let todo = await prisma.todo.create({
       data: {
         title,
         description,
@@ -52,7 +52,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       const baseDate = completeAtDate || new Date();
       const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
 
-      await prisma.todo.update({
+      todo =await prisma.todo.update({
         where: {
           id: todo.id,
         },
@@ -64,7 +64,16 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 
     return res.status(200).json({
       msg: "Todo added sucessfully",
-    });
+      todo: {
+        ...todo,
+        completeAt: todo.completeAt ? todo.completeAt.toISOString() : null,
+        completedAt: todo.completedAt ? todo.completedAt.toISOString() : null,
+        recurrenceEndDate: todo.recurrenceEndDate ? todo.recurrenceEndDate.toISOString() : null,
+        nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
+        createdAt: todo.createdAt.toISOString(),
+        updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
+      },
+    })
   } catch (error) {
     console.error("Error while adding todo", error);
     return res.status(500).json({

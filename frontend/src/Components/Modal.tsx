@@ -127,7 +127,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
     setIsSubmitting(true);
     console.log("completeAtIso",completeAtIso);
     try {
-      await api.post("/v1/todo/", {
+      const res =await api.post("/v1/todo/", {
         title,
         description,
         completeAt: completeAtIso,
@@ -138,6 +138,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         recurrenceInterval,
         recurrenceEndDate: recurrenceEndDate || undefined,
       });
+      if(res.data.todo){
+        addTodo(res.data.todo);
+      }
+      else{
       console.log("Todo created");
       addTodo({
         title,
@@ -153,6 +157,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
         parentRecurringId: null,
       });
+    }
       onClose();
       handleClick();
     } catch (error) {

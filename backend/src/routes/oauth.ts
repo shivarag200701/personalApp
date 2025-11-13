@@ -158,7 +158,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                     data:{
                         email: userInfo.email,
                         username,
-                        password: null,
+                        hashedPassword: null,
                     }
                 })
 

@@ -5,6 +5,7 @@ import prisma from "../db/index.js";
 import dotenv from "dotenv";
 import { signUpSchema, signInSchema } from "@shiva200701/todotypes";
 import crypto from "crypto";
+import { hashPassword, verifyPassword } from "../utils/passwordHasher.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ userRouter.post("/signup", async (req, res) => {
   }
 
   const { username, password, email } = data;
+  const { hashedPassword } = await hashPassword(password);
   try {
     const user = await prisma.user.findFirst({
       where: {
@@ -43,7 +45,7 @@ userRouter.post("/signup", async (req, res) => {
     const newUser = await prisma.user.create({
       data: {
         username,
-        password,
+        hashedPassword,
         email,
       },
     });
@@ -71,6 +73,7 @@ userRouter.post("/signin", async (req, res) => {
   }
 
   const { username, password } = data;
+
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -83,7 +86,7 @@ userRouter.post("/signin", async (req, res) => {
       });
     }
 
-    if (password != user.password) {
+    if (!user.hashedPassword || !await verifyPassword(password, user.hashedPassword)) {
       return res.status(400).json({
         msg: "Please Enter a Valid password",
       });

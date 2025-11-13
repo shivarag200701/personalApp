@@ -18,10 +18,11 @@ model User {
   id            Int             @id @default(autoincrement())
   username      String          @unique
   email         String          @unique
-  password      String?
+  hashedPassword      String?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   todos         Todo[]
+
   oauthAccounts OAuthAccount[]
 }
 

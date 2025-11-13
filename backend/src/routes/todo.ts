@@ -110,7 +110,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
           {
             isRecurring: true,
             parentRecurringId: null,
-            createdAt: {
+            completeAt: {
               gte: today,
               lt: tomorrow
             }

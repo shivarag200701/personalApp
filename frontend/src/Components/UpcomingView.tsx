@@ -4,6 +4,7 @@ import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
 import WarningModal from "./WarningModal";
+import completedSound from "@/assets/completed.wav";
 
 interface UpcomingViewProps {
   todos: Todo[];
@@ -32,10 +33,15 @@ const UpcomingView = ({
   const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
+  const audio = new Audio(completedSound);
 
   const dateRange = useMemo(() => {
     return getUpcomingDateRange(startDate, 5);
   }, [startDate]);
+
+  const playSound = () => {
+    audio.play();
+  };
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -431,7 +437,10 @@ const UpcomingView = ({
                           <Checkbox
                             className="border-blue-600 cursor-pointer"
                             defaultChecked={todo.completed}
-                            onClick={() => todo.id && onToggleComplete(todo.id)}
+                            onClick={() => {
+                              todo.id && onToggleComplete(todo.id);
+                              playSound();
+                            }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">

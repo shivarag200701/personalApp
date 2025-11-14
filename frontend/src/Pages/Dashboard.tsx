@@ -198,6 +198,7 @@ const Dashboard = () => {
             onToggleComplete={toggleTodoCompletion}
             onDelete={deleteTodo}
             onEdit={handleEdit}
+            onUpdateTodo={updateTodo}
             onAddTask={(date) => openModal(date)}
           />
         )}

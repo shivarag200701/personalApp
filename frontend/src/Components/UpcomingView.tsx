@@ -8,7 +8,6 @@ import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import api from "../utils/api";
 
 

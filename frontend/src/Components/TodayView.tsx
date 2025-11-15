@@ -17,6 +17,7 @@ interface TodayViewProps {
   onDelete: (todoId: string | number) => void;
   onEdit: (todo: Todo) => void;
   onAddTask: () => void;
+  onViewDetails: (todo: Todo) => void;
 }
 
 const TodayView = ({
@@ -26,6 +27,7 @@ const TodayView = ({
   onDelete,
   onEdit,
   onAddTask,
+  onViewDetails,
 }: TodayViewProps) => {
   const todayTodos = useMemo(() => {
     return todos.filter(
@@ -109,6 +111,7 @@ const TodayView = ({
           onToggleComplete={onToggleComplete}
           onDelete={onDelete}
           onEdit={onEdit}
+          onViewDetails={onViewDetails}
         />
       ) : (
         <NoTodo
@@ -124,4 +127,3 @@ const TodayView = ({
 };
 
 export default TodayView;
-

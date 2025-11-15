@@ -10,12 +10,15 @@ import CompletedView from "../Components/CompletedView";
 import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
+import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<TabType>("today");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,6 +46,9 @@ const Dashboard = () => {
     setTodoToEdit(null);
     setPreselectedDate(undefined);
   }
+  const closeDetailDrawer = () => {
+    setIsDetailOpen(false);
+  };
 
   function addTodo(newTask: Todo) {
     console.log("new task", newTask);
@@ -51,10 +57,23 @@ const Dashboard = () => {
   function updateTodo(updatedTask: Todo) {
     console.log("updated task", updatedTask);
     setTodos((prev) => prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo));
+    setSelectedTodo((prev) => {
+      if (prev?.id === updatedTask.id) {
+        return updatedTask;
+      }
+      return prev;
+    });
   }
   const handleEdit = (todo: Todo) => {
+    setSelectedTodo(todo);
     setTodoToEdit(todo);
+    setIsDetailOpen(false);
     setIsModalOpen(true);
+  };
+
+  const handleViewDetails = (todo: Todo) => {
+    setSelectedTodo(todo);
+    setIsDetailOpen(true);
   };
 
   const toggleTodoCompletion = async (todoId: string | number) => {
@@ -67,13 +86,19 @@ const Dashboard = () => {
 
     //upadate parent task optimistically
     setTodos((prev) => {
-      return prev.map((todo) => {
-        if(todo.id === todoId){
-          return {...todo, completed: newCompletedStatus}
-        }
-        return todo;
-      })
+        return prev.map((todo) => {
+          if(todo.id === todoId){
+            return {...todo, completed: newCompletedStatus}
+          }
+          return todo;
+        })
     })
+    setSelectedTodo((prev) => {
+      if (prev?.id === todoId) {
+        return { ...prev, completed: newCompletedStatus };
+      }
+      return prev;
+    });
 
     if (todoToUpdate?.isRecurring && 
       todoToUpdate?.recurrencePattern  && 
@@ -145,6 +170,12 @@ const Dashboard = () => {
           return todo;
         });
       });
+      setSelectedTodo((prev) => {
+        if (prev?.id === todoId) {
+          return { ...prev, completed: !newCompletedStatus };
+        }
+        return prev;
+      });
     }
   };
 
@@ -153,6 +184,10 @@ const Dashboard = () => {
       return;
     }
     setTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+    if (selectedTodo?.id === todoId) {
+      setSelectedTodo(null);
+      setIsDetailOpen(false);
+    }
     try {
       await api.delete(`/v1/todo/${todoId}`);
       console.log("Todo deleted");
@@ -190,6 +225,7 @@ const Dashboard = () => {
             onDelete={deleteTodo}
             onEdit={handleEdit}
             onAddTask={() => openModal()}
+            onViewDetails={handleViewDetails}
           />
         )}
         {activeTab === "upcoming" && (
@@ -200,6 +236,7 @@ const Dashboard = () => {
             onEdit={handleEdit}
             onUpdateTodo={updateTodo}
             onAddTask={(date) => openModal(date)}
+            onViewDetails={handleViewDetails}
           />
         )}
         {activeTab === "completed" && (
@@ -210,6 +247,7 @@ const Dashboard = () => {
             onDelete={deleteTodo}
             onEdit={handleEdit}
             onAddTask={() => openModal()}
+            onViewDetails={handleViewDetails}
           />
         )}
       </div>
@@ -220,6 +258,14 @@ const Dashboard = () => {
         editTodo={updateTodo}
         todoToEdit={todoToEdit}
         preselectedDate={preselectedDate}
+      />
+      <TaskDetailDrawer
+        todo={selectedTodo}
+        isOpen={isDetailOpen}
+        onClose={closeDetailDrawer}
+        onEdit={handleEdit}
+        onToggleComplete={toggleTodoCompletion}
+        onDelete={deleteTodo}
       />
     </>
   );

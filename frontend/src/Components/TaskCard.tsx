@@ -24,12 +24,13 @@ type PriorityKey = keyof typeof priorityColors;
 
 type TaskCardProps = {
   todos: Todo[];
-  onToggleComplete: (todoId: string | number) => void; // 🔑 NEW PROP
+  onToggleComplete: (todoId: string | number) => void;
   onDelete: (todoId: string | number) => void;
-  onEdit?: (todo: Todo) => void; 
+  onEdit?: (todo: Todo) => void;
+  onViewDetails?: (todo: Todo) => void;
 };
 
-const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) => {
+const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: TaskCardProps) => {
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
   const handleDeleteConfirm = async () => {
@@ -74,14 +75,26 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
         return (
           <div
             key={todo.id || `temp=${index}`}
-            className={`p-5 border border-gray-800 relative  bg-[#1B1B1E] my-4  rounded-2xl ${
+            className={`p-5 border border-gray-800 relative bg-[#1B1B1E] my-4 rounded-2xl transition transform hover:-translate-y-0.5 hover:border-purple-400/40 cursor-pointer ${
               todo.completed ? "brightness-80" : ""
             }`}
+            onClick={() => onViewDetails?.(todo)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onViewDetails?.(todo);
+              }
+            }}
           >
              <div className="absolute top-2 right-2 flex gap-2">
               <button 
                 className="text-gray-500 hover:text-purple-400 text-xl cursor-pointer transition-colors" 
-                onClick={handleEdit}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleEdit();
+                }}
                 title="Edit task"
               >
                 <Pencil className="w-5 h-5" />
@@ -89,7 +102,8 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
               {todo.id && (
               <button 
                 className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer hover:animate-jiggle" 
-                onClick={() => {
+                onClick={(event) => {
+                  event.stopPropagation();
                   handleDeleteClick(todo);
                 }}
                 title="Delete task"
@@ -102,7 +116,10 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit }: TaskCardProps) 
                 <Checkbox
                   className="p-3 border-blue-600 flex items-center justify-center cursor-pointer transform transition-transform duration-100 hover:scale-[1.1]"
                   defaultChecked={todo.completed}
-                  onClick={handleComplete}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleComplete();
+                  }}
                 />
               </div>
               <div className="flex-col">

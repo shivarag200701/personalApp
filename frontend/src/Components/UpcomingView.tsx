@@ -18,6 +18,7 @@ interface UpcomingViewProps {
   onEdit: (todo: Todo) => void;
   onUpdateTodo: (todo: Todo) => void;
   onAddTask: (preselectedDate?: string) => void;
+  onViewDetails: (todo: Todo) => void;
 }
 
 interface DraggableTaskProps {
@@ -26,6 +27,7 @@ interface DraggableTaskProps {
     onToggleComplete: (todoId: string | number) => void;
     onDelete: (todo: Todo) => void;
     onEdit: (todo: Todo) => void;
+    onViewDetails: (todo: Todo) => void;
     openDropdownId: number | string | null;
     setOpenDropdownId: (id: number | string | null) => void;
     hoveredTodoId: number | string | null;
@@ -48,6 +50,7 @@ const DraggableTask = ({
     onToggleComplete,
     onDelete,
     onEdit,
+    onViewDetails,
     openDropdownId,
     setOpenDropdownId,
     hoveredTodoId,
@@ -88,9 +91,10 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      className="p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-grab active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300"
+      className="p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300"
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
+      onClick={() => onViewDetails(todo)}
     >
       {/* Three-dot Menu */}
       {todo.id && (
@@ -230,6 +234,7 @@ const UpcomingView = ({
   onEdit,
   onUpdateTodo,
   onAddTask,
+  onViewDetails,
 }: UpcomingViewProps) => {
   const [startDate, setStartDate] = useState<Date>(() => {
     const today = new Date();
@@ -250,6 +255,8 @@ const UpcomingView = ({
     return getUpcomingDateRange(startDate, 5);
   }, [startDate]);
 
+  const isMobile = window.innerWidth < 768;
+
   const playSound = () => {
     audio.play();
   };
@@ -258,7 +265,7 @@ const UpcomingView = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 1,    // Require 8px of movement before drag starts
+        distance: isMobile ? Number.MAX_SAFE_INTEGER : 8,   // Require 8px of movement before drag starts
       },
     }),
   )
@@ -538,7 +545,7 @@ const UpcomingView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-[#1B1B1E] border border-gray-700 rounded-2xl p-5 shadow-2xl z-50 min-w-[320px] backdrop-blur-sm">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-[#1B1B1E] border border-gray-700 rounded-2xl p-5 shadow-2xl z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px] backdrop-blur-sm">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>
@@ -613,22 +620,22 @@ const UpcomingView = ({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-[#1B1B1E] text-sm font-medium cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  rounded-lg hover:bg-[#1B1B1E] text-sm font-medium cursor-pointer"
           >
             Today
           </button>
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -658,6 +665,7 @@ const UpcomingView = ({
                     onToggleComplete={onToggleComplete}
                     onDelete={handleDeleteClick}
                     onEdit={handleEditClick}
+                    onViewDetails={onViewDetails}
                     openDropdownId={openDropdownId}
                     setOpenDropdownId={setOpenDropdownId}
                     hoveredTodoId={hoveredTodoId}
@@ -677,7 +685,7 @@ const UpcomingView = ({
       {/* Drag Overlay for better UX */}
       <DragOverlay>
         {activeTodo ? (
-          <div className="p-3 bg-[#131315] border-2 border-purple-500 rounded-xl shadow-lg opacity-90"
+          <div className="p-3 bg-[#131315] border-2 border-purple-500 rounded-xl shadow-lg opacity-90 cursor-grabbing"
           style={{
             transform: 'rotate(3deg)'
           }}>

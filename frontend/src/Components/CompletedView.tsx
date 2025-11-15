@@ -13,6 +13,7 @@ interface CompletedViewProps {
   onDelete: (todoId: string | number) => void;
   onEdit: (todo: Todo) => void;
   onAddTask: () => void;
+  onViewDetails: (todo: Todo) => void;
 }
 
 const CompletedView = ({
@@ -22,6 +23,7 @@ const CompletedView = ({
   onDelete,
   onEdit,
   onAddTask,
+  onViewDetails,
 }: CompletedViewProps) => {
   const completedTodos = useMemo(() => {
     return todos.filter((todo) => todo?.completed === true);
@@ -42,6 +44,7 @@ const CompletedView = ({
           onToggleComplete={onToggleComplete}
           onDelete={onDelete}
           onEdit={onEdit}
+          onViewDetails={onViewDetails}
         />
       ) : (
         <NoTodo
@@ -57,4 +60,3 @@ const CompletedView = ({
 };
 
 export default CompletedView;
-

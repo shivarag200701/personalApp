@@ -69,6 +69,9 @@ const DraggableTask = ({
         opacity: isDragging ? 0 : 1,
     }
 
+    const [isActivating, setIsActivating] = useState(false);
+    const activationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const toggleDropdown = (todoId: number | string | undefined, event: React.MouseEvent) => {
         event.stopPropagation();
         if (!todoId) return;
@@ -85,17 +88,41 @@ const DraggableTask = ({
         onDelete(todo);
       };
 
+      const handleTouchStart = () =>{
+        setIsActivating(true);
+        activationTimeout.current = setTimeout(()=>{
+            setIsActivating(false);
+        },250);
+      }
+
+      const handleTouchEnd = () =>{
+        if(activationTimeout.current){
+            clearTimeout(activationTimeout.current);
+        }
+        setIsActivating(false);
+      }
+
       return (
         <div
       ref={setNodeRef}
       style={style}
       {...listeners}
       {...attributes}
-      className="p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      className={`p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300 ${isActivating  ? "border-purple-500 scale-105 shadow-lg shadow-purple-500/50 ring-2 ring-purple-500/30"  : "border-gray-800 hover:border-purple-500/50"}`}
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
     >
+         {isActivating && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="bg-purple-500/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-purple-500/50 animate-pulse">
+                <span className="text-purple-400 text-xs font-medium">Hold to drag</span>
+            </div>
+        </div>
+    )}
       {/* Three-dot Menu */}
       {todo.id && (
         <div

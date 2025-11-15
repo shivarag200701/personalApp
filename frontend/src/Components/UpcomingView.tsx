@@ -5,7 +5,7 @@ import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
 import WarningModal from "./WarningModal";
 import completedSound from "@/assets/completed.wav";
-import {DndContext, useDraggable, useDroppable, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {DndContext, useDraggable, useDroppable, DragOverlay, PointerSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
@@ -255,7 +255,6 @@ const UpcomingView = ({
     return getUpcomingDateRange(startDate, 5);
   }, [startDate]);
 
-  const isMobile = window.innerWidth < 768;
 
   const playSound = () => {
     audio.play();
@@ -265,7 +264,14 @@ const UpcomingView = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: isMobile ? Number.MAX_SAFE_INTEGER : 8,   // Require 8px of movement before drag starts
+        distance: 8,   // Require 8px of movement before drag starts
+      },
+    }),
+
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     }),
   )
@@ -529,9 +535,9 @@ const UpcomingView = ({
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <div className="flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 overflow-x-hidden">
         <div className="flex items-center gap-4">
-          <h1 className="text-white text-3xl md:text-4xl font-bold">Upcoming</h1>
+          <h1 className="text-white text-3xl md:text-4xl font-bold hidden sm:block">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
               className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors"

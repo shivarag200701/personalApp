@@ -5,7 +5,7 @@ import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
 import WarningModal from "./WarningModal";
 import completedSound from "@/assets/completed.wav";
-import {DndContext, useDraggable, useDroppable, DragOverlay, PointerSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
+import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
@@ -67,8 +67,6 @@ const DraggableTask = ({
 
     
 
-    const [isActivating, setIsActivating] = useState(false);
-    const activationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const style = {
         opacity: isDragging ? 0 : 1,
@@ -95,29 +93,6 @@ const DraggableTask = ({
         onDelete(todo);
       };
 
-      const handleTouchStart = () =>{
-        activationTimeout.current = setTimeout(() => {
-            setIsActivating(true);
-        }, 100);
-      }
-
-      const handleTouchEnd = () =>{
-        if(activationTimeout.current){
-            clearTimeout(activationTimeout.current);
-            activationTimeout.current = null;
-        }
-        setIsActivating(false);
-      }
-      
-      useEffect(() => {
-        if (isDragging) {
-            setIsActivating(false);
-            if (activationTimeout.current) {
-                clearTimeout(activationTimeout.current);
-                activationTimeout.current = null;
-            }
-        }
-    }, [isDragging]);
 
       return (
         <div
@@ -125,22 +100,12 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
-      className={`p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300 ${isActivating  ? "border-purple-500 scale-105 shadow-lg shadow-purple-500/50 ring-2 ring-purple-500/30" : "border-gray-800 hover:border-purple-500/50"}`}
+      className="p-3 bg-[#131315] border-2 border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-gray-700 transition-all duration-300 "
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
     >
-         {isActivating && (
 
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-            <div className="bg-purple-500/40 backdrop-blur-md rounded-lg px-3 py-1.5 border border-purple-500/70 shadow-lg">
-                <span className="text-purple-200 text-xs font-medium">Hold to drag</span>
-            </div>
-        </div>
-    )}
       {/* Three-dot Menu */}
       {todo.id && isMobile && (
         <div
@@ -307,11 +272,9 @@ const UpcomingView = ({
 
   //smoother UI transitions
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,   // Require 8px of movement before drag starts
-      },
-    }),
+    useSensor(MouseSensor, {
+        activationConstraint: { distance: 8 },
+      }),
 
     useSensor(TouchSensor, {
       activationConstraint: {
@@ -736,7 +699,7 @@ const UpcomingView = ({
       {/* Drag Overlay for better UX */}
       <DragOverlay>
         {activeTodo ? (
-          <div className="p-3 bg-[#131315] border-2 border-purple-500 rounded-xl shadow-lg opacity-90 cursor-grabbing"
+          <div className="p-3 bg-[#131315] border-none rounded-xl shadow-lg opacity-90 cursor-grabbing"
           style={{
             transform: 'rotate(3deg)'
           }}>

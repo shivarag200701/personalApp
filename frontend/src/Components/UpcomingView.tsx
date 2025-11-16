@@ -71,7 +71,7 @@ const DraggableTask = ({
     const style = {
         opacity: isDragging ? 0 : 1,
         userSelect: 'none' as const,
-        touchAction: 'none' as const,
+        touchAction: 'pan-y' as const,
         WebkitUserSelect: 'none' as const,
     }
 

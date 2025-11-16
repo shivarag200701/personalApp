@@ -78,6 +78,8 @@ const DraggableTask = ({
         transform: isActivating ? 'rotate(1deg)' : 'rotate(0deg)',
     }
 
+    const isMobile = window.innerWidth < 768;
+
     const toggleDropdown = (todoId: number | string | undefined, event: React.MouseEvent) => {
         event.stopPropagation();
         if (!todoId) return;
@@ -95,7 +97,9 @@ const DraggableTask = ({
       };
 
       const handleTouchStart = () =>{
-        setIsActivating(true);
+        activationTimeout.current = setTimeout(() => {
+            setIsActivating(true);
+        }, 100);
       }
 
       const handleTouchEnd = () =>{
@@ -105,6 +109,7 @@ const DraggableTask = ({
         }
         setIsActivating(false);
       }
+      
       useEffect(() => {
         if (isDragging) {
             setIsActivating(false);
@@ -130,14 +135,17 @@ const DraggableTask = ({
       onClick={() => onViewDetails(todo)}
     >
          {isActivating && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <div className="bg-purple-500/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-purple-500/50 animate-pulse">
-                <span className="text-purple-400 text-xs font-medium">Hold to drag</span>
+        <>
+        <div className="absolute inset-0 bg-[#131315]/80 backdrop-blur-sm pointer-events-none z-10" />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            <div className="bg-purple-500/40 backdrop-blur-md rounded-lg px-3 py-1.5 border border-purple-500/70 shadow-lg">
+                <span className="text-purple-200 text-xs font-medium">Hold to drag</span>
             </div>
         </div>
+    </>
     )}
       {/* Three-dot Menu */}
-      {todo.id && (
+      {todo.id && isMobile && (
         <div
           className={`absolute top-2 right-2 z-20 transition-opacity duration-200 pointer-events-auto ${
             openDropdownId === todo.id || hoveredTodoId === todo.id ? "opacity-100" : "opacity-0"
@@ -251,7 +259,7 @@ const DroppableDateColumn = ({
             </div>
 
             {/* Tasks */}
-            <div className="flex-1 mb-4 space-y-3 overflow-y-auto">
+            <div className="flex-1 mb-4 space-y-3 overflow-y-auto ">
                 {children}
             </div>
 

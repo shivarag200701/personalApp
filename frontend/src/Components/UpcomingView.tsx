@@ -65,12 +65,18 @@ const DraggableTask = ({
         }
     })
 
-    const style = {
-        opacity: isDragging ? 0 : 1,
-    }
+    
 
     const [isActivating, setIsActivating] = useState(false);
     const activationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const style = {
+        opacity: isDragging ? 0 : 1,
+        userSelect: 'none' as const,
+        touchAction: 'none' as const,
+        WebkitUserSelect: 'none' as const,
+        transform: isActivating ? 'rotate(1deg)' : 'rotate(0deg)',
+    }
 
     const toggleDropdown = (todoId: number | string | undefined, event: React.MouseEvent) => {
         event.stopPropagation();
@@ -90,17 +96,24 @@ const DraggableTask = ({
 
       const handleTouchStart = () =>{
         setIsActivating(true);
-        activationTimeout.current = setTimeout(()=>{
-            setIsActivating(false);
-        },250);
       }
 
       const handleTouchEnd = () =>{
         if(activationTimeout.current){
             clearTimeout(activationTimeout.current);
+            activationTimeout.current = null;
         }
         setIsActivating(false);
       }
+      useEffect(() => {
+        if (isDragging) {
+            setIsActivating(false);
+            if (activationTimeout.current) {
+                clearTimeout(activationTimeout.current);
+                activationTimeout.current = null;
+            }
+        }
+    }, [isDragging]);
 
       return (
         <div
@@ -111,7 +124,7 @@ const DraggableTask = ({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
-      className={`p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300 ${isActivating  ? "border-purple-500 scale-105 shadow-lg shadow-purple-500/50 ring-2 ring-purple-500/30"  : "border-gray-800 hover:border-purple-500/50"}`}
+      className={`p-3 bg-[#131315] border border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-purple-500/50 transition-all duration-300 ${isActivating  ? "border-purple-500 scale-105 shadow-lg shadow-purple-500/50 ring-2 ring-purple-500/30" : "border-gray-800 hover:border-purple-500/50"}`}
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}

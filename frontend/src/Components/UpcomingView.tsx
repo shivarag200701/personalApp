@@ -75,7 +75,6 @@ const DraggableTask = ({
         userSelect: 'none' as const,
         touchAction: 'none' as const,
         WebkitUserSelect: 'none' as const,
-        transform: isActivating ? 'rotate(1deg)' : 'rotate(0deg)',
     }
 
     const isMobile = window.innerWidth < 768;
@@ -135,14 +134,12 @@ const DraggableTask = ({
       onClick={() => onViewDetails(todo)}
     >
          {isActivating && (
-        <>
-        <div className="absolute inset-0 bg-[#131315]/80 backdrop-blur-sm pointer-events-none z-10" />
+
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
             <div className="bg-purple-500/40 backdrop-blur-md rounded-lg px-3 py-1.5 border border-purple-500/70 shadow-lg">
                 <span className="text-purple-200 text-xs font-medium">Hold to drag</span>
             </div>
         </div>
-    </>
     )}
       {/* Three-dot Menu */}
       {todo.id && isMobile && (

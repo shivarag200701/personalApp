@@ -7,7 +7,7 @@
 - [ ] Think about plans for calender view
 - [ ] Create a Rich text editor for Description
 - [ ] Subtasks for a main task
-- [ ] Fix isToday, isTomorrow, isThisWeek
+- [ ] Implement Overdue section and enable reschedule for them
 
 ## Essential Features
 

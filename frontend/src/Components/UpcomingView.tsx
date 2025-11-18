@@ -4,6 +4,7 @@ import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
 import WarningModal from "./WarningModal";
+import InlineTaskForm from "./InlineTaskForm";
 import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 
@@ -19,6 +20,7 @@ interface UpcomingViewProps {
   onUpdateTodo: (todo: Todo) => void;
   onAddTask: (preselectedDate?: string) => void;
   onViewDetails: (todo: Todo) => void;
+  onTaskCreated?: (todo: Todo) => void;
 }
 
 interface DraggableTaskProps {
@@ -41,6 +43,7 @@ interface DroppableDateColumnProps {
     dayTasks: Todo[];
     isToday: boolean;
     onAddTask: (date: Date) => void;
+    onTaskCreated: (todo: Todo) => void;
     children: React.ReactNode;
 }
 
@@ -194,7 +197,7 @@ const DroppableDateColumn = ({
     date,
     dayTasks,
     isToday,
-    onAddTask,
+    onTaskCreated,
     children,
 }: DroppableDateColumnProps) => {
     const {setNodeRef, isOver} = useDroppable({
@@ -203,6 +206,21 @@ const DroppableDateColumn = ({
             date
         }
     });
+    const [showInlineForm, setShowInlineForm] = useState(false);
+
+    const handleAddTaskClick = () => {
+        setShowInlineForm(true);
+    };
+
+    const handleCancel = () => {
+        setShowInlineForm(false);
+    };
+
+    const handleTaskCreated = (todo: Todo) => {
+        onTaskCreated(todo);
+        setShowInlineForm(false);
+    };
+
     return (
         <div
             ref={setNodeRef}
@@ -212,27 +230,37 @@ const DroppableDateColumn = ({
         >
             {/* Date Header */}
             <div className="mb-4 pb-3 border-b border-gray-800">
-                <div className="text-white text-sm font-semibold mb-1">
-                {formatUpcomingDateHeader(date)}
-                </div>
-                <div className="text-[#A2A2A9] text-xs">
-                {dayTasks.length} {dayTasks.length === 1 ? "task" : "tasks"}
+                <div className="flex items-center justify-between mb-1">
+                    <div className="text-white text-sm font-semibold">
+                        {formatUpcomingDateHeader(date)}
+                    </div>
+                    <div className="text-[#A2A2A9] text-xs">
+                        {dayTasks.length}
+                    </div>
                 </div>
             </div>
 
-            {/* Tasks */}
-            <div className="flex-1 mb-4 space-y-3 overflow-y-auto ">
+            {/* Tasks Container - Includes tasks, Add task button, and inline form */}
+            <div className="flex-1 mb-4 space-y-3 overflow-y-auto">
                 {children}
+                
+                {/* Add Task Button and Inline Form - Below all tasks */}
+                {!showInlineForm ? (
+                    <button
+                        onClick={handleAddTaskClick}
+                        className=" group flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-xs font-medium cursor-pointer pl-3"
+                    >
+                        <Plus className="w-4 h-4 group-hover:bg-red-400 group-hover:text-white transition-colors rounded-full text-red-400" />
+                        <span>Add task</span>
+                    </button>
+                ) : (
+                    <InlineTaskForm
+                        preselectedDate={date}
+                        onCancel={handleCancel}
+                        onSuccess={handleTaskCreated}
+                    />
+                )}
             </div>
-
-            {/* Add Task Button */}
-            <button
-                onClick={() => onAddTask(date)}
-                className="flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-sm font-medium mt-auto pt-3 border-t border-gray-800 cursor-pointer"
-            >
-                <Plus className="w-4 h-4" />
-                <span>Add task</span>
-            </button>
         </div>
     )
 }
@@ -245,6 +273,7 @@ const UpcomingView = ({
   onUpdateTodo,
   onAddTask,
   onViewDetails,
+  onTaskCreated,
 }: UpcomingViewProps) => {
   const [startDate, setStartDate] = useState<Date>(() => {
     const today = new Date();
@@ -260,10 +289,36 @@ const UpcomingView = ({
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
   const audio = new Audio(completedSound);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Update window width on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate number of days based on screen size
+  const getDayCount = () => {
+    const smallTablet = windowWidth >= 768 && windowWidth <= 850;
+    const isTablet = windowWidth <= 1024;
+    
+    if(smallTablet){
+        return 3;
+    }
+    if(isTablet){
+        return 4;
+    }
+    return 5;
+  };
+
+  const dayCount = getDayCount();
 
   const dateRange = useMemo(() => {
-    return getUpcomingDateRange(startDate, 5);
-  }, [startDate]);
+    return getUpcomingDateRange(startDate, dayCount);
+  }, [startDate, dayCount]);
 
 
   const playSound = () => {
@@ -311,7 +366,7 @@ const UpcomingView = ({
 
   const navigatePrevious = () => {
     const newDate = new Date(startDate);
-    newDate.setDate(newDate.getDate() - 5);
+    newDate.setDate(newDate.getDate() - dayCount);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     // Only navigate if the new date is today or in the future
@@ -326,7 +381,7 @@ const UpcomingView = ({
 
   const navigateNext = () => {
     const newDate = new Date(startDate);
-    newDate.setDate(newDate.getDate() + 5);
+    newDate.setDate(newDate.getDate() + dayCount);
     setStartDate(newDate);
   };
 
@@ -543,7 +598,7 @@ const UpcomingView = ({
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <div className="flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 overflow-x-hidden">
+      <div className="flex justify-between items-center mb-6 overflow-hidden">
         <div className="flex items-center gap-4">
           <h1 className="text-white text-3xl md:text-4xl font-bold hidden sm:block">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
@@ -643,7 +698,7 @@ const UpcomingView = ({
           </button>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  rounded-lg hover:bg-[#1B1B1E] text-sm font-medium cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  rounded-lg hover:bg-[#1B1B1E] text-sm font-medium cursor-pointer "
           >
             Today
           </button>
@@ -657,7 +712,7 @@ const UpcomingView = ({
       </div>
 
       {/* Calendar Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {dateRange.map((date, index) => {
           const dayTasks = getTasksForDate(date);
           const isToday = date.toDateString() === new Date().toDateString();
@@ -669,9 +724,13 @@ const UpcomingView = ({
               dayTasks={dayTasks}
               isToday={isToday}
               onAddTask={handleAddTask}
+              onTaskCreated={(todo) => {
+                if (onTaskCreated) {
+                  onTaskCreated(todo);
+                }
+              }}
             >
-              {dayTasks.length > 0 ? (
-                dayTasks.map((todo, taskIndex) => (
+                {dayTasks.map((todo, taskIndex) => (
                   <DraggableTask
                     key={todo.id || `temp-${index}-${todo.title}`}
                     todo={todo}
@@ -687,10 +746,7 @@ const UpcomingView = ({
                     dropdownRefs={dropdownRefs}
                     playSound={playSound}
                   />
-                ))
-              ) : (
-                <div className="text-[#6B6B75] text-xs text-center py-8">No tasks</div>
-              )}
+                ))}
             </DroppableDateColumn>
           );
         })}

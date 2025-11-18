@@ -212,7 +212,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[#131315] max-w-7xl mx-auto p-4 md:p-8 pb-12">
+      <div className="min-h-screen  bg-[#131315] w-full px-4 md:px-16 l pb-12">
         <div className="mb-8">
           <AppBar />
         </div>
@@ -237,6 +237,7 @@ const Dashboard = () => {
             onUpdateTodo={updateTodo}
             onAddTask={(date) => openModal(date)}
             onViewDetails={handleViewDetails}
+            onTaskCreated={addTodo}
           />
         )}
         {activeTab === "completed" && (

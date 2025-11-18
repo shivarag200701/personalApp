@@ -169,7 +169,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm mb-2 outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm mb-2 outline-none focus:outline-none min-w-0"
         autoFocus
       />
 
@@ -179,7 +179,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-xs mb-3 outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-3 outline-none focus:outline-none min-w-0"
       />
 
       {/* Action Buttons Row */}

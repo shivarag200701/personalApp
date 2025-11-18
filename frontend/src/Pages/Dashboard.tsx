@@ -212,7 +212,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen  bg-[#131315] w-full px-4 md:px-16 l pb-12">
+      <div className="min-h-screen bg-[#131315] w-full px-4 md:px-16 pb-12 overflow-x-hidden">
         <div className="mb-8">
           <AppBar />
         </div>

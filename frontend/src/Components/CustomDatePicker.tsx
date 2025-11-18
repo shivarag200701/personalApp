@@ -24,10 +24,18 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
     const updatePosition = () => {
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
-        setPosition({
-          left: rect.right, // Right edge of picker aligns with right edge of button
-          top: rect.bottom - 400, // Top edge of picker below button with spacing
-        });
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          setPosition({
+            left: rect.left,
+            top: rect.bottom - 400,
+          });
+        } else {
+          setPosition({
+            left: rect.right,
+            top: rect.bottom - 400,
+          });
+        }
       }
     };
 

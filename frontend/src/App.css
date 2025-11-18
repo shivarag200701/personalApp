@@ -9,6 +9,8 @@ html {
   padding: 0;
   height: 100%; /* Ensure body/html takes full height */
   background-color: #131315;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  max-width: 100vw; /* Ensure content doesn't exceed viewport width */
   /* Or for a background image: */
   /* background-image: url('./path/to/your/image.jpg'); */
   /* background-size: cover; */

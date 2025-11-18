@@ -712,7 +712,7 @@ const UpcomingView = ({
       </div>
 
       {/* Calendar Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">
         {dateRange.map((date, index) => {
           const dayTasks = getTasksForDate(date);
           const isToday = date.toDateString() === new Date().toDateString();

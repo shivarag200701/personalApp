@@ -94,9 +94,9 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     };
 
     // Initial position calculation - use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      updatePosition();
-    });
+    // requestAnimationFrame(() => {
+    //   updatePosition();
+    // });
 
     // Update position on scroll (use capture phase to catch all scroll events)
     window.addEventListener('scroll', updatePosition, true);

@@ -24,18 +24,50 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     }
     return new Date();
   });
-  const [position, setPosition] = useState({ left: 0, top: 0 });
+  
+  // Calculate initial position synchronously to avoid flash
+  const [position, setPosition] = useState(() => {
+    if (buttonRef?.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        return {
+          left: rect.left,
+          top: rect.bottom,
+        };
+      } else {
+        if (index <= 2) {
+          return {
+            left: rect.right,
+            top: rect.bottom - 400,
+          };
+        }
+        if (index >= 3) {
+          // For index >= 3, we'll need pickerHeight which isn't available yet
+          // So use a reasonable default and update in useEffect
+          return {
+            left: rect.left,
+            top: rect.top - 400, // Default height, will be updated
+          };
+        }
+      }
+    }
+    return { left: 0, top: 0 };
+  });
+  
   const pickerRef = useRef<HTMLDivElement>(null);
   const [nlpInput, setNlpInput] = useState("");
   const [parsedResult, setParsedResult] = useState<ParsedDateResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Track if position has been calculated (starts false, set to true after first calculation)
+  const [isPositioned, setIsPositioned] = useState(false);
 
   // Calculate position based on button
   useEffect(() => {
     const updatePosition = () => {
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
-        const pickerHeight = pickerRef.current?.offsetHeight;
+        const pickerHeight = pickerRef.current?.offsetHeight || 400;
         const isMobile = window.innerWidth < 768;
         if (isMobile) {
           setPosition({
@@ -52,19 +84,18 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             if (index >= 3){
                 setPosition({
                     left: rect.left,
-                    top: rect.top - (pickerHeight || 0),
+                    top: rect.top - pickerHeight,
                 })
             }
-        //   setPosition({
-        //     left: rect.right,
-        //     bottom: rect.bottom - 400,
-        //   });
         }
+        setIsPositioned(true);
       }
     };
 
-    // Initial position calculation
-    updatePosition();
+    // Initial position calculation - use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      updatePosition();
+    });
 
     // Update position on scroll (use capture phase to catch all scroll events)
     window.addEventListener('scroll', updatePosition, true);
@@ -75,7 +106,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
     };
-  }, [buttonRef]);
+  }, [buttonRef, index]);
 
   // Close on outside click
   useEffect(() => {
@@ -129,12 +160,35 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return () => clearTimeout(timeoutId);
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
-  // Focus input when picker opens
+  // Focus input and scroll into view when picker opens
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
+    // Delay to ensure picker is rendered and positioned
+    const timer = setTimeout(() => {
+      // Always scroll the button into view to bring the picker area into view
+      if (buttonRef?.current) {
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          buttonRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+          
+          // Focus the input after scroll starts
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
+          }, 300);
+        });
+      } else if (inputRef.current) {
+        // Fallback: just focus if no button ref
+        inputRef.current.focus();
+      }
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [buttonRef]);
 
   // Update current month when parsed date changes
   useEffect(() => {
@@ -309,10 +363,12 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       {/* Date Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[250px]"
+        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[250px] transition-opacity duration-150"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
+          opacity: isPositioned || (position.left !== 0 && position.top !== 0) ? 1 : 0,
+          pointerEvents: isPositioned || (position.left !== 0 && position.top !== 0) ? 'auto' : 'none',
         }}
       >
       {/* NLP Input Section */}

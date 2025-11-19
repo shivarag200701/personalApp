@@ -109,6 +109,11 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     };
   }, [buttonRef, index]);
 
+  useEffect(() => {
+    if (inputRef.current && buttonRef?.current) {
+      inputRef.current.focus();
+    }
+  }, [buttonRef]);
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

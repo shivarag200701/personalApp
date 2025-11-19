@@ -410,32 +410,32 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           type="text"
           value={nlpInput}
           onChange={(e) => setNlpInput(e.target.value)}
-          onFocus={(e) => {
-            // On mobile, scroll input into view when keyboard appears
-            if (window.innerWidth < 768) {
-              setTimeout(() => {
-                e.target.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'center',
-                  inline: 'nearest'
-                });
+        //   onFocus={(e) => {
+        //     // On mobile, scroll input into view when keyboard appears
+        //     if (window.innerWidth < 768) {
+        //       setTimeout(() => {
+        //         e.target.scrollIntoView({ 
+        //           behavior: 'smooth', 
+        //           block: 'center',
+        //           inline: 'nearest'
+        //         });
                 
-                // Also ensure picker is visible
-                if (pickerRef.current) {
-                  const pickerRect = pickerRef.current.getBoundingClientRect();
-                  const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+        //         // Also ensure picker is visible
+        //         if (pickerRef.current) {
+        //           const pickerRect = pickerRef.current.getBoundingClientRect();
+        //           const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
                   
-                  if (pickerRect.bottom > visualViewportHeight) {
-                    const scrollOffset = pickerRect.bottom - visualViewportHeight + 20;
-                    window.scrollBy({
-                      top: scrollOffset,
-                      behavior: 'smooth'
-                    });
-                  }
-                }
-              }, 300);
-            }
-          }}
+        //           if (pickerRect.bottom > visualViewportHeight) {
+        //             const scrollOffset = pickerRect.bottom - visualViewportHeight + 20;
+        //             window.scrollBy({
+        //               top: scrollOffset,
+        //               behavior: 'smooth'
+        //             });
+        //           }
+        //         }
+        //       }, 300);
+        //     }
+        //   }}
           placeholder="e.g., tomorrow, every Monday, in 5 days"
           className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
         />

@@ -161,131 +161,57 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return () => clearTimeout(timeoutId);
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
-  // Handle input focus to keep it visible on mobile when keyboard appears
-//   useEffect(() => {
-//     const handleInputFocus = () => {
-//       if (inputRef.current) {
-//         // Small delay to let keyboard appear
-//         setTimeout(() => {
-//           // Scroll input into view, accounting for keyboard
-//           inputRef.current?.scrollIntoView({ 
-//             behavior: 'smooth', 
-//             block: 'center',
-//             inline: 'nearest'
-//           });
-          
-//           // Also scroll the picker container if needed
-//           if (pickerRef.current) {
-//             const pickerRect = pickerRef.current.getBoundingClientRect();
-//             const viewportHeight = window.innerHeight;
-//             const visualViewportHeight = window.visualViewport?.height || viewportHeight;
-            
-//             // If picker is below visible area (keyboard is covering it)
-//             if (pickerRect.bottom > visualViewportHeight) {
-//               const scrollOffset = pickerRect.bottom - visualViewportHeight + 20; // 20px padding
-//               window.scrollBy({
-//                 top: scrollOffset,
-//                 behavior: 'smooth'
-//               });
-//             }
-//           }
-//         }, 300);
-//       }
-//     };
-
-//     const input = inputRef.current;
-//     if (input) {
-//       input.addEventListener('focus', handleInputFocus);
-//       return () => input.removeEventListener('focus', handleInputFocus);
-//     }
-//   }, []);
-
-  // Handle visual viewport resize (keyboard appearing/disappearing on mobile)
-//   useEffect(() => {
-//     const handleViewportResize = () => {
-//       if (buttonRef?.current && pickerRef.current) {
-//         const rect = buttonRef.current.getBoundingClientRect();
-//         const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
-//         const isMobile = window.innerWidth < 768;
-        
-//         if (isMobile) {
-//           // Reposition picker to stay above keyboard
-//           const pickerHeight = pickerRef.current.offsetHeight || 400;
-//           const availableHeight = visualViewportHeight;
-          
-//           // Position picker above keyboard, but don't go above button
-//           const newTop = Math.min(
-//             rect.bottom,
-//             availableHeight - pickerHeight - 10 // 10px padding from bottom
-//           );
-          
-//           setPosition({
-//             left: rect.left,
-//             top: Math.max(rect.top, newTop), // Don't go above button
-//           });
-//         }
-//       }
-//     };
-
-//     // Use visual viewport API if available (for mobile keyboards)
-//     if (window.visualViewport) {
-//       window.visualViewport.addEventListener('resize', handleViewportResize);
-//       return () => {
-//         window.visualViewport?.removeEventListener('resize', handleViewportResize);
-//       };
-//     }
-//   }, [buttonRef]);
 
   // Focus input and scroll into view when picker opens
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768;
+//   useEffect(() => {
+//     const isMobile = window.innerWidth < 768;
     
-    if (isMobile) {
-      // On mobile, focus immediately to open keyboard
-      const timer = setTimeout(() => {
-        if (inputRef.current) {
-          // Focus immediately on mobile to open keyboard
-          inputRef.current.focus();
+//     if (isMobile) {
+//       // On mobile, focus immediately to open keyboard
+//       const timer = setTimeout(() => {
+//         if (inputRef.current) {
+//           // Focus immediately on mobile to open keyboard
+//           inputRef.current.focus();
           
-          // Then scroll into view after keyboard starts appearing
-          setTimeout(() => {
-            if (inputRef.current) {
-              inputRef.current.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center',
-                inline: 'nearest'
-              });
-            }
-          }, 300);
-        }
-      }, 100);
+//           // Then scroll into view after keyboard starts appearing
+//           setTimeout(() => {
+//             if (inputRef.current) {
+//               inputRef.current.scrollIntoView({ 
+//                 behavior: 'smooth', 
+//                 block: 'center',
+//                 inline: 'nearest'
+//               });
+//             }
+//           }, 300);
+//         }
+//       }, 100);
       
-      return () => clearTimeout(timer);
-    } else {
-      // On desktop, scroll button into view first, then focus
-      const timer = setTimeout(() => {
-        if (buttonRef?.current) {
-          requestAnimationFrame(() => {
-            buttonRef.current?.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center',
-              inline: 'nearest'
-            });
+//       return () => clearTimeout(timer);
+//     } else {
+//       // On desktop, scroll button into view first, then focus
+//       const timer = setTimeout(() => {
+//         if (buttonRef?.current) {
+//           requestAnimationFrame(() => {
+//             buttonRef.current?.scrollIntoView({ 
+//               behavior: 'smooth', 
+//               block: 'center',
+//               inline: 'nearest'
+//             });
             
-            setTimeout(() => {
-              if (inputRef.current) {
-                inputRef.current.focus();
-              }
-            }, 300);
-          });
-        } else if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 50);
+//             setTimeout(() => {
+//               if (inputRef.current) {
+//                 inputRef.current.focus();
+//               }
+//             }, 300);
+//           });
+//         } else if (inputRef.current) {
+//           inputRef.current.focus();
+//         }
+//       }, 50);
       
-      return () => clearTimeout(timer);
-    }
-  }, [buttonRef]);
+//       return () => clearTimeout(timer);
+//     }
+//   }, [buttonRef]);
 
   // Update current month when parsed date changes
   useEffect(() => {

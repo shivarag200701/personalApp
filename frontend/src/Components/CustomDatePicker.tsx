@@ -89,6 +89,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             }
         }
         setIsPositioned(true);
+        
+        // On mobile, focus input immediately once positioned to open keyboard
+        if (isMobile && inputRef.current) {
+          // Small delay to ensure picker is visible
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 50);
+        }
       }
     };
 
@@ -237,32 +245,53 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
   // Focus input and scroll into view when picker opens
   useEffect(() => {
-    // Delay to ensure picker is rendered and positioned
-    const timer = setTimeout(() => {
-      // Always scroll the button into view to bring the picker area into view
-      if (buttonRef?.current) {
-        // Use requestAnimationFrame to ensure DOM is ready
-        requestAnimationFrame(() => {
-          buttonRef.current?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
+    const isMobile = window.innerWidth < 768;
+    
+    if (isMobile) {
+      // On mobile, focus immediately to open keyboard
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          // Focus immediately on mobile to open keyboard
+          inputRef.current.focus();
           
-          // Focus the input after scroll starts
+          // Then scroll into view after keyboard starts appearing
           setTimeout(() => {
             if (inputRef.current) {
-              inputRef.current.focus();
+              inputRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+              });
             }
           }, 300);
-        });
-      } else if (inputRef.current) {
-        // Fallback: just focus if no button ref
-        inputRef.current.focus();
-      }
-    }, 50);
-
-    return () => clearTimeout(timer);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } else {
+      // On desktop, scroll button into view first, then focus
+      const timer = setTimeout(() => {
+        if (buttonRef?.current) {
+          requestAnimationFrame(() => {
+            buttonRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+            
+            setTimeout(() => {
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
+            }, 300);
+          });
+        } else if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
   }, [buttonRef]);
 
   // Update current month when parsed date changes

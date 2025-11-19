@@ -160,6 +160,81 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return () => clearTimeout(timeoutId);
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
+  // Handle input focus to keep it visible on mobile when keyboard appears
+  useEffect(() => {
+    const handleInputFocus = () => {
+      if (inputRef.current) {
+        // Small delay to let keyboard appear
+        setTimeout(() => {
+          // Scroll input into view, accounting for keyboard
+          inputRef.current?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+          
+          // Also scroll the picker container if needed
+          if (pickerRef.current) {
+            const pickerRect = pickerRef.current.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const visualViewportHeight = window.visualViewport?.height || viewportHeight;
+            
+            // If picker is below visible area (keyboard is covering it)
+            if (pickerRect.bottom > visualViewportHeight) {
+              const scrollOffset = pickerRect.bottom - visualViewportHeight + 20; // 20px padding
+              window.scrollBy({
+                top: scrollOffset,
+                behavior: 'smooth'
+              });
+            }
+          }
+        }, 300);
+      }
+    };
+
+    const input = inputRef.current;
+    if (input) {
+      input.addEventListener('focus', handleInputFocus);
+      return () => input.removeEventListener('focus', handleInputFocus);
+    }
+  }, []);
+
+  // Handle visual viewport resize (keyboard appearing/disappearing on mobile)
+  useEffect(() => {
+    const handleViewportResize = () => {
+      if (buttonRef?.current && pickerRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+        const isMobile = window.innerWidth < 768;
+        
+        if (isMobile) {
+          // Reposition picker to stay above keyboard
+          const pickerHeight = pickerRef.current.offsetHeight || 400;
+          const availableHeight = visualViewportHeight;
+          
+          // Position picker above keyboard, but don't go above button
+          const newTop = Math.min(
+            rect.bottom,
+            availableHeight - pickerHeight - 10 // 10px padding from bottom
+          );
+          
+          setPosition({
+            left: rect.left,
+            top: Math.max(rect.top, newTop), // Don't go above button
+          });
+        }
+      }
+    };
+
+    // Use visual viewport API if available (for mobile keyboards)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportResize);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportResize);
+      };
+    }
+  }, [buttonRef]);
+
   // Focus input and scroll into view when picker opens
   useEffect(() => {
     // Delay to ensure picker is rendered and positioned
@@ -382,6 +457,32 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           type="text"
           value={nlpInput}
           onChange={(e) => setNlpInput(e.target.value)}
+          onFocus={(e) => {
+            // On mobile, scroll input into view when keyboard appears
+            if (window.innerWidth < 768) {
+              setTimeout(() => {
+                e.target.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center',
+                  inline: 'nearest'
+                });
+                
+                // Also ensure picker is visible
+                if (pickerRef.current) {
+                  const pickerRect = pickerRef.current.getBoundingClientRect();
+                  const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+                  
+                  if (pickerRect.bottom > visualViewportHeight) {
+                    const scrollOffset = pickerRect.bottom - visualViewportHeight + 20;
+                    window.scrollBy({
+                      top: scrollOffset,
+                      behavior: 'smooth'
+                    });
+                  }
+                }
+              }, 300);
+            }
+          }}
           placeholder="e.g., tomorrow, every Monday, in 5 days"
           className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
         />

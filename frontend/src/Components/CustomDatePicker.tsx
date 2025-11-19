@@ -437,7 +437,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         //     }
         //   }}
           placeholder="e.g., tomorrow, every Monday, in 5 days"
-          className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
+          className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-base sm:text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
         />
         {parsedResult && (
           <div className="mt-2 text-xs">

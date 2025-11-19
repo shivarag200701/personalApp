@@ -40,7 +40,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         if (isMobile) {
           setPosition({
             left: rect.left,
-            top: rect.bottom - 400,
+            top: rect.bottom,
           });
         } else {
             if (index <= 2){

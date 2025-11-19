@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Calendar, Flag, AlarmClock, MoreHorizontal, X, Send } from "lucide-react";
+import { Calendar, Flag, AlarmClock, MoreHorizontal, X, SendHorizontal } from "lucide-react";
 import api from "../utils/api";
 import type { Todo } from "./Modal";
 import CustomDatePicker from "./CustomDatePicker";
@@ -8,9 +8,10 @@ interface InlineTaskFormProps {
   preselectedDate: Date;
   onCancel: () => void;
   onSuccess: (todo: Todo) => void;
+  index: number;
 }
 
-const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskFormProps) => {
+const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -159,17 +160,17 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
     setSelectedDate("");
   };
   console.log("dateLabel", dateLabel ? "yes" : "no");
-  
+  console.log("index", index);
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-[#1B1B1E] border border-gray-800 rounded-xl mt-3 w-full min-w-0">
+    <form onSubmit={handleSubmit} className="p-2 bg-[#1B1B1E] border border-gray-700 rounded-xl mt-3 w-full min-w-0">
       {/* Task Name Input */}
       <input
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm mb-2 outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm outline-none focus:outline-none min-w-0"
         autoFocus
       />
 
@@ -179,7 +180,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-3 outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0"
       />
 
       {/* Action Buttons Row */}
@@ -216,8 +217,21 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
               selectedDate={selectedDate}
               onDateSelect={(date: string) => {
                 setSelectedDate(date);
-                setShowDatePicker(false);
+                // setShowDatePicker(false);
               }}
+              onRecurringSelect={(config) => {
+                setIsRecurring(config.isRecurring || false);
+                if (config.recurrencePattern) {
+                  setRecurrencePattern(config.recurrencePattern);
+                }
+                if (config.recurrenceInterval) {
+                  setRecurrenceInterval(config.recurrenceInterval);
+                }
+                if (config.recurrenceEndDate !== undefined) {
+                  setRecurrenceEndDate(config.recurrenceEndDate || "");
+                }
+              }}
+              index={index}
               onClose={() => setShowDatePicker(false)}
               buttonRef={dateButtonRef}
             />
@@ -277,7 +291,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
       </div>
 
       {/* Bottom Row: Project and Submit */}
-      <div className="flex items-center justify-end pt-3 border-t border-gray-800 gap-2 min-w-0">
+      <div className="flex items-center justify-end pt-1.5 border-t border-gray-800 gap-2 min-w-0">
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 shrink-0">
@@ -286,48 +300,17 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess }: InlineTaskForm
             onClick={onCancel}
             className="p-1.5 rounded-md bg-[#27272B] hover:bg-[#323238] transition-colors cursor-pointer shrink-0"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-1.5 rounded-md bg-[#A0522D] hover:bg-[#8B4513] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-md bg-[#A0522D] hover:bg-[#8B4513] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0"
           >
-            <Send className="w-4 h-4 text-white" />
+            <SendHorizontal className="w-4 h-4 text-white" />
           </button>
         </div>
       </div>
-
-      {/* Recurring Options (collapsed by default, can be expanded) */}
-      {isRecurring && (
-        <div className="mt-4 pt-4 border-t border-gray-800 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[#A2A2A9] text-xs">Every</span>
-            <input
-              type="number"
-              min="1"
-              value={recurrenceInterval}
-              onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
-              className="bg-[#141415] rounded-sm p-1.5 w-16 text-white border border-gray-600 text-xs text-center"
-            />
-            <select
-              value={recurrencePattern}
-              onChange={(e) => setRecurrencePattern(e.target.value as any)}
-              className="bg-[#141415] rounded-sm p-1.5 flex-1 text-white border border-gray-600 text-xs"
-            >
-              <option value="daily">Day(s)</option>
-              <option value="weekly">Week(s)</option>
-              <option value="monthly">Month(s)</option>
-              <option value="yearly">Year(s)</option>
-            </select>
-          </div>
-          {recurrenceEndDate && (
-            <div className="text-[#A2A2A9] text-xs">
-              Ends on {new Date(recurrenceEndDate).toLocaleDateString()}
-            </div>
-          )}
-        </div>
-      )}
     </form>
   );
 };

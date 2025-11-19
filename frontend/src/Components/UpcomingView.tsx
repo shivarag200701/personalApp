@@ -45,6 +45,9 @@ interface DroppableDateColumnProps {
     onAddTask: (date: Date) => void;
     onTaskCreated: (todo: Todo) => void;
     children: React.ReactNode;
+    isFormOpen: boolean;
+    onOpenForm: () => void;
+    onCloseForm: () => void;
 }
 
 const DraggableTask = ({
@@ -96,7 +99,7 @@ const DraggableTask = ({
         onDelete(todo);
       };
 
-
+    
       return (
         <div
       ref={setNodeRef}
@@ -199,6 +202,9 @@ const DroppableDateColumn = ({
     isToday,
     onTaskCreated,
     children,
+    isFormOpen,
+    onOpenForm,
+    onCloseForm,
 }: DroppableDateColumnProps) => {
     const {setNodeRef, isOver} = useDroppable({
         id: date.toISOString(),
@@ -206,19 +212,18 @@ const DroppableDateColumn = ({
             date
         }
     });
-    const [showInlineForm, setShowInlineForm] = useState(false);
 
     const handleAddTaskClick = () => {
-        setShowInlineForm(true);
+        onOpenForm();
     };
 
     const handleCancel = () => {
-        setShowInlineForm(false);
+        onCloseForm();
     };
 
     const handleTaskCreated = (todo: Todo) => {
         onTaskCreated(todo);
-        setShowInlineForm(false);
+        onCloseForm();
     };
 
     return (
@@ -245,7 +250,7 @@ const DroppableDateColumn = ({
                 {children}
                 
                 {/* Add Task Button and Inline Form - Below all tasks */}
-                {!showInlineForm ? (
+                {!isFormOpen ? (
                     <button
                         onClick={handleAddTaskClick}
                         className=" group flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-xs font-medium cursor-pointer pl-3"
@@ -255,6 +260,7 @@ const DroppableDateColumn = ({
                     </button>
                 ) : (
                     <InlineTaskForm
+                        index={dayTasks.length}
                         preselectedDate={date}
                         onCancel={handleCancel}
                         onSuccess={handleTaskCreated}
@@ -286,6 +292,7 @@ const UpcomingView = ({
   const [openDropdownId, setOpenDropdownId] = useState<number | string | null>(null);
   const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
   const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
+  const [openFormDate, setOpenFormDate] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
   const audio = new Audio(completedSound);
@@ -716,14 +723,18 @@ const UpcomingView = ({
         {dateRange.map((date, index) => {
           const dayTasks = getTasksForDate(date);
           const isToday = date.toDateString() === new Date().toDateString();
-
+          const dateKey = date.toISOString();
+          const isFormOpen = openFormDate === dateKey;
           return (
             <DroppableDateColumn
-              key={date.toISOString()}
+              key={dateKey}
               date={date}
               dayTasks={dayTasks}
               isToday={isToday}
               onAddTask={handleAddTask}
+              isFormOpen={isFormOpen}
+              onOpenForm={() => setOpenFormDate(dateKey)}
+              onCloseForm={() => setOpenFormDate(null)}
               onTaskCreated={(todo) => {
                 if (onTaskCreated) {
                   onTaskCreated(todo);

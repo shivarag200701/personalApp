@@ -1,14 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX} from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles} from "lucide-react";
+import { parseNaturalLanguageDate , type ParsedDateResult} from "../utils/nlpDateParser";
 
 interface CustomDatePickerProps {
   selectedDate: string; // YYYY-MM-DD format
   onDateSelect: (date: string) => void;
   onClose: () => void;
   buttonRef?: React.RefObject<HTMLButtonElement | null>;
+  index: number;
+  onRecurringSelect?: (config: {
+    isRecurring: boolean;
+    recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
+    recurrenceInterval?: number;
+    recurrenceEndDate?: string | null;
+  }) => void;
 }
 
-const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: CustomDatePickerProps) => {
+const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, index, onRecurringSelect }: CustomDatePickerProps) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     if (selectedDate) {
       const [year, month] = selectedDate.split('-').map(Number);
@@ -18,12 +26,16 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
   });
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const pickerRef = useRef<HTMLDivElement>(null);
+  const [nlpInput, setNlpInput] = useState("");
+  const [parsedResult, setParsedResult] = useState<ParsedDateResult | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Calculate position based on button
   useEffect(() => {
     const updatePosition = () => {
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
+        const pickerHeight = pickerRef.current?.offsetHeight;
         const isMobile = window.innerWidth < 768;
         if (isMobile) {
           setPosition({
@@ -31,10 +43,22 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
             top: rect.bottom - 400,
           });
         } else {
-          setPosition({
-            left: rect.right,
-            top: rect.bottom - 400,
-          });
+            if (index <= 2){
+                setPosition({
+                    left: rect.right,
+                    top: rect.bottom - 400,
+                })
+            }
+            if (index >= 3){
+                setPosition({
+                    left: rect.left,
+                    top: rect.top - (pickerHeight || 0),
+                })
+            }
+        //   setPosition({
+        //     left: rect.right,
+        //     bottom: rect.bottom - 400,
+        //   });
         }
       }
     };
@@ -68,6 +92,57 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose, buttonRef]);
+
+  // Debounced NLP parsing
+  useEffect(() => {
+    if (!nlpInput.trim()) {
+      setParsedResult(null);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      const result = parseNaturalLanguageDate(nlpInput);
+      console.log(result);
+      setParsedResult(result);
+      
+      // Auto-apply if high confidence
+      if (result.confidence === "high" && result.date) {
+        onDateSelect(result.date);
+        
+        // If recurring, notify parent
+        if (result.isRecurring && onRecurringSelect) {
+          onRecurringSelect({
+            isRecurring: true,
+            recurrencePattern: result.recurrencePattern,
+            recurrenceInterval: result.recurrenceInterval,
+            recurrenceEndDate: result.recurrenceEndDate
+          });
+        } else if (onRecurringSelect) {
+          // Clear recurring if not recurring
+          onRecurringSelect({
+            isRecurring: false
+          });
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [nlpInput, onDateSelect, onRecurringSelect]);
+
+  // Focus input when picker opens
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  // Update current month when parsed date changes
+  useEffect(() => {
+    if (parsedResult?.date) {
+      const [year, month] = parsedResult.date.split('-').map(Number);
+      setCurrentMonth(new Date(year, month - 1, 1));
+    }
+  }, [parsedResult]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -170,6 +245,15 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
   const handleDateClick = (date: Date) => {
     if (!isPastDate(date)) {
       onDateSelect(dateToInput(date));
+      // Clear recurring when manually selecting date
+      if (onRecurringSelect) {
+        onRecurringSelect({
+          isRecurring: false
+        });
+      }
+      // Clear NLP input
+      setNlpInput("");
+      setParsedResult(null);
     }
   };
 
@@ -214,6 +298,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   const nextMonthDays = getDaysInMonth(nextMonth);
   const nextMonthLabel = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+  
   return (
     <>
       {/* Backdrop */}
@@ -230,10 +315,38 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
           top: `${position.top}px`,
         }}
       >
+      {/* NLP Input Section */}
+      <div className="p-3 border-b border-gray-800">
+        <div className="flex items-center gap-2 mb-2">
+          <Sparkles className="w-4 h-4 text-gray-500" />
+          <span className="text-gray-500 text-xs font-medium">Type a date</span>
+        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={nlpInput}
+          onChange={(e) => setNlpInput(e.target.value)}
+          placeholder="e.g., tomorrow, every Monday, in 5 days"
+          className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
+        />
+        {parsedResult && (
+          <div className="mt-2 text-xs">
+            {parsedResult.confidence === "high" && (
+              <div className="text-green-400">
+                {parsedResult.displayText}
+                {parsedResult.isRecurring && (
+                  <span className="ml-1 text-gray-500">(recurring)</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Current Selected Date Header */}
-      {selectedDate && (
+      {selectedDate && !nlpInput && (
         <div className="p-3 border-b border-gray-800 text-gray-500 text-sm">
-          <div>Type a date</div>
+          <div>Selected: {selectedDate}</div>
         </div>
       )}
 
@@ -253,6 +366,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
                 } else {
                   onDateSelect("");
                 }
+                // Clear recurring when selecting quick option
+                if (onRecurringSelect) {
+                  onRecurringSelect({
+                    isRecurring: false
+                  });
+                }
+                setNlpInput("");
+                setParsedResult(null);
               }}
               className={`w-full flex items-center gap-3 p-1 rounded-lg hover:bg-[#27272B] transition-colors cursor-pointer ${
                 (isSelected || isNoDate) ? "bg-[#27272B]" : ""
@@ -318,6 +439,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
             const isSelected = isSelectedDate(date);
             const isTodayDate = isToday(date);
             const isPast = isPastDate(date);
+            const isParsedDate = parsedResult?.date === dateToInput(date);
 
             return (
               <button
@@ -327,6 +449,8 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
                 className={`aspect-square rounded-lg text-sm transition-colors cursor-pointer ${
                   isSelected
                     ? "bg-red-500 text-white font-semibold"
+                    : isParsedDate
+                    ? "bg-blue-500/50 text-white"
                     : isTodayDate
                     ? "bg-[#27272B] text-white"
                     : isPast
@@ -351,6 +475,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
 
               const isSelected = isSelectedDate(date);
               const isPast = isPastDate(date);
+              const isParsedDate = parsedResult?.date === dateToInput(date);
 
               return (
                 <button
@@ -360,6 +485,8 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef }: Cu
                   className={`aspect-square rounded-lg text-sm transition-colors cursor-pointer ${
                     isSelected
                       ? "bg-red-500 text-white font-semibold"
+                      : isParsedDate
+                      ? "bg-blue-500/50 text-white"
                       : isPast
                       ? "text-[#4A4A4A] cursor-not-allowed"
                       : "text-[#A2A2A9] hover:bg-[#27272B] hover:text-white"

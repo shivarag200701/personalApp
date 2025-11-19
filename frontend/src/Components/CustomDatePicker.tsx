@@ -64,7 +64,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
   // Calculate position based on button
   useEffect(() => {
-    const updatePosition = () => {
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
         const pickerHeight = pickerRef.current?.offsetHeight || 400;
@@ -90,23 +89,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         }
         setIsPositioned(true);
         
-      }
-    };
-
-    // Initial position calculation - use requestAnimationFrame to ensure DOM is ready
-    // requestAnimationFrame(() => {
-    //   updatePosition();
-    // });
-
-    // Update position on scroll (use capture phase to catch all scroll events)
-    window.addEventListener('scroll', updatePosition, true);
-    // Update position on window resize
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
+    }
   }, [buttonRef, index]);
 
   useEffect(() => {

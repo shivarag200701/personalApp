@@ -90,13 +90,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         }
         setIsPositioned(true);
         
-        // On mobile, focus input immediately once positioned to open keyboard
-        if (isMobile && inputRef.current) {
-          // Small delay to ensure picker is visible
-          setTimeout(() => {
-            inputRef.current?.focus();
-          }, 50);
-        }
       }
     };
 
@@ -169,79 +162,79 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
   // Handle input focus to keep it visible on mobile when keyboard appears
-  useEffect(() => {
-    const handleInputFocus = () => {
-      if (inputRef.current) {
-        // Small delay to let keyboard appear
-        setTimeout(() => {
-          // Scroll input into view, accounting for keyboard
-          inputRef.current?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
+//   useEffect(() => {
+//     const handleInputFocus = () => {
+//       if (inputRef.current) {
+//         // Small delay to let keyboard appear
+//         setTimeout(() => {
+//           // Scroll input into view, accounting for keyboard
+//           inputRef.current?.scrollIntoView({ 
+//             behavior: 'smooth', 
+//             block: 'center',
+//             inline: 'nearest'
+//           });
           
-          // Also scroll the picker container if needed
-          if (pickerRef.current) {
-            const pickerRect = pickerRef.current.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const visualViewportHeight = window.visualViewport?.height || viewportHeight;
+//           // Also scroll the picker container if needed
+//           if (pickerRef.current) {
+//             const pickerRect = pickerRef.current.getBoundingClientRect();
+//             const viewportHeight = window.innerHeight;
+//             const visualViewportHeight = window.visualViewport?.height || viewportHeight;
             
-            // If picker is below visible area (keyboard is covering it)
-            if (pickerRect.bottom > visualViewportHeight) {
-              const scrollOffset = pickerRect.bottom - visualViewportHeight + 20; // 20px padding
-              window.scrollBy({
-                top: scrollOffset,
-                behavior: 'smooth'
-              });
-            }
-          }
-        }, 300);
-      }
-    };
+//             // If picker is below visible area (keyboard is covering it)
+//             if (pickerRect.bottom > visualViewportHeight) {
+//               const scrollOffset = pickerRect.bottom - visualViewportHeight + 20; // 20px padding
+//               window.scrollBy({
+//                 top: scrollOffset,
+//                 behavior: 'smooth'
+//               });
+//             }
+//           }
+//         }, 300);
+//       }
+//     };
 
-    const input = inputRef.current;
-    if (input) {
-      input.addEventListener('focus', handleInputFocus);
-      return () => input.removeEventListener('focus', handleInputFocus);
-    }
-  }, []);
+//     const input = inputRef.current;
+//     if (input) {
+//       input.addEventListener('focus', handleInputFocus);
+//       return () => input.removeEventListener('focus', handleInputFocus);
+//     }
+//   }, []);
 
   // Handle visual viewport resize (keyboard appearing/disappearing on mobile)
-  useEffect(() => {
-    const handleViewportResize = () => {
-      if (buttonRef?.current && pickerRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
-        const isMobile = window.innerWidth < 768;
+//   useEffect(() => {
+//     const handleViewportResize = () => {
+//       if (buttonRef?.current && pickerRef.current) {
+//         const rect = buttonRef.current.getBoundingClientRect();
+//         const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
+//         const isMobile = window.innerWidth < 768;
         
-        if (isMobile) {
-          // Reposition picker to stay above keyboard
-          const pickerHeight = pickerRef.current.offsetHeight || 400;
-          const availableHeight = visualViewportHeight;
+//         if (isMobile) {
+//           // Reposition picker to stay above keyboard
+//           const pickerHeight = pickerRef.current.offsetHeight || 400;
+//           const availableHeight = visualViewportHeight;
           
-          // Position picker above keyboard, but don't go above button
-          const newTop = Math.min(
-            rect.bottom,
-            availableHeight - pickerHeight - 10 // 10px padding from bottom
-          );
+//           // Position picker above keyboard, but don't go above button
+//           const newTop = Math.min(
+//             rect.bottom,
+//             availableHeight - pickerHeight - 10 // 10px padding from bottom
+//           );
           
-          setPosition({
-            left: rect.left,
-            top: Math.max(rect.top, newTop), // Don't go above button
-          });
-        }
-      }
-    };
+//           setPosition({
+//             left: rect.left,
+//             top: Math.max(rect.top, newTop), // Don't go above button
+//           });
+//         }
+//       }
+//     };
 
-    // Use visual viewport API if available (for mobile keyboards)
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleViewportResize);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleViewportResize);
-      };
-    }
-  }, [buttonRef]);
+//     // Use visual viewport API if available (for mobile keyboards)
+//     if (window.visualViewport) {
+//       window.visualViewport.addEventListener('resize', handleViewportResize);
+//       return () => {
+//         window.visualViewport?.removeEventListener('resize', handleViewportResize);
+//       };
+//     }
+//   }, [buttonRef]);
 
   // Focus input and scroll into view when picker opens
   useEffect(() => {

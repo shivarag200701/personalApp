@@ -51,7 +51,9 @@ oauthRouter.get("/google/connect", async (req,res) => {
     try{
         const state = crypto.randomBytes(32).toString('hex');
         const userId = req.session.userId;
-        const type: 'login' | 'connect' = userId ? 'connect' : 'login';
+        // for now, we are only supporting login
+        // const type: 'login' | 'connect' = userId ? 'connect' : 'login';
+        const type = "login";
 
         const stateData: StateData = {
             type,

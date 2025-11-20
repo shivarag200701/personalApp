@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles} from "lucide-react";
 import { parseNaturalLanguageDate , type ParsedDateResult} from "../utils/nlpDateParser";
+import { RefreshCw} from 'lucide-react';
 
 interface CustomDatePickerProps {
   selectedDate: string; // YYYY-MM-DD format
@@ -126,16 +127,22 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       setParsedResult(result);
       
       // Auto-apply if high confidence
-      if (result.confidence === "high" && result.date) {
-        onDateSelect(result.date);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [nlpInput, onDateSelect, onRecurringSelect]);
+
+  function handleApplyDate(){
+    if (parsedResult?.confidence === "high" && parsedResult?.date) {
+        onDateSelect(parsedResult.date);
         
         // If recurring, notify parent
-        if (result.isRecurring && onRecurringSelect) {
+        if (parsedResult.isRecurring && onRecurringSelect) {
           onRecurringSelect({
             isRecurring: true,
-            recurrencePattern: result.recurrencePattern,
-            recurrenceInterval: result.recurrenceInterval,
-            recurrenceEndDate: result.recurrenceEndDate
+            recurrencePattern: parsedResult.recurrencePattern,
+            recurrenceInterval: parsedResult.recurrenceInterval,
+            recurrenceEndDate: parsedResult.recurrenceEndDate
           });
         } else if (onRecurringSelect) {
           // Clear recurring if not recurring
@@ -144,62 +151,10 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           });
         }
       }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [nlpInput, onDateSelect, onRecurringSelect]);
+      onClose();
+  }
 
 
-  // Focus input and scroll into view when picker opens
-//   useEffect(() => {
-//     const isMobile = window.innerWidth < 768;
-    
-//     if (isMobile) {
-//       // On mobile, focus immediately to open keyboard
-//       const timer = setTimeout(() => {
-//         if (inputRef.current) {
-//           // Focus immediately on mobile to open keyboard
-//           inputRef.current.focus();
-          
-//           // Then scroll into view after keyboard starts appearing
-//           setTimeout(() => {
-//             if (inputRef.current) {
-//               inputRef.current.scrollIntoView({ 
-//                 behavior: 'smooth', 
-//                 block: 'center',
-//                 inline: 'nearest'
-//               });
-//             }
-//           }, 300);
-//         }
-//       }, 100);
-      
-//       return () => clearTimeout(timer);
-//     } else {
-//       // On desktop, scroll button into view first, then focus
-//       const timer = setTimeout(() => {
-//         if (buttonRef?.current) {
-//           requestAnimationFrame(() => {
-//             buttonRef.current?.scrollIntoView({ 
-//               behavior: 'smooth', 
-//               block: 'center',
-//               inline: 'nearest'
-//             });
-            
-//             setTimeout(() => {
-//               if (inputRef.current) {
-//                 inputRef.current.focus();
-//               }
-//             }, 300);
-//           });
-//         } else if (inputRef.current) {
-//           inputRef.current.focus();
-//         }
-//       }, 50);
-      
-//       return () => clearTimeout(timer);
-//     }
-//   }, [buttonRef]);
 
   // Update current month when parsed date changes
   useEffect(() => {
@@ -393,44 +348,32 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           type="text"
           value={nlpInput}
           onChange={(e) => setNlpInput(e.target.value)}
-        //   onFocus={(e) => {
-        //     // On mobile, scroll input into view when keyboard appears
-        //     if (window.innerWidth < 768) {
-        //       setTimeout(() => {
-        //         e.target.scrollIntoView({ 
-        //           behavior: 'smooth', 
-        //           block: 'center',
-        //           inline: 'nearest'
-        //         });
-                
-        //         // Also ensure picker is visible
-        //         if (pickerRef.current) {
-        //           const pickerRect = pickerRef.current.getBoundingClientRect();
-        //           const visualViewportHeight = window.visualViewport?.height || window.innerHeight;
-                  
-        //           if (pickerRect.bottom > visualViewportHeight) {
-        //             const scrollOffset = pickerRect.bottom - visualViewportHeight + 20;
-        //             window.scrollBy({
-        //               top: scrollOffset,
-        //               behavior: 'smooth'
-        //             });
-        //           }
-        //         }
-        //       }, 300);
-        //     }
-        //   }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleApplyDate();
+            }
+          }}
           placeholder="e.g., tomorrow, every Monday, in 5 days"
           className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-base sm:text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
         />
         {parsedResult && (
-          <div className="mt-2 text-xs">
+          <div className="mt-3 text-xs flex items-center gap-3">
             {parsedResult.confidence === "high" && (
-              <div className="text-green-400">
+              <div>
+                <div className="flex items-center gap-3 cursor-pointer" onClick={handleApplyDate}>
+              {parsedResult.isRecurring && <RefreshCw className="w-4 h-4 text-gray-400" />}
+              {!parsedResult.isRecurring && <Calendar className="w-4 h-4 text-gray-400" />}
+              <div className="text-white flex items-center gap-1">
                 {parsedResult.displayText}
                 {parsedResult.isRecurring && (
-                  <span className="ml-1 text-gray-500">(recurring)</span>
+                  <span className="flex items-center gap-1"><ArrowRight className="w-4 h-4 text-white" /> Forever</span>
                 )}
               </div>
+              </div>
+            <div className="text-gray-400 mt-3 text-xs">
+            You can also type in recurring dates like <span className="text-gray-300">every day, every 2 weeks, and every month.</span> 
+            </div>
+            </div>
             )}
           </div>
         )}

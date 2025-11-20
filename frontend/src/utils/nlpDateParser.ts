@@ -236,7 +236,9 @@ export interface ParsedDateResult {
     }
     
     // Weekly patterns
-    if (normalized.match(/(every\s+)?(\d+\s+)?weeks?|weekly|each\s+week/i)) {
+    if (normalized.match(/(every\s+)(\d+\s+)?weeks?|weekly|each\s+week/i)) {
+        console.log("this");
+        
       return {
         isRecurring: true,
         pattern: "weekly",
@@ -245,8 +247,10 @@ export interface ParsedDateResult {
     }
     
     // Every [weekday]
-    const weekdayMatch = normalized.match(/every\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)/i);
+    const weekdayMatch = normalized.match(/every\s+\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)\b/i);
     if (weekdayMatch) {
+        console.log("that");
+
         const abbreviation = weekdayMatch[1].toLowerCase();
         const weekdayName = weekdayMap[abbreviation] || abbreviation;
       return {
@@ -403,9 +407,9 @@ export interface ParsedDateResult {
       // Special handling for "every [weekday]" patterns
       if (recurringInfo.weekdayName && result.recurrencePattern === 'weekly' && result.recurrenceInterval === 1) {
         const weekdayDisplay = recurringInfo.weekdayName.charAt(0).toUpperCase() + recurringInfo.weekdayName.slice(1);
-        result.displayText = `Every ${weekdayDisplay}`;
+        result.displayText = `${weekdayDisplay}`;
       } else {
-        result.displayText = `Every ${result.recurrenceInterval} ${patternText}${result.recurrenceInterval > 1 ? 's' : ''}`;
+        result.displayText = `${result.recurrenceInterval} ${patternText}${result.recurrenceInterval > 1 ? 's' : ''}`;
       }
       
       if (result.recurrenceEndDate) {
@@ -416,13 +420,7 @@ export interface ParsedDateResult {
       const dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'short' });
       const dateStr = parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
-      if (parsedDate.getTime() === today.getTime()) {
-        result.displayText = "Today";
-      } else if (parsedDate.getTime() === today.getTime() + 86400000) {
-        result.displayText = "Tomorrow";
-      } else {
         result.displayText = `${dayName}, ${dateStr}`;
-      }
     }
     
     if (!parsedDate && !recurringInfo.isRecurring) {

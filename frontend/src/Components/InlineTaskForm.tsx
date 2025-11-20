@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Calendar, Flag, AlarmClock, MoreHorizontal, X, SendHorizontal } from "lucide-react";
+import { Calendar, Flag, AlarmClock, MoreHorizontal, X, SendHorizontal , RefreshCw} from "lucide-react";
 import api from "../utils/api";
 import type { Todo } from "./Modal";
 import CustomDatePicker from "./CustomDatePicker";
@@ -158,6 +158,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
   // Handle empty date (No Date selected)
   const handleNoDate = () => {
     setSelectedDate("");
+    setIsRecurring(false);
   };
   console.log("dateLabel", dateLabel ? "yes" : "no");
   console.log("index", index);
@@ -200,6 +201,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
           >
             <Calendar className="w-3.5 h-3.5 shrink-0 " />
             {dateLabel && <span className="whitespace-nowrap truncate max-w-[100px]">{dateLabel}</span>}
+            {isRecurring && <RefreshCw className="w-2.5 h-2.5 shrink-0 text-gray-300" />}
             {selectedDate && (
               <X
                 className="w-3 h-3 ml-1 text-white hover:text-gray-300 shrink-0"

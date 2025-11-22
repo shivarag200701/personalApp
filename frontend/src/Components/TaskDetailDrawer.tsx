@@ -21,6 +21,7 @@ interface TaskDetailDrawerProps {
   onEdit: (todo: Todo) => void;
   onToggleComplete: (todoId: string | number) => void;
   onDelete: (todoId: string | number) => void;
+  handleDuplicate: (todo: Todo) => void;
 }
 
 const labelClass = "text-xs uppercase tracking-wide text-gray-400";
@@ -46,6 +47,7 @@ const TaskDetailDrawer = ({
   onEdit,
   onToggleComplete,
   onDelete,
+  handleDuplicate,
 }: TaskDetailDrawerProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
@@ -63,6 +65,7 @@ const TaskDetailDrawer = ({
       setEditedDescription(todo.description || "");
     }
   }, [todo]);
+  console.log("todo", todo?.id);
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
@@ -270,7 +273,7 @@ const TaskDetailDrawer = ({
                     className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(todo.id! as string | number);
+                      onDelete(todo.id as string | number);
                       setIsDropdownOpen(false);
                     }}
                   >
@@ -426,7 +429,12 @@ const TaskDetailDrawer = ({
                 </Button>
                 <Button
                   variant="ghost"
-                  className="bg-[#1B1B1E] text-white hover:bg-[#222227]"
+                  className="bg-[#1B1B1E] text-white hover:bg-[#222227] cursor-pointer"
+                  onClick={(e)=>{
+                    e.stopPropagation();
+                    handleDuplicate(todo);
+                    onClose();
+                  }}
                 >
                   <Copy className="mr-2 h-4 w-4" /> Duplicate
                 </Button>

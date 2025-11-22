@@ -6,13 +6,14 @@ import CustomDatePicker from "./CustomDatePicker";
 import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 interface InlineTaskFormProps {
+  todo?: Todo;
   preselectedDate: Date;
   onCancel: () => void;
   onSuccess: (todo: Todo) => void;
   index: number;
 }
 
-const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTaskFormProps) => {
+const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -27,10 +28,24 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
 
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper function to convert ISO date string to YYYY-MM-DD format (using local timezone)
+  const isoToDateInput = (isoString: string | null | undefined): string => {
+    if (!isoString) {
+      return "";
+    }
+    // Parse the ISO string and get local date components
+    const date = new Date(isoString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -51,9 +66,33 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
     return date.toISOString();
   };
 
+  // Initialize form fields from todo prop when editing
   useEffect(() => {
-    setSelectedDate(dateToInput(preselectedDate));
-  }, [preselectedDate]);
+    if (todo) {
+      setTitle(todo.title || "");
+      setDescription(todo.description || "");
+      setSelectedDate(todo.completeAt ? isoToDateInput(todo.completeAt) : dateToInput(preselectedDate));
+      setPriority((todo.priority as "high" | "medium" | "low") || "high");
+      setCategory(todo.category || "");
+      setIsRecurring(todo.isRecurring || false);
+      setRecurrencePattern(todo.recurrencePattern || "daily");
+      setRecurrenceInterval(todo.recurrenceInterval || 1);
+      setRecurrenceEndDate(todo.recurrenceEndDate 
+        ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
+        : "");
+    } else {
+      // Reset form for new todo
+      setTitle("");
+      setDescription("");
+      setSelectedDate(dateToInput(preselectedDate));
+      setPriority("high");
+      setCategory("");
+      setIsRecurring(false);
+      setRecurrencePattern("daily");
+      setRecurrenceInterval(1);
+      setRecurrenceEndDate("");
+    }
+  }, [todo, preselectedDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,34 +102,52 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
     setIsSubmitting(true);
 
     try {
-      const res = await api.post("/v1/todo/", {
-        title,
-        description,
-        completeAt: completeAtIso,
-        category,
-        priority,
-        isRecurring,
-        recurrencePattern,
-        recurrenceInterval,
-        recurrenceEndDate: recurrenceEndDate || undefined,
-      });
-
-      if (res.data.todo) {
-        onSuccess(res.data.todo);
-      } else {
-        onSuccess({
+      let res;
+      if (todo?.id) {
+        // Update existing todo
+        res = await api.put(`/v1/todo/${todo.id}`, {
           title,
           description,
           completeAt: completeAtIso,
           category,
           priority,
-          completed: false,
-          completedAt: null,
+          isRecurring,
+          recurrencePattern,
+          recurrenceInterval,
+          recurrenceEndDate: recurrenceEndDate || undefined,
+        });
+      } else {
+        // Create new todo
+        res = await api.post("/v1/todo/", {
+          title,
+          description,
+          completeAt: completeAtIso,
+          category,
+          priority,
+          isRecurring,
+          recurrencePattern,
+          recurrenceInterval,
+          recurrenceEndDate: recurrenceEndDate || undefined,
+        });
+      }
+
+      if (res.data.todo) {
+        onSuccess(res.data.todo);
+      } else {
+        onSuccess({
+          ...todo,
+          title,
+          description,
+          completeAt: completeAtIso,
+          category,
+          priority,
+          completed: todo?.completed || false,
+          completedAt: todo?.completedAt || null,
           isRecurring,
           recurrencePattern,
           recurrenceInterval,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
-          parentRecurringId: null,
+          parentRecurringId: todo?.parentRecurringId || null,
         });
       }
 
@@ -106,7 +163,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
       setRecurrenceEndDate("");
       onCancel();
     } catch (error) {
-      console.error("Error creating todo", error);
+      console.error(todo?.id ? "Error updating todo" : "Error creating todo", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -163,6 +220,25 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
     setIsRecurring(false);
   };
 
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = descriptionTextareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height to scrollHeight, but cap at max-height (200px)
+      const scrollHeight = textarea.scrollHeight;
+      const maxHeight = 200; // Max height in pixels before scrolling
+      textarea.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+      // Add overflow-y-auto when content exceeds max height
+      if (scrollHeight > maxHeight) {
+        textarea.style.overflowY = 'auto';
+      } else {
+        textarea.style.overflowY = 'hidden';
+      }
+    }
+  }, [description, todo]);
+
   useEffect(() =>{
     if(!title.trim()){
       return;
@@ -188,12 +264,14 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
       />
 
       {/* Description Input */}
-      <input
-        type="text"
+      <textarea
+        ref={descriptionTextareaRef}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0"
+        rows={1}
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
+        style={{ minHeight: '20px', maxHeight: '200px' }}
       />
 
       {/* Action Buttons Row */}

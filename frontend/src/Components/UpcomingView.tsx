@@ -8,6 +8,7 @@ import InlineTaskForm from "./InlineTaskForm";
 import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 
+
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
 
@@ -55,7 +56,6 @@ const DraggableTask = ({
     index,
     onToggleComplete,
     onDelete,
-    onEdit,
     onViewDetails,
     openDropdownId,
     setOpenDropdownId,
@@ -89,18 +89,25 @@ const DraggableTask = ({
         setOpenDropdownId(openDropdownId === todoId ? null : todoId);
       };
 
-      const handleEditClick = (todo: Todo) => {
-        setOpenDropdownId(null);
-        onEdit(todo);
-      };
     
       const handleDeleteClick = (todo: Todo) => {
         setOpenDropdownId(null);
         onDelete(todo);
       };
+      const [isEditing, setIsEditing] = useState(false);
 
     
       return (
+        <>
+        {isEditing ? (
+          <InlineTaskForm
+            index={index}
+            preselectedDate={todo.completeAt ? new Date(todo.completeAt) : new Date()}
+            todo={todo}
+            onCancel={() => setIsEditing(false)}
+            onSuccess={() => setIsEditing(false)}
+          />
+        ):(
         <div
       ref={setNodeRef}
       style={style}
@@ -146,10 +153,10 @@ const DraggableTask = ({
           {openDropdownId === todo.id && (
             <div className="absolute right-0 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border-b border-gray-700"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleEditClick(todo);
+                  setIsEditing(true);
                 }}
               >
                 <Pencil className="w-3 h-3" />
@@ -193,6 +200,8 @@ const DraggableTask = ({
         </div>
       </div>
     </div>
+    )}
+    </>
       )
 }
 
@@ -214,6 +223,7 @@ const DroppableDateColumn = ({
     });
 
     const handleAddTaskClick = () => {
+        console.log("handleAddTaskClick");
         onOpenForm();
     };
 
@@ -293,6 +303,7 @@ const UpcomingView = ({
   const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
   const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
   const [openFormDate, setOpenFormDate] = useState<string | null>(null);
+
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
   const audio = new Audio(completedSound);

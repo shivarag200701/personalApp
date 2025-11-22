@@ -180,6 +180,7 @@ const Dashboard = () => {
   };
 
   const deleteTodo = async (todoId: string | number) => {
+    console.log("deleting todo", todoId);
     if (!todoId) {
       return;
     }
@@ -193,6 +194,22 @@ const Dashboard = () => {
       console.log("Todo deleted");
     } catch (error) {
       console.error("Error deleting todo", error);
+    }
+  }
+  const duplicateTodo = async (todo: Todo) => {
+    const newTodo = {
+      ...todo,
+      id: undefined,
+    };
+    addTodo(newTodo);
+    try {
+      const res = await api.post("v1/todo/",{
+        ...newTodo,
+      });
+      const createdTodo = res.data.todo;
+      addTodo(createdTodo);
+    } catch (error) {
+      console.error("Error duplicating todo", error);
     }
   }
 
@@ -267,6 +284,7 @@ const Dashboard = () => {
         onEdit={updateTodo}
         onToggleComplete={toggleTodoCompletion}
         onDelete={deleteTodo}
+        handleDuplicate={duplicateTodo}
       />
     </>
   );

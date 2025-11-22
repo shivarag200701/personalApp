@@ -8,7 +8,6 @@ import { calculateNextOccurence } from "../utils/recurringTasks.js";
 const todoRouter = express();
 
 todoRouter.post("/", requireLogin, async (req, res) => {
-  console.log("post request body",req.body);
   const { data, success, error } = todoSchema.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
@@ -26,7 +25,6 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt);
-  console.log("completeAtDate",completeAtDate);
   try {
      let todo = await prisma.todo.create({
       data: {
@@ -84,7 +82,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 
 todoRouter.get("/", requireLogin, async (req, res) => {
   const userId = req.session.userId;
-  console.log("user get");
+
 
   if (!userId) {
     return res.status(401).json({
@@ -136,7 +134,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
       return true;
     });
 
-    console.log(filteredTodos);
+
 
     if (!filteredTodos || filteredTodos.length === 0) {
       return res.status(200).json({
@@ -229,7 +227,6 @@ todoRouter.post("/:id/completed", async (req, res) => {
 });
 
 todoRouter.delete("/:id", requireLogin, async (req, res) => {
-  console.log("delete todo");
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({

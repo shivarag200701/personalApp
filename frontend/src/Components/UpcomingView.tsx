@@ -113,10 +113,10 @@ const DraggableTask = ({
     >
 
       {/* Three-dot Menu */}
-      {todo.id && isMobile && (
+      {todo.id  && (
         <div
           className={`absolute top-2 right-2 z-20 transition-opacity duration-200 pointer-events-auto ${
-            openDropdownId === todo.id || hoveredTodoId === todo.id ? "opacity-100" : "opacity-0"
+            openDropdownId === todo.id || hoveredTodoId === todo.id || isMobile ? "opacity-100" : "opacity-0"
           }`}
           ref={(el) => {
             if (el && todo.id) {
@@ -144,7 +144,7 @@ const DraggableTask = ({
 
           {/* Dropdown Menu */}
           {openDropdownId === todo.id && (
-            <div className="absolute right-0 mt-1 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+            <div className="absolute right-0 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
               <button
                 className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
                 onClick={(e) => {
@@ -246,14 +246,14 @@ const DroppableDateColumn = ({
             </div>
 
             {/* Tasks Container - Includes tasks, Add task button, and inline form */}
-            <div className="flex-1 mb-4 space-y-3 overflow-y-auto">
+            <div className="mb-4 space-y-3 overflow-y-auto">
                 {children}
                 
                 {/* Add Task Button and Inline Form - Below all tasks */}
                 {!isFormOpen ? (
                     <button
                         onClick={handleAddTaskClick}
-                        className=" group flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-xs font-medium cursor-pointer pl-3"
+                        className=" group flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-[0.2px] focus:ring-blue-400 focus:ring-inset focus:border-blue-400 focus:bg-[#262626] p-3 rounded-md w-full border border-transparent"
                     >
                         <Plus className="w-4 h-4 group-hover:bg-red-400 group-hover:text-white transition-colors rounded-full text-red-400" />
                         <span>Add task</span>

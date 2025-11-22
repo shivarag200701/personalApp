@@ -4,6 +4,7 @@ import api from "../utils/api";
 import type { Todo } from "./Modal";
 import CustomDatePicker from "./CustomDatePicker";
 import PriorityPicker from "./PriorityPicker";
+import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 interface InlineTaskFormProps {
   preselectedDate: Date;
   onCancel: () => void;
@@ -26,6 +27,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
+
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -160,9 +162,19 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
     setSelectedDate("");
     setIsRecurring(false);
   };
-  console.log("dateLabel", dateLabel ? "yes" : "no");
-  console.log("index", index);
 
+  useEffect(() =>{
+    if(!title.trim()){
+      return;
+    }
+    const timeoutId = setTimeout(() => {
+      const result = parseNaturalLanguageDate(title);
+      if(result.confidence === "high" && result.date){
+          console.log("matched string", result.matchedString);
+      }
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  },[title])
   return (
     <form onSubmit={handleSubmit} className="p-2 bg-[#1B1B1E] border border-gray-700 rounded-xl mt-3 w-full min-w-0">
       {/* Task Name Input */}
@@ -195,7 +207,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
               e.preventDefault();
               setShowDatePicker(!showDatePicker);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border border-gray-700 text-xs font-medium hover:bg-[#323238] transition-colors cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 border border-gray-700 text-xs font-medium hover:bg-[#323238] transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400  cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
               isTodaySelected ? "rounded-full" : "rounded-md"
             }`}
           >
@@ -249,7 +261,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
               e.preventDefault();
               setShowPriorityPicker(!showPriorityPicker);
             }}
-            className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer shrink-0 ${priorityColors[priority]}`}
+            className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 ${priorityColors[priority]}`}
           >
             <Flag 
               className={`w-4 h-4 ${priorityColors[priority]}`}
@@ -278,7 +290,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
         {/* Reminder Button (placeholder) */}
         <button
           type="button"
-          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer text-white shrink-0"
+          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
         >
           <AlarmClock className="w-4 h-4" />
         </button>
@@ -286,7 +298,7 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
         {/* More Options Button */}
         <button
           type="button"
-          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer text-white shrink-0"
+          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
         >
           <MoreHorizontal className="w-4 h-4" />
         </button>
@@ -300,14 +312,14 @@ const InlineTaskForm = ({ preselectedDate, onCancel, onSuccess, index}: InlineTa
           <button
             type="button"
             onClick={onCancel}
-            className="p-1.5 rounded-md bg-[#27272B] hover:bg-[#323238] transition-colors cursor-pointer shrink-0"
+            className="p-1.5 rounded-md bg-[#27272B] hover:bg-[#323238] transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           >
             <X className="w-5 h-5 text-white" />
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-2 rounded-md bg-[#A0522D] hover:bg-[#8B4513] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-md bg-[#A0522D] hover:bg-[#8B4513] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           >
             <SendHorizontal className="w-4 h-4 text-white" />
           </button>

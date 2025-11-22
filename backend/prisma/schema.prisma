@@ -63,6 +63,7 @@ model OAuthAccount {
   idToken String?
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
+  pictureUrl String?
 
   @@unique([userId, provider])
 }

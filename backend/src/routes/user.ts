@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { signUpSchema, signInSchema } from "@shiva200701/todotypes";
 import crypto from "crypto";
 import { hashPassword, verifyPassword } from "../utils/passwordHasher.js";
+import { requireLogin } from "../middleware.js";
 
 dotenv.config();
 
@@ -144,7 +145,6 @@ userRouter.post("/signin", async (req, res) => {
 
 userRouter.post("/logout", async (req, res) => {
   if (req.session) {
-    console.log(req.session);
 
     req.session.destroy((err) => {
       if (err) {
@@ -156,6 +156,53 @@ userRouter.post("/logout", async (req, res) => {
   } else {
     return res.status(401).json({
       msg: "No active session to log out from",
+    });
+  }
+});
+
+userRouter.get("/profile", requireLogin, async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.status(401).json({
+      msg: "Not authorized",
+    });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        oauthAccounts: {
+          where: { provider: "google" },
+          select: {
+            pictureUrl: true,
+          },
+          take: 1,
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        msg: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        pictureUrl: user.oauthAccounts[0]?.pictureUrl || null,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user profile", error);
+    return res.status(500).json({
+      msg: "Failed to fetch user profile",
     });
   }
 });

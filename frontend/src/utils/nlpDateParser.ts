@@ -9,6 +9,7 @@ export interface ParsedDateResult {
     confidence: "high" | "medium" | "low";
     error?: string;
     displayText?: string; // Human-readable description
+    matchedString?: string; // The substring from input that was matched
   }
   const weekdayMap: Record<string, string> = {
     sun: 'sunday',
@@ -66,52 +67,88 @@ export interface ParsedDateResult {
     return result;
   }
   
+  // Helper function to find matched string in original input (case-insensitive)
+  function findMatchedString(originalInput: string, pattern: string): string {
+    const regex = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const match = originalInput.match(regex);
+    return match ? match[0] : pattern;
+  }
+
   // Parse relative date expressions
-  function parseRelativeDate(input: string, allowToday: boolean = false): Date | null {
+  function parseRelativeDate(input: string, allowToday: boolean = false): { date: Date | null; matchedString?: string } {
     const normalized = input.toLowerCase().trim();
+    const originalInput = input.trim();
     const today = getToday();
 
     // Extract weekday name properly
     const weekdayMatch = normalized.match(/(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)/i);
     if (weekdayMatch) {
-      return getNextWeekday(weekdayMatch[1], allowToday);
+      const matchedStr = findMatchedString(originalInput, weekdayMatch[1]);
+      return { date: getNextWeekday(weekdayMatch[1], allowToday), matchedString: matchedStr };
     }
     
     // Today
-    if (normalized === 'today' || normalized === 'tdy') {
-      return today;
+    if (normalized.includes('today')) {
+      return { date: today, matchedString: findMatchedString(originalInput, 'today') };
+    }
+    if (normalized.includes('tdy')) {
+      return { date: today, matchedString: findMatchedString(originalInput, 'tdy') };
     }
     
     // Tomorrow
-    if (normalized === 'tomorrow' || normalized === 'tmr' || normalized === 'tmrw') {
+    if (normalized.includes('tomorrow')) {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      return tomorrow;
+      return { date: tomorrow, matchedString: findMatchedString(originalInput, 'tomorrow') };
+    }
+    if (normalized.includes('tmrw')) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return { date: tomorrow, matchedString: findMatchedString(originalInput, 'tmrw') };
+    }
+    if (normalized.includes('tmr')) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return { date: tomorrow, matchedString: findMatchedString(originalInput, 'tmr') };
     }
     
     // Day after tomorrow
-    if (normalized === 'day after tomorrow' || normalized === 'dat') {
+    if (normalized.includes('day after tomorrow')) {
       const dat = new Date(today);
       dat.setDate(dat.getDate() + 2);
-      return dat;
+      return { date: dat, matchedString: findMatchedString(originalInput, 'day after tomorrow') };
+    }
+    if (normalized.includes('dat')) {
+      const dat = new Date(today);
+      dat.setDate(dat.getDate() + 2);
+      return { date: dat, matchedString: findMatchedString(originalInput, 'dat') };
     }
     
     // Next week
-    if (normalized === 'next week' || normalized === 'nxt week') {
+    if (normalized.includes('next week')) {
       const nextWeek = new Date(today);
       nextWeek.setDate(nextWeek.getDate() + 7);
-      return nextWeek;
+      return { date: nextWeek, matchedString: findMatchedString(originalInput, 'next week') };
+    }
+    if (normalized.includes('nxt week')) {
+      const nextWeek = new Date(today);
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      return { date: nextWeek, matchedString: findMatchedString(originalInput, 'nxt week') };
     }
     
     // This weekend (next Saturday)
     if (normalized.includes('weekend')) {
-      return getNextWeekday('saturday');
+      return { date: getNextWeekday('saturday'), matchedString: findMatchedString(originalInput, 'weekend') };
+    }
+    if (normalized.includes('wknd')) {
+      return { date: getNextWeekday('saturday'), matchedString: findMatchedString(originalInput, 'wknd') };
     }
     
     // Next [weekday]
     const nextDayMatch = normalized.match(/next\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)/i);
     if (nextDayMatch) {
-      return getNextWeekday(nextDayMatch[1]);
+      const matchedStr = findMatchedString(originalInput, nextDayMatch[0]);
+      return { date: getNextWeekday(nextDayMatch[1]), matchedString: matchedStr };
     }
     
     // This [weekday]
@@ -119,12 +156,9 @@ export interface ParsedDateResult {
     if (thisDayMatch) {
       const day = getNextWeekday(thisDayMatch[1]);
       // If it's already past this weekday, get next week's
-      if (day < today) {
-        const nextWeek = new Date(day);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        return nextWeek;
-      }
-      return day;
+      const finalDay = day < today ? (() => { const nw = new Date(day); nw.setDate(nw.getDate() + 7); return nw; })() : day;
+      const matchedStr = findMatchedString(originalInput, thisDayMatch[0]);
+      return { date: finalDay, matchedString: matchedStr };
     }
     
     // In X days
@@ -133,7 +167,8 @@ export interface ParsedDateResult {
       const days = parseInt(inDaysMatch[1]);
       const result = new Date(today);
       result.setDate(result.getDate() + days);
-      return result;
+      const matchedStr = findMatchedString(originalInput, inDaysMatch[0]);
+      return { date: result, matchedString: matchedStr };
     }
     
     // X days from now
@@ -142,29 +177,31 @@ export interface ParsedDateResult {
       const days = parseInt(daysFromNowMatch[1]);
       const result = new Date(today);
       result.setDate(result.getDate() + days);
-      return result;
+      const matchedStr = findMatchedString(originalInput, daysFromNowMatch[0]);
+      return { date: result, matchedString: matchedStr };
     }
     
     // Next month
-    if (normalized === 'next month') {
+    if (normalized.includes('next month')) {
       const nextMonth = new Date(today);
       nextMonth.setMonth(nextMonth.getMonth() + 1);
-      return nextMonth;
+      return { date: nextMonth, matchedString: findMatchedString(originalInput, 'next month') };
     }
     
     // Next year
-    if (normalized === 'next year') {
+    if (normalized.includes('next year')) {
       const nextYear = new Date(today);
       nextYear.setFullYear(nextYear.getFullYear() + 1);
-      return nextYear;
+      return { date: nextYear, matchedString: findMatchedString(originalInput, 'next year') };
     }
     
-    return null;
+    return { date: null };
   }
   
   // Parse absolute date formats
-  function parseAbsoluteDate(input: string): Date | null {
+  function parseAbsoluteDate(input: string): { date: Date | null; matchedString?: string } {
     const normalized = input.trim();
+    const originalInput = input.trim();
     
     // YYYY-MM-DD format
     const isoMatch = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
@@ -173,7 +210,7 @@ export interface ParsedDateResult {
       const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       if (!isNaN(date.getTime())) {
         date.setHours(0, 0, 0, 0);
-        return date;
+        return { date, matchedString: isoMatch[0] };
       }
     }
     
@@ -184,7 +221,7 @@ export interface ParsedDateResult {
       const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       if (!isNaN(date.getTime())) {
         date.setHours(0, 0, 0, 0);
-        return date;
+        return { date, matchedString: usDateMatch[0] };
       }
     }
     
@@ -202,12 +239,13 @@ export interface ParsedDateResult {
         const date = new Date(parseInt(match[3]), i, parseInt(match[2]));
         if (!isNaN(date.getTime())) {
           date.setHours(0, 0, 0, 0);
-          return date;
+          const matchedStr = findMatchedString(originalInput, match[0]);
+          return { date, matchedString: matchedStr };
         }
       }
     }
     
-    return null;
+    return { date: null };
   }
   
   // Parse recurring patterns
@@ -217,8 +255,11 @@ export interface ParsedDateResult {
     interval?: number;
     endDate?: Date | null;
     weekdayName?: string; // Store weekday name for "every monday" patterns
+    matchedString?: string;
+    endDateMatchedString?: string;
   } {
     const normalized = input.toLowerCase().trim();
+    const originalInput = input.trim();
     
     
     // Extract interval number
@@ -227,22 +268,25 @@ export interface ParsedDateResult {
 
     
     // Daily patterns
-    if (normalized.match(/(every|each)\s+(\d+\s+)?day(s)?|daily/i)) {
+    const dailyMatch = normalized.match(/(every|each)\s+(\d+\s+)?day(s)?|daily/i);
+    if (dailyMatch) {
       return {
         isRecurring: true,
         pattern: "daily",
-        interval: interval || 1
+        interval: interval || 1,
+        matchedString: findMatchedString(originalInput, dailyMatch[0])
       };
     }
     
     // Weekly patterns
-    if (normalized.match(/(every\s+)(\d+\s+)?weeks?|weekly|each\s+week/i)) {
+    const weeklyMatch = normalized.match(/(every\s+)(\d+\s+)?weeks?|weekly|each\s+week/i);
+    if (weeklyMatch) {
         console.log("this");
-        
       return {
         isRecurring: true,
         pattern: "weekly",
-        interval: interval || 1
+        interval: interval || 1,
+        matchedString: findMatchedString(originalInput, weeklyMatch[0])
       };
     }
     
@@ -257,25 +301,30 @@ export interface ParsedDateResult {
         isRecurring: true,
         pattern: "weekly",
         interval: 1,
-        weekdayName: weekdayName // Store the weekday name
+        weekdayName: weekdayName, // Store the weekday name
+        matchedString: findMatchedString(originalInput, weekdayMatch[0])
       };
     }
     
     // Monthly patterns
-    if (normalized.match(/(every\s+)?(\d+\s+)?months?|monthly|each\s+month/i)) {
+    const monthlyMatch = normalized.match(/(every\s+)?(\d+\s+)?months?|monthly|each\s+month/i);
+    if (monthlyMatch) {
       return {
         isRecurring: true,
         pattern: "monthly",
-        interval: interval || 1
+        interval: interval || 1,
+        matchedString: findMatchedString(originalInput, monthlyMatch[0])
       };
     }
     
     // Yearly patterns
-    if (normalized.match(/(every\s+)?(\d+\s+)?years?|yearly|annually|each\s+year/i)) {
+    const yearlyMatch = normalized.match(/(every\s+)?(\d+\s+)?years?|yearly|annually|each\s+year/i);
+    if (yearlyMatch) {
       return {
         isRecurring: true,
         pattern: "yearly",
-        interval: interval || 1
+        interval: interval || 1,
+        matchedString: findMatchedString(originalInput, yearlyMatch[0])
       };
     }
     
@@ -286,6 +335,7 @@ export interface ParsedDateResult {
     console.log("untilMatch", untilMatch);
     
     let endDate: Date | null = null;
+    let endDateMatchedString: string | undefined = undefined;
     if (forMatch) {
       const amount = parseInt(forMatch[1]);
       const unit = forMatch[2].toLowerCase();
@@ -301,17 +351,26 @@ export interface ParsedDateResult {
       } else if (unit.startsWith('year')) {
         endDate.setFullYear(endDate.getFullYear() + amount);
       }
+      endDateMatchedString = findMatchedString(originalInput, forMatch[0]);
     } else if (untilMatch) {
       const untilDateStr = untilMatch[1].trim();
-      const parsedUntilDate = parseAbsoluteDate(untilDateStr) || parseRelativeDate(untilDateStr);
-      if (parsedUntilDate) {
-        endDate = parsedUntilDate;
+      const parsedUntilDate = parseAbsoluteDate(untilDateStr);
+      if (parsedUntilDate.date) {
+        endDate = parsedUntilDate.date;
+        endDateMatchedString = parsedUntilDate.matchedString || findMatchedString(originalInput, untilMatch[0]);
+      } else {
+        const parsedUntilDateRel = parseRelativeDate(untilDateStr);
+        if (parsedUntilDateRel.date) {
+          endDate = parsedUntilDateRel.date;
+          endDateMatchedString = parsedUntilDateRel.matchedString || findMatchedString(originalInput, untilMatch[0]);
+        }
       }
     }
     
     return {
       isRecurring: false,
-      endDate: endDate || undefined
+      endDate: endDate || undefined,
+      endDateMatchedString
     };
   }
   
@@ -327,20 +386,23 @@ export interface ParsedDateResult {
     }
     
     const normalized = input.toLowerCase().trim();
+    const originalInput = input.trim();
     const today = getToday();
     
     // Check for "no date" or clear
-    if (normalized.match(/^(no\s+date|clear|none|remove)$/i)) {
+    const noDateMatch = normalized.match(/^(no\s+date|clear|none|remove)$/i);
+    if (noDateMatch) {
       return {
         date: null,
         isRecurring: false,
         confidence: "high",
-        displayText: "No date"
+        displayText: "No date",
+        matchedString: noDateMatch[0]
       };
     }
     
     // Try to parse recurring pattern first
-    const recurringInfo = parseRecurringPattern(normalized);
+    const recurringInfo = parseRecurringPattern(originalInput);
     
     // Extract base date from input (remove recurring keywords)
     let dateInput = normalized
@@ -352,18 +414,35 @@ export interface ParsedDateResult {
       .trim();
     
     let parsedDate: Date | null = null;
+    let dateMatchedString: string | undefined = undefined;
+    const matchedStrings: string[] = [];
     
     // Special handling for "every [weekday]" patterns
     if (recurringInfo.isRecurring && recurringInfo.weekdayName) {
       // Use the extracted weekday name and allow today if it matches
       parsedDate = getNextWeekday(recurringInfo.weekdayName, true);
+      if (recurringInfo.matchedString) {
+        matchedStrings.push(recurringInfo.matchedString);
+      }
     } else if (dateInput.length > 0) {
       // Try absolute date first
-      parsedDate = parseAbsoluteDate(dateInput);
-      
-      // Then try relative date (allow today for recurring patterns)
-      if (!parsedDate) {
-        parsedDate = parseRelativeDate(dateInput, recurringInfo.isRecurring);
+      const absoluteResult = parseAbsoluteDate(dateInput);
+      if (absoluteResult.date) {
+        parsedDate = absoluteResult.date;
+        // Find the matched string in original input
+        dateMatchedString = absoluteResult.matchedString 
+          ? findMatchedString(originalInput, absoluteResult.matchedString) 
+          : undefined;
+      } else {
+        // Then try relative date (allow today for recurring patterns)
+        const relativeResult = parseRelativeDate(dateInput, recurringInfo.isRecurring);
+        if (relativeResult.date) {
+          parsedDate = relativeResult.date;
+          // Find the matched string in original input
+          dateMatchedString = relativeResult.matchedString 
+            ? findMatchedString(originalInput, relativeResult.matchedString) 
+            : undefined;
+        }
       }
     }
     
@@ -374,7 +453,17 @@ export interface ParsedDateResult {
     
     // If no date found and not recurring, try parsing the original input
     if (!parsedDate && !recurringInfo.isRecurring) {
-      parsedDate = parseAbsoluteDate(normalized) || parseRelativeDate(normalized);
+      const absoluteResult = parseAbsoluteDate(originalInput);
+      if (absoluteResult.date) {
+        parsedDate = absoluteResult.date;
+        dateMatchedString = absoluteResult.matchedString;
+      } else {
+        const relativeResult = parseRelativeDate(originalInput);
+        if (relativeResult.date) {
+          parsedDate = relativeResult.date;
+          dateMatchedString = relativeResult.matchedString;
+        }
+      }
     }
     
     // Validate date is not in the past
@@ -387,11 +476,29 @@ export interface ParsedDateResult {
       };
     }
     
+    // Build matched string
+    if (recurringInfo.matchedString) {
+      matchedStrings.push(recurringInfo.matchedString);
+    }
+    if (dateMatchedString) {
+      matchedStrings.push(dateMatchedString);
+    }
+    if (recurringInfo.endDateMatchedString) {
+      matchedStrings.push(recurringInfo.endDateMatchedString);
+    }
+    
+    // Combine matched strings, removing duplicates and preserving order
+    const uniqueMatchedStrings = Array.from(new Set(matchedStrings));
+    const combinedMatchedString = uniqueMatchedStrings.length > 0 
+      ? uniqueMatchedStrings.join(' ') 
+      : (parsedDate ? originalInput : undefined);
+    
     // Build result
     const result: ParsedDateResult = {
       date: parsedDate ? formatDate(parsedDate) : null,
       isRecurring: recurringInfo.isRecurring,
       confidence: parsedDate ? "high" : "low",
+      matchedString: combinedMatchedString
     };
     
     if (recurringInfo.isRecurring) {

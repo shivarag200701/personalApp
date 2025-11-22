@@ -45,6 +45,7 @@ export async function getGoogleTokens(code: string): Promise<{
         id: string;
         email: string;
         name: string;
+        pictureUrl: string;
     }
 }> {
     try {
@@ -68,7 +69,6 @@ export async function getGoogleTokens(code: string): Promise<{
         }
 
         const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : new Date(Date.now() + 3600000); // 1 hour from now
-
         return {
             accessToken: encrypt(tokens.access_token),
             refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
@@ -77,6 +77,7 @@ export async function getGoogleTokens(code: string): Promise<{
                 id: userInfo.id,
                 email: userInfo.email,
                 name: userInfo.name || "",
+                pictureUrl: userInfo.picture || "",
             },
         };
     } catch (error) {

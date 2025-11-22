@@ -42,10 +42,7 @@ function setSessionCookie(req: express.Request, res: express.Response, userId: n
     });
     });
 }
-// Add this at the top of oauthRouter routes (after line 8)
-oauthRouter.get("/test", (req, res) => {
-    res.json({ msg: "OAuth router is working!" });
-});
+
 
 oauthRouter.get("/google/connect", async (req,res) => {
     try{
@@ -77,6 +74,9 @@ oauthRouter.get("/google/connect", async (req,res) => {
 
 oauthRouter.get("/google/callback", async (req,res) => {
     const {code, state, error} = req.query;
+    console.log("code:", code);
+    console.log("state:", state);
+    console.log("error:", error);
 
     if(error){
         console.error('Google OAuth error:',error);
@@ -101,6 +101,9 @@ oauthRouter.get("/google/callback", async (req,res) => {
 
         //exchange code for tokens
         const {accessToken, refreshToken, expiresAt, userInfo} = await getGoogleTokens(code as string);
+        console.log("type:", stateData.type);
+        console.log("userInfo:", userInfo);
+        
 
             if(stateData.type === 'login'){
 
@@ -112,7 +115,8 @@ oauthRouter.get("/google/callback", async (req,res) => {
             });
             console.log('user:',user);
             if(user){
-
+                console.log("here");
+                
                 await prisma.oAuthAccount.upsert({
                     where:{
                         userId_provider:{
@@ -126,6 +130,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                         tokenExpiresAt: expiresAt,
                         providerAccountId: userInfo.id,
                         updatedAt: new Date(),
+                        pictureUrl: userInfo.pictureUrl
                     },
                     create:{
                         userId: user.id,
@@ -135,6 +140,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                         refreshToken,
                         tokenExpiresAt: expiresAt,
                         scope: 'email profile',
+                        pictureUrl: userInfo.pictureUrl
                     },
                 });
                 await setSessionCookie(req, res, user.id);
@@ -186,6 +192,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                             refreshToken,
                             tokenExpiresAt: expiresAt,
                             scope: 'email profile',
+                            pictureUrl: userInfo.pictureUrl
                         },
                     });
                     await setSessionCookie(req, res, user.id);
@@ -225,6 +232,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                         refreshToken,
                         tokenExpiresAt: expiresAt,
                         scope: 'email profile',
+                        pictureUrl: userInfo.pictureUrl
                         },
                         });
                         return res.redirect(`${FRONTEND_URL}/settings?success=google_calendar_connected`);

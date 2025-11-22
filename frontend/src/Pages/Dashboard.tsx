@@ -264,7 +264,7 @@ const Dashboard = () => {
         todo={selectedTodo}
         isOpen={isDetailOpen}
         onClose={closeDetailDrawer}
-        onEdit={handleEdit}
+        onEdit={updateTodo}
         onToggleComplete={toggleTodoCompletion}
         onDelete={deleteTodo}
       />

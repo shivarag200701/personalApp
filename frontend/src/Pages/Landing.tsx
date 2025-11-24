@@ -14,7 +14,7 @@ const Landing = () => {
         delay: Math.random() * 5,
         duration: 10 + Math.random() * 8,
         size: 2 + Math.random() * 4,
-        opacity: 0.3 + Math.random() * 0.5,
+        opacity: 0.3 + Math.random() * 1.5,
       })),
     []
   );
@@ -61,11 +61,11 @@ const Landing = () => {
       {particles.map((particle) => (
         <span
           key={particle.id}
-          className="pointer-events-none absolute bottom-0 rounded-full bg-white/40 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
+          className="pointer-events-none absolute bottom-0 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
           style={{
             left: `${particle.left}%`,
-            width: particle.size,
-            height: particle.size,
+            width: particle.size * 1.5,
+            height: particle.size * 1.5,
             opacity: particle.opacity,
             animation: `floatUp ${particle.duration}s linear ${particle.delay}s infinite`,
           }}

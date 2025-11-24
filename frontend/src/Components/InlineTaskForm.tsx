@@ -18,7 +18,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [priority, setPriority] = useState<"high" | "medium" | "low">("high");
+  const [priority, setPriority] = useState<"high" | "medium" | "low" | "undefined">("undefined");
   const [category, setCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
@@ -73,7 +73,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setTitle(todo.title || "");
       setDescription(todo.description || "");
       setSelectedDate(todo.completeAt ? isoToDateInput(todo.completeAt) : dateToInput(preselectedDate));
-      setPriority((todo.priority as "high" | "medium" | "low") || "high");
+      setPriority((todo.priority as "high" | "medium" | "low" | "undefined") || "undefined");
       setCategory(todo.category || "");
       setIsRecurring(todo.isRecurring || false);
       setRecurrencePattern(todo.recurrencePattern || undefined);
@@ -81,13 +81,12 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setRecurrenceEndDate(todo.recurrenceEndDate 
         ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
         : "");
-      console.log("todo in useEffect", todo);
     } else {
       // Reset form for new todo
       setTitle("");
       setDescription("");
       setSelectedDate(dateToInput(preselectedDate));
-      setPriority("high");
+      setPriority("undefined");
       setCategory("");
       setIsRecurring(false);
       setRecurrencePattern(undefined);
@@ -160,7 +159,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setTitle("");
       setDescription("");
       setSelectedDate(dateToInput(preselectedDate));
-      setPriority("high");
+      setPriority("undefined");
       setCategory("");
       setIsRecurring(false);
       setRecurrencePattern("daily");
@@ -200,8 +199,9 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
 
   const priorityColors = {
     high: "text-red-500",
-    medium: "text-yellow-500",
+    medium: "text-blue-500",
     low: "text-green-500",
+    undefined: "text-gray-500",
   };
 
   const dateLabel = getDateLabel(selectedDate);
@@ -344,13 +344,13 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               e.preventDefault();
               setShowPriorityPicker(!showPriorityPicker);
             }}
-            className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 ${priorityColors[priority]}`}
+            className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 `}
           >
             <Flag 
               className={`w-4 h-4 ${priorityColors[priority]}`}
               style={{ 
                 fill: priority === "high" ? "#DC2828" : 
-                      priority === "medium" ? "#F39C12" : 
+                      priority === "medium" ? "#3B82F6" : 
                       priority === "low" ? "#28A745" : "none" 
               }}
             />

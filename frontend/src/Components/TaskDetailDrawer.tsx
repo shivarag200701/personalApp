@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import {
   Bell,
   Clock4,
-  Copy,
+  CopyPlus,
   MoreHorizontal,
   Play,
   Trash,
@@ -436,7 +436,7 @@ const TaskDetailDrawer = ({
                     onClose();
                   }}
                 >
-                  <Copy className="mr-2 h-4 w-4" /> Duplicate
+                  <CopyPlus className="mr-2 h-4 w-4" /> Duplicate
                 </Button>
                 <Button className="flex-1 justify-center bg-purple-600 text-white hover:bg-purple-500">
                   <Play className="mr-2 h-4 w-4" /> Start Focus Session

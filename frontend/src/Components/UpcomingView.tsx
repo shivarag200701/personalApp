@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, Pencil, Trash, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag } from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
@@ -87,6 +87,14 @@ const DraggableTask = ({
         WebkitUserSelect: 'none' as const,
     }
 
+    const priorityColors = {
+      high: "text-red-500",
+      medium: "text-blue-500",
+      low: "text-green-500",
+      none: "text-gray-500",
+    };
+    
+
     const isMobile = window.innerWidth < 768;
 
     const toggleDropdown = (todoId: number | string | undefined, event: React.MouseEvent) => {
@@ -101,6 +109,25 @@ const DraggableTask = ({
         onDelete(todo);
       };
       const [isEditing, setIsEditing] = useState(false);
+
+      const handlePrioritySelect = async (todo: Todo) => {
+        try {
+          const response = await api.put(`/v1/todo/${todo.id}`, {
+            title: todo.title,
+            description: todo.description,
+            completeAt: todo.completeAt,
+            category: todo.category,
+            priority: todo.priority,
+            isRecurring: todo.isRecurring,
+            recurrencePattern: todo.recurrencePattern || undefined,
+            recurrenceInterval: todo.recurrenceInterval || undefined,
+            recurrenceEndDate: todo.recurrenceEndDate || undefined,
+          });
+          onTaskUpdated(response.data.todo);
+        } catch (error) {
+          console.error("Error updating priority", error);
+        }
+      }
 
     
       return (
@@ -158,36 +185,52 @@ const DraggableTask = ({
 
           {/* Dropdown Menu */}
           {openDropdownId === todo.id && (
-            <div className="absolute right-0 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 ">
+            <div className="absolute right-0 w-45 bg-[#1B1B1E] border border-gray-700 rounded-sm shadow-lg z-50 ">
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border-b border-gray-700"
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-gray-700"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditing(true);
                 }}
               >
-                <Pencil className="w-3 h-3" />
+                <PencilLine className="w-4 h-4" />
                 <span>Edit</span>
               </button>
-              <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer "
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteClick(todo);
-                }}
-              >
-                <Trash className="w-3 h-3" />
-                <span>Delete</span>
-              </button>
-              <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer  border-b border-gray-700   "
+              <div className="text-white px-3 py-2 text-xs font-light">Priority</div>
+              <div className="px-3 py-1 flex items-center gap-3">
+                  {Array.from({length: 4}).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        todo.priority = index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : undefined as unknown as string;
+                        handlePrioritySelect(todo);
+                        setOpenDropdownId(null);
+                      }}
+                    >
+                    <Flag className={`w-7 h-7 hover:bg-gray-800 p-[5px] rounded-md cursor-pointer ${priorityColors[index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : "none"]}`} style={{ fill: index === 0 ? "#DC2828" : index === 1 ? "#3B82F6" : index === 2 ? "#28A745" : "none"  }} />
+                    </button>
+                  ))}
+                </div>
+                <button
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer "
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicateTask(todo as Todo);
                 }}
               >
-                <Copy className="w-3 h-3" />
+                <CopyPlus className="w-4 h-4" />
                 <span>Duplicate</span>
+              </button>
+              <button
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer "
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick(todo);
+                }}
+              >
+                <Trash2 className="w-4 h-4 text-red-500" />
+                <span className="text-red-500">Delete</span>
               </button>
             </div>
           )}
@@ -196,7 +239,7 @@ const DraggableTask = ({
       <div className="flex gap-3 pr-4">
         <div className="pt-0.5">
           <Checkbox
-            className="border-blue-600 cursor-pointer"
+            className={`border-blue-600 cursor-pointer ${todo.priority === "high" ? "border-red-500" : todo.priority === "medium" ? "border-blue-500" : todo.priority === "low" ? "border-green-500" : "border-gray-500"}`}
             defaultChecked={todo.completed}
             onClick={(e) => {
               e.stopPropagation();

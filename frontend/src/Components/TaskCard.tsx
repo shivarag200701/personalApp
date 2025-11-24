@@ -169,7 +169,12 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
     <WarningModal 
       isOpen={isWarningModalOpen}
       onClose={handleCloseModal}
-      onDelete={handleDeleteConfirm}/>
+      onDelete={handleDeleteConfirm}
+      title="Delete Task"
+      description="Are you sure you want to delete this task?"
+      buttonText="Delete"
+    />
+
     </>
   );
 };

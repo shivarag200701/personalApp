@@ -217,6 +217,8 @@ const DraggableTask = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicateTask(todo as Todo);
+                  setOpenDropdownId(null);
+
                 }}
               >
                 <CopyPlus className="w-4 h-4" />
@@ -882,6 +884,9 @@ const UpcomingView = ({
       isOpen={isWarningModalOpen}
       onClose={handleDeleteCancel}
       onDelete={handleDeleteConfirm}
+      title="Delete Task"
+      description="Are you sure you want to delete this task?"
+      buttonText="Delete"
     />
   </DndContext>
   );

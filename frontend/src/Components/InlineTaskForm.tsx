@@ -5,6 +5,7 @@ import type { Todo } from "./Modal";
 import CustomDatePicker from "./CustomDatePicker";
 import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
+import WarningModal from "./WarningModal";
 interface InlineTaskFormProps {
   todo?: Todo;
   preselectedDate: Date;
@@ -30,7 +31,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -93,7 +94,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setRecurrenceInterval(undefined);
       setRecurrenceEndDate("");
     }
-  }, [todo, preselectedDate]);
+  }, [todo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -256,7 +257,18 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     }, 300);
     return () => clearTimeout(timeoutId);
   },[title])
+
+  const handleCancel = () => {
+    setIsWarningModalOpen(false);
+  }
+  const handleDiscard = () => {
+    onCancel();
+    setIsWarningModalOpen(false);
+  }
+  console.log("date label", dateLabel);
+  
   return (
+    <>
     <form onSubmit={handleSubmit} className="p-2 bg-[#1B1B1E] border border-gray-700 rounded-xl mt-3 w-full min-w-0">
       {/* Task Name Input */}
       <input
@@ -394,7 +406,9 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={() =>{
+              setIsWarningModalOpen(true);
+            }}
             className="p-1.5 rounded-md bg-[#27272B] hover:bg-[#323238] transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           >
             <X className="w-5 h-5 text-white" />
@@ -409,6 +423,15 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         </div>
       </div>
     </form>
+    <WarningModal
+      isOpen={isWarningModalOpen}
+      onClose={handleCancel}
+      onDiscard={handleDiscard}
+      title="Discard unsaved changes"
+      description="Your unsaved changes will be discarded."
+      buttonText="Discard"
+    />
+    </>
   );
 };
 

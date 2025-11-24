@@ -23,6 +23,7 @@ const AuthContext = createContext<ContextProps>({
 });
 
 export function AuthProvider({ children }: AuthProps) {
+  console.log("AuthProvider ran");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,7 +47,6 @@ export function AuthProvider({ children }: AuthProps) {
       }
     }
     useEffect(() => {
-      console.log("here");
       fetchUserSession();
     }, []);
     

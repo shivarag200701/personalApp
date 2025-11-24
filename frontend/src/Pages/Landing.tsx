@@ -5,14 +5,21 @@ import { Auth } from "../Context/AuthContext";
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = Auth();
+  const { isAuthenticated, isLoading, refreshAuth } = Auth();
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Refresh auth status when landing page loads
+  useEffect(() => {
+    refreshAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== "undefined") {
       return window.innerWidth < 640; // 640px is Tailwind's sm breakpoint
     }
     return false;
   });
+  console.log("isAuthenticated from landing", isAuthenticated);
   
   const particles = useMemo(
     () =>

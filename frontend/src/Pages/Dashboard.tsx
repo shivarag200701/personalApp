@@ -197,15 +197,18 @@ const Dashboard = () => {
     }
   }
   const duplicateTodo = async (todo: Todo) => {
-    console.log("duplicating todo", todo);
-    const newTodo = {
-      ...todo,
-      id: undefined,
-    };
-    addTodo(newTodo);
+
     try {
       const res = await api.post("v1/todo/",{
-        ...newTodo,
+        title: todo.title,
+        description: todo.description,
+        priority: todo.priority,
+        completeAt: todo.completeAt,
+        category: todo.category,
+        isRecurring: todo.isRecurring,
+        recurrencePattern: todo.recurrencePattern || undefined,
+        recurrenceInterval: todo.recurrenceInterval || undefined,
+        recurrenceEndDate: todo.recurrenceEndDate || undefined,
       });
       const createdTodo = res.data.todo;
       addTodo(createdTodo);

@@ -113,24 +113,24 @@ app.listen(3000, () => {
 //cron job to process recurring tasks every day at 12:00 AM
 
 
-cron.schedule("0 0 * * *", async()=>{
-  console.log("Processing recurring tasks");
-  try{
-    await processRecurringTasks();
-  }catch(error){
-    console.error("Error processing recurring tasks", error);
-  }
-},{
-  timezone: "UTC"
-});
+// cron.schedule("0 0 * * *", async()=>{
+//   console.log("Processing recurring tasks");
+//   try{
+//     await processRecurringTasks();
+//   }catch(error){
+//     console.error("Error processing recurring tasks", error);
+//   }
+// },{
+//   timezone: "UTC"
+// });
 
-processRecurringTasks()
-  .then(()=>{
-    console.log("Recurring tasks processed successfully");
-  })
-  .catch((error)=>{
-    console.error("Error processing recurring tasks", error);
-  });
+// processRecurringTasks()
+//   .then(()=>{
+//     console.log("Recurring tasks processed successfully");
+//   })
+//   .catch((error)=>{
+//     console.error("Error processing recurring tasks", error);
+//   });
 
 
 

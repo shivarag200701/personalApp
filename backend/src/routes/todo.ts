@@ -15,7 +15,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       error,
     });
   }
-
+  console.log("data", data);
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({
@@ -99,51 +99,53 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     const todos = await prisma.todo.findMany({
       where: {
         userId,
-        OR: [
-          // Non-recurring tasks
-          { isRecurring: false },
-          // Child instances (actual recurring tasks to do)
-          { isRecurring: true, parentRecurringId: { not: null } },
-          // Parent templates created today
-          {
-            isRecurring: true,
-            parentRecurringId: null,
-            completeAt: {
-              gte: today,
-              lt: tomorrow
-            }
-          }
-        ]
+        // OR: [
+        //   // Non-recurring tasks
+        //   { isRecurring: false },
+        //   // Child instances (actual recurring tasks to do)
+        //   { isRecurring: true, parentRecurringId: { not: null } },
+        //   // Parent templates created today
+        //   {
+        //     isRecurring: true,
+        //     parentRecurringId: null,
+        //     completeAt: {
+        //       gte: today,
+        //       lt: tomorrow
+        //     }
+        //   }
+        // ]
       },
     });
 
+    console.log("todos", todos);
+
     // Filter out parent templates that already have instances (in-memory filtering)
-    const childInstanceParentIds = new Set(
-      todos
-        .filter(t => t.isRecurring && t.parentRecurringId !== null)
-        .map(t => t.parentRecurringId)
-        .filter(id => id !== null)
-    );
+    // const childInstanceParentIds = new Set(
+    //   todos
+    //     .filter(t => t.isRecurring && t.parentRecurringId !== null)
+    //     .map(t => t.parentRecurringId)
+    //     .filter(id => id !== null)
+    // );
 
-    const filteredTodos = todos.filter(todo => {
-      // If it's a parent template, only show if no instance exists yet
-      if (todo.isRecurring && todo.parentRecurringId === null) {
-        return !childInstanceParentIds.has(todo.id);
-      }
-      // Show all other tasks (non-recurring and child instances)
-      return true;
-    });
+    // const filteredTodos = todos.filter(todo => {
+    //   // If it's a parent template, only show if no instance exists yet
+    //   if (todo.isRecurring && todo.parentRecurringId === null) {
+    //     return !childInstanceParentIds.has(todo.id);
+    //   }
+    //   // Show all other tasks (non-recurring and child instances)
+    //   return true;
+    // });
 
 
 
-    if (!filteredTodos || filteredTodos.length === 0) {
-      return res.status(200).json({
-        msg: "No todo found",
-        todos: [],
-      });
-    }
+    // if (!filteredTodos || filteredTodos.length === 0) {
+    //   return res.status(200).json({
+    //     msg: "No todo found",
+    //     todos: [],
+    //   });
+    // }
     return res.status(200).json({
-      todos: filteredTodos.map(todo => ({
+      todos: todos.map(todo => ({
         ...todo,
         completeAt: todo.completeAt ? todo.completeAt.toISOString() : null,
         completedAt: todo.completedAt ? todo.completedAt.toISOString() : null,

@@ -197,6 +197,7 @@ const Dashboard = () => {
     }
   }
   const duplicateTodo = async (todo: Todo) => {
+    console.log("duplicating todo", todo);
     const newTodo = {
       ...todo,
       id: undefined,
@@ -255,6 +256,8 @@ const Dashboard = () => {
             onAddTask={(date) => openModal(date)}
             onViewDetails={handleViewDetails}
             onTaskCreated={addTodo}
+            onTaskUpdated={updateTodo}
+            onDuplicateTask={duplicateTodo}
           />
         )}
         {activeTab === "completed" && (

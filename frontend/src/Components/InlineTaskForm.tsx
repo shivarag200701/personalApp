@@ -10,10 +10,11 @@ interface InlineTaskFormProps {
   preselectedDate: Date;
   onCancel: () => void;
   onSuccess: (todo: Todo) => void;
+  onUpdate: (todo: Todo) => void;
   index: number;
 }
 
-const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: InlineTaskFormProps) => {
+const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -21,8 +22,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
   const [category, setCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly">("daily");
-  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+  const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly" | undefined>(undefined);
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number | undefined>(undefined);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
@@ -75,11 +76,12 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
       setPriority((todo.priority as "high" | "medium" | "low") || "high");
       setCategory(todo.category || "");
       setIsRecurring(todo.isRecurring || false);
-      setRecurrencePattern(todo.recurrencePattern || "daily");
-      setRecurrenceInterval(todo.recurrenceInterval || 1);
+      setRecurrencePattern(todo.recurrencePattern || undefined);
+      setRecurrenceInterval(todo.recurrenceInterval || undefined);
       setRecurrenceEndDate(todo.recurrenceEndDate 
         ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
         : "");
+      console.log("todo in useEffect", todo);
     } else {
       // Reset form for new todo
       setTitle("");
@@ -88,8 +90,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
       setPriority("high");
       setCategory("");
       setIsRecurring(false);
-      setRecurrencePattern("daily");
-      setRecurrenceInterval(1);
+      setRecurrencePattern(undefined);
+      setRecurrenceInterval(undefined);
       setRecurrenceEndDate("");
     }
   }, [todo, preselectedDate]);
@@ -100,7 +102,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
 
     const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
-
+    
     try {
       let res;
       if (todo?.id) {
@@ -112,11 +114,14 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
           category,
           priority,
           isRecurring,
-          recurrencePattern,
-          recurrenceInterval,
+          recurrencePattern: recurrencePattern || undefined,
+          recurrenceInterval: recurrenceInterval || undefined,
           recurrenceEndDate: recurrenceEndDate || undefined,
         });
+        onUpdate(res.data.todo);
       } else {
+        console.log("creating new todo");
+        
         // Create new todo
         res = await api.post("/v1/todo/", {
           title,
@@ -125,8 +130,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
           category,
           priority,
           isRecurring,
-          recurrencePattern,
-          recurrenceInterval,
+          recurrencePattern: recurrencePattern || undefined,
+          recurrenceInterval: recurrenceInterval || undefined,
           recurrenceEndDate: recurrenceEndDate || undefined,
         });
       }
@@ -144,8 +149,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, index}: In
           completed: todo?.completed || false,
           completedAt: todo?.completedAt || null,
           isRecurring,
-          recurrencePattern,
-          recurrenceInterval,
+          recurrencePattern: recurrencePattern || undefined,
+          recurrenceInterval: recurrenceInterval || undefined ,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
         });

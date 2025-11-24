@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, Pencil, Trash, Copy } from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
@@ -22,6 +22,8 @@ interface UpcomingViewProps {
   onAddTask: (preselectedDate?: string) => void;
   onViewDetails: (todo: Todo) => void;
   onTaskCreated?: (todo: Todo) => void;
+  onDuplicateTask: (todo: Todo) => void;
+  onTaskUpdated: (todo: Todo) => void;
 }
 
 interface DraggableTaskProps {
@@ -37,6 +39,8 @@ interface DraggableTaskProps {
     setHoveredTodoId: (id: number | string | null) => void;
     dropdownRefs: React.RefObject<Map<number | string, HTMLDivElement>>;
     playSound: () => void;
+    onDuplicateTask: (todo: Todo) => void;
+    onTaskUpdated: (todo: Todo) => void;
 }
 
 interface DroppableDateColumnProps {
@@ -45,6 +49,7 @@ interface DroppableDateColumnProps {
     isToday: boolean;
     onAddTask: (date: Date) => void;
     onTaskCreated: (todo: Todo) => void;
+    onTaskUpdated: (todo: Todo) => void;
     children: React.ReactNode;
     isFormOpen: boolean;
     onOpenForm: () => void;
@@ -63,6 +68,8 @@ const DraggableTask = ({
     setHoveredTodoId,
     dropdownRefs,
     playSound,
+    onDuplicateTask,
+    onTaskUpdated,
 }: DraggableTaskProps) => {
     const {attributes, listeners, setNodeRef, isDragging} = useDraggable({
         id: todo.id || `temp-${index}`,
@@ -72,7 +79,6 @@ const DraggableTask = ({
     })
 
     
-
 
     const style = {
         opacity: isDragging ? 0 : 1,
@@ -106,6 +112,7 @@ const DraggableTask = ({
             todo={todo}
             onCancel={() => setIsEditing(false)}
             onSuccess={() => setIsEditing(false)}
+            onUpdate={onTaskUpdated}
           />
         ):(
         <div
@@ -151,7 +158,7 @@ const DraggableTask = ({
 
           {/* Dropdown Menu */}
           {openDropdownId === todo.id && (
-            <div className="absolute right-0 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+            <div className="absolute right-0 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 ">
               <button
                 className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-2 cursor-pointer border-b border-gray-700"
                 onClick={(e) => {
@@ -163,7 +170,7 @@ const DraggableTask = ({
                 <span>Edit</span>
               </button>
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer "
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteClick(todo);
@@ -171,6 +178,16 @@ const DraggableTask = ({
               >
                 <Trash className="w-3 h-3" />
                 <span>Delete</span>
+              </button>
+              <button
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer  border-b border-gray-700   "
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDuplicateTask(todo as Todo);
+                }}
+              >
+                <Copy className="w-3 h-3" />
+                <span>Duplicate</span>
               </button>
             </div>
           )}
@@ -210,6 +227,7 @@ const DroppableDateColumn = ({
     dayTasks,
     isToday,
     onTaskCreated,
+    onTaskUpdated,
     children,
     isFormOpen,
     onOpenForm,
@@ -236,6 +254,11 @@ const DroppableDateColumn = ({
         onCloseForm();
     };
 
+    const handleTaskUpdated = (todo: Todo) => {
+        onTaskUpdated(todo);
+        onCloseForm();
+    };
+
     return (
         <div
             ref={setNodeRef}
@@ -256,7 +279,7 @@ const DroppableDateColumn = ({
             </div>
 
             {/* Tasks Container - Includes tasks, Add task button, and inline form */}
-            <div className="mb-4 space-y-3 overflow-y-auto">
+            <div className="mb-4 space-y-3 ">
                 {children}
                 
                 {/* Add Task Button and Inline Form - Below all tasks */}
@@ -274,6 +297,7 @@ const DroppableDateColumn = ({
                         preselectedDate={date}
                         onCancel={handleCancel}
                         onSuccess={handleTaskCreated}
+                        onUpdate={handleTaskUpdated}
                     />
                 )}
             </div>
@@ -290,6 +314,8 @@ const UpcomingView = ({
   onAddTask,
   onViewDetails,
   onTaskCreated,
+  onDuplicateTask,
+  onTaskUpdated,
 }: UpcomingViewProps) => {
   const [startDate, setStartDate] = useState<Date>(() => {
     const today = new Date();
@@ -751,6 +777,11 @@ const UpcomingView = ({
                   onTaskCreated(todo);
                 }
               }}
+              onTaskUpdated={(todo) => {
+                if (onTaskUpdated) {
+                  onTaskUpdated(todo);
+                }
+              }}
             >
                 {dayTasks.map((todo, taskIndex) => (
                   <DraggableTask
@@ -767,6 +798,12 @@ const UpcomingView = ({
                     setHoveredTodoId={setHoveredTodoId}
                     dropdownRefs={dropdownRefs}
                     playSound={playSound}
+                    onDuplicateTask={onDuplicateTask}
+                    onTaskUpdated={(todo) => {
+                        if (onTaskUpdated) {
+                          onTaskUpdated(todo);
+                        }
+                      }}
                   />
                 ))}
             </DroppableDateColumn>

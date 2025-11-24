@@ -133,6 +133,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
   function handleApplyDate(){
+    console.log("parsedResult", parsedResult);
     if (parsedResult?.confidence === "high" && parsedResult?.date) {
         onDateSelect(parsedResult.date);
         

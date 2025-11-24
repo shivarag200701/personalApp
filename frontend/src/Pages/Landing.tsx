@@ -19,7 +19,8 @@ const Landing = () => {
       Array.from({ length: 100 }).map((_, index) => ({
         id: index,
         left: Math.random() * 100,
-        delay: Math.random() * 5,
+        bottom: Math.random() * 100, // Random starting position from 0-100vh
+        delay: 0, // Start immediately
         duration: 10 + Math.random() * 8,
         size: 2 + Math.random() * 4,
         opacity: 0.3 + Math.random() * 1.5,
@@ -105,9 +106,9 @@ const Landing = () => {
     <div className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-white flex flex-col">
       <style>{`
         @keyframes floatUp {
-          0% { transform: translateY(0) scale(0.9); opacity: 0; }
+          0% { transform: translateY(0) scale(0.9); opacity: 0.3; }
           15% { opacity: 1; }
-          100% { transform: translateY(calc(var(--landing-height, 110vh) * -1)) scale(1.2); opacity: 0; }
+          100% { transform: translateY(calc(-100vh - 100px)) scale(1.2); opacity: 0; }
         }
         @keyframes pulseOrbit {
           0% { opacity: 0.35; transform: scale(0.98); }
@@ -136,9 +137,10 @@ const Landing = () => {
       {particles.map((particle) => (
         <span
           key={particle.id}
-          className="pointer-events-none absolute bottom-0 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
+          className="pointer-events-none absolute rounded-full bg-blue-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
           style={{
             left: `${particle.left}%`,
+            bottom: `${particle.bottom}%`,
             width: particle.size * 1.5,
             height: particle.size * 1.5,
             opacity: particle.opacity,
@@ -148,8 +150,7 @@ const Landing = () => {
       ))}
 
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-[#05050a]/95 backdrop-blur-md border-b border-white/5' : 'bg-transparent'
+      <header className={`transition-all duration-300 ${isMobile ? (isScrolled ? 'bg-[#05050a]/95 backdrop-blur-md border-b border-white/5 fixed top-0 left-0 right-0 w-full z-50 ' : 'bg-transparent fixed top-0 left-0 right-0 w-full z-50 '):""
       }`}>
         <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
           <div className="flex items-center sm:justify-between justify-center">
@@ -191,7 +192,7 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-24 md:pt-40 pb-16 md:pb-24">
+      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-30 md:pt-16 pb-16 md:pb-24">
         <div className="relative max-w-6xl w-full mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center z-10">
           <div>
             {/* Main Heading */}

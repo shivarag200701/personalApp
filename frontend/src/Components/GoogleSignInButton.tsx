@@ -24,10 +24,10 @@ export function GoogleSignInButton({ className = '' }: GoogleSignInButtonProps) 
     <button
       onClick={handleGoogleSignIn}
       disabled={loading}
-      className={`flex cursor-pointer items-center justify-center gap-3 w-full px-4 py-3 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium ${className}`}
+      className={`flex cursor-pointer items-center justify-center gap-3 w-full px-4 py-3 bg-white/5 backdrop-blur-sm text-white rounded-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium ${className}`}
       type="button"
     >
-        <img src="/google-icon.svg" alt="Google" width={20} height={20} />
+      <img src="/google-icon.svg" alt="Google" width={20} height={20} />
       <span>{loading ? 'Connecting...' : 'Sign in with Google'}</span>
     </button>
   );

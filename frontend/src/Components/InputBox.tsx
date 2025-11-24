@@ -17,15 +17,14 @@ const InputBox = ({
   register,
 }: InputBoxProps) => {
   return (
-    <div className="flex flex-col  my-6 justify-start w-full relative ">
+    <div className="flex flex-col my-6 justify-start w-full relative">
       <p className="mb-2 font-regular text-white">{label}</p>
       {children}
       <input
         {...register}
         placeholder={placeholder}
         type={Type}
-        className="pl-10 p-2 border-2 border-gray-700 bg-[#0f0f11] text-white placeholder:text-gray-500 rounded-md h-10 focus:border-purple-500 focus:outline-none transition-colors"
-        style={{ backgroundColor: '#0f0f11' }}
+        className="pl-10 p-2 border border-white/10 bg-white/5 backdrop-blur-sm text-white placeholder:text-[#9EA0BB] rounded-xl h-10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
       />
     </div>
   );

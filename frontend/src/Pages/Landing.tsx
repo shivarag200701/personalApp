@@ -7,7 +7,12 @@ const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = Auth();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640; // 640px is Tailwind's sm breakpoint
+    }
+    return false;
+  });
   
   const particles = useMemo(
     () =>
@@ -50,12 +55,9 @@ const Landing = () => {
   // Scroll detection for mobile navbar
   useEffect(() => {
     const handleScroll = () => {
-      console.log(" called handleScroll");
-      
-      if (typeof window === "undefined" || typeof document === "undefined"){
-        console.log("window or document is undefined");
+      if (typeof window === "undefined" || typeof document === "undefined") {
         return;
-      };
+      }
       
       // Try multiple methods to get scroll position
       const scrollY = window.scrollY 
@@ -70,12 +72,17 @@ const Landing = () => {
     // Set initial state
     handleScroll();
     
-    // Add scroll listener
-    window.addEventListener("wheel", handleScroll, { passive: true });
-    document.addEventListener("wheel", handleScroll, { passive: true });
+    // Add scroll listener - use 'scroll' event for both touch and mouse scrolling
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Also listen to touchmove for mobile touch scrolling
+    window.addEventListener("touchmove", handleScroll, { passive: true });
     
     return () => {
-      window.removeEventListener("wheel", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("touchmove", handleScroll);
     };
   }, []);
 
@@ -132,8 +139,8 @@ const Landing = () => {
       ))}
 
       {/* Header */}
-      <header className={`${isMobile ?(
-        isScrolled ? 'fixed top-0 left-0 right-0 w-full z-50 bg-[#05050a]/95 backdrop-blur-md ' : 'bg-transparent fixed top-0 left-0 right-0 w-full z-50'):''
+      <header className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-[#05050a]/95 backdrop-blur-md border-b border-white/5' : 'bg-transparent'
       }`}>
         <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
           <div className="flex items-center sm:justify-between justify-center">
@@ -159,7 +166,7 @@ const Landing = () => {
             >
               <button
                 onClick={() => navigate("/signin")}
-                className="px-4 py-2 text-white/90 hover:text-white transition-colorsrounded-md bg-white/5 backdrop-blur cursor-pointer text-center text-sm font-medium"
+                className="px-4 py-2 text-white/90 hover:text-white transition-colors border border-white/15 rounded-md bg-white/5 backdrop-blur cursor-pointer text-center text-sm font-medium"
               >
                 Sign In
               </button>
@@ -175,7 +182,7 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-24 md:pt-16 pb-16 md:pb-24">
+      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-24 md:pt-40 pb-16 md:pb-24">
         <div className="relative max-w-6xl w-full mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center z-10">
           <div>
             {/* Main Heading */}

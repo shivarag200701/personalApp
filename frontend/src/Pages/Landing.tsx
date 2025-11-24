@@ -54,7 +54,7 @@ const Landing = () => {
 
   // Scroll detection for mobile navbar
   useEffect(() => {
-    const handleScroll = () => {
+    const checkScrollPosition = () => {
       if (typeof window === "undefined" || typeof document === "undefined") {
         return;
       }
@@ -65,24 +65,33 @@ const Landing = () => {
         || document.documentElement.scrollTop 
         || document.body.scrollTop 
         || 0;
+      
       const shouldBeScrolled = scrollY > 30;
       setIsScrolled(shouldBeScrolled);
     };
 
     // Set initial state
-    handleScroll();
+    checkScrollPosition();
     
     // Add scroll listener - use 'scroll' event for both touch and mouse scrolling
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    document.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", checkScrollPosition, { passive: true });
+    document.addEventListener("scroll", checkScrollPosition, { passive: true });
     
     // Also listen to touchmove for mobile touch scrolling
-    window.addEventListener("touchmove", handleScroll, { passive: true });
+    window.addEventListener("touchmove", checkScrollPosition, { passive: true });
+    
+    // Continuous polling to catch momentum scrolling on mobile
+    // This ensures we detect scroll even when events stop firing
+    // Polling at ~30fps is lightweight and catches momentum scrolling
+    const pollInterval = setInterval(() => {
+      checkScrollPosition();
+    }, 33); // ~30fps - good balance between responsiveness and performance
     
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("touchmove", handleScroll);
+      window.removeEventListener("scroll", checkScrollPosition);
+      document.removeEventListener("scroll", checkScrollPosition);
+      window.removeEventListener("touchmove", checkScrollPosition);
+      clearInterval(pollInterval);
     };
   }, []);
 

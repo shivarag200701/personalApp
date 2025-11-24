@@ -1,8 +1,9 @@
   import { CheckCircle2 } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 const LogoCard = () => {
+  const navigate = useNavigate();
   return (
-    <div className="flex items-center justify-center gap-3 cursor-pointer hover-elevate rounded-2xl p-2 transition-all">
+    <div className="flex items-center justify-center gap-3 cursor-pointer hover-elevate rounded-2xl p-2 transition-all" onClick={() => navigate("/")}>
       <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center text-white">
         <CheckCircle2 className="w-7 h-7 text-primary-foreground" />
       </div>

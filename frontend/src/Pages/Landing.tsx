@@ -115,6 +115,25 @@ const Landing = () => {
           50% { opacity: 0.7; transform: scale(1.02); }
           100% { opacity: 0.35; transform: scale(0.98); }
         }
+        /* Custom dark scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #1a1a2e;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #2a2a3e;
+        }
+        /* Firefox scrollbar */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #1a1a2e #0a0a0f;
+        }
       `}</style>
 
       {/* Grid backdrop */}

@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Sparkles, Flame, TrendingUp } from "lucide-react";
 import { Auth } from "../Context/AuthContext";
 
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = Auth();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
   const particles = useMemo(
     () =>
       Array.from({ length: 100 }).map((_, index) => ({
@@ -18,21 +21,77 @@ const Landing = () => {
       })),
     []
   );
+  
+  useEffect(() => {
+    const updateHeight = () => {
+      if (typeof window === "undefined" || typeof document === "undefined")
+        return;
+      document.documentElement.style.setProperty(
+        "--landing-height",
+        `${window.innerHeight + 240}px`
+      );
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // 640px is Tailwind's sm breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Scroll detection for mobile navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      console.log(" called handleScroll");
+      
+      if (typeof window === "undefined" || typeof document === "undefined"){
+        console.log("window or document is undefined");
+        return;
+      };
+      
+      // Try multiple methods to get scroll position
+      const scrollY = window.scrollY 
+        || window.pageYOffset 
+        || document.documentElement.scrollTop 
+        || document.body.scrollTop 
+        || 0;
+      const shouldBeScrolled = scrollY > 30;
+      setIsScrolled(shouldBeScrolled);
+    };
+
+    // Set initial state
+    handleScroll();
+    
+    // Add scroll listener
+    window.addEventListener("wheel", handleScroll, { passive: true });
+    document.addEventListener("wheel", handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener("wheel", handleScroll);
+    };
+  }, []);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       navigate("/dashboard", { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate]);
-
+  }, [isAuthenticated, isLoading, navigate]);  
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#05050a] text-white flex flex-col">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-white flex flex-col">
       <style>{`
         @keyframes floatUp {
           0% { transform: translateY(0) scale(0.9); opacity: 0; }
           15% { opacity: 1; }
-          100% { transform: translateY(calc(-100vh - 200px)) scale(1.2); opacity: 0; }
+          100% { transform: translateY(calc(var(--landing-height, 110vh) * -1)) scale(1.2); opacity: 0; }
         }
         @keyframes pulseOrbit {
           0% { opacity: 0.35; transform: scale(0.98); }
@@ -73,35 +132,50 @@ const Landing = () => {
       ))}
 
       {/* Header */}
-      <header className="w-full max-w-6xl mx-auto p-4 md:p-8 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center">
-              <CheckCircle2 className="w-7 h-7 text-white" />
+      <header className={`${isMobile ?(
+        isScrolled ? 'fixed top-0 left-0 right-0 w-full z-50 bg-[#05050a]/95 backdrop-blur-md ' : 'bg-transparent fixed top-0 left-0 right-0 w-full z-50'):''
+      }`}>
+        <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
+          <div className="flex items-center sm:justify-between justify-center">
+            <div className="flex items-center gap-3 transition-all duration-300 ease-in-out"
+            style={isMobile ? {
+              display: isScrolled ? 'none' : 'flex',
+            } : {}}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-purple-500">
+                FlowTask
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-purple-500">
-              FlowTask
-            </h1>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() => navigate("/signin")}
-              className="px-4 py-2 text-white hover:text-purple-400 transition-colors cursor-pointer"
+            <div 
+              className="flex items-center gap-3 transition-all duration-300 ease-in-out sm:opacity-100 sm:translate-x-0 sm:pointer-events-auto"
+              style={isMobile ? {
+                display: isScrolled ? 'flex' : 'none',
+                transform: isScrolled ? 'translateX(0)' : 'translateX(-16px)',
+                pointerEvents: isScrolled ? 'auto' : 'none',
+              } : {}}
             >
-              Sign In
-            </button>
-            <button
-              onClick={() => navigate("/signup")}
-              className="px-6 py-2 bg-linear-to-r from-purple-500 to-pink-400 text-white rounded-md hover:opacity-90 transition-opacity font-semibold cursor-pointer"
-            >
-              Get Started
-            </button>
+              <button
+                onClick={() => navigate("/signin")}
+                className="px-4 py-2 text-white/90 hover:text-white transition-colorsrounded-md bg-white/5 backdrop-blur cursor-pointer text-center text-sm font-medium"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => navigate("/signup")}
+                className="px-6 py-2 bg-linear-to-r from-purple-500 to-pink-400 text-white rounded-md hover:opacity-90 transition-opacity font-semibold text-sm cursor-pointer shadow-[0_12px_35px_rgba(168,85,247,0.3)]"
+              >
+                Get Started
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24">
+      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-24 md:pt-16 pb-16 md:pb-24">
         <div className="relative max-w-6xl w-full mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center z-10">
           <div>
             {/* Main Heading */}

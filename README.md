@@ -1,2 +1,2 @@
 ## Personal Todo Application
-# persoanl use case
+# persoanl use case and testing

@@ -30,7 +30,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       data: {
         title,
         description,
-        priority,
+        priority: priority ?? null,
         completeAt: completeAtDate, // Ensure compatibility between the two types
         category,
         isRecurring: isRecurring || false,
@@ -300,7 +300,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       data: {
         title,
         description,
-        priority,
+        priority: priority ?? null,
         completeAt: completeAtDate,
         category,
         isRecurring: isRecurring || false,

@@ -132,7 +132,7 @@ const TaskDetailDrawer = ({
         description: editedDescription,
         completeAt: todo.completeAt,
         category: todo.category,
-        priority: todo.priority,
+        priority: todo.priority ?? null,
         isRecurring: todo.isRecurring || false,
       };
 

@@ -24,7 +24,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
   }
   const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
 
-  const completeAtDate = convertCompleteAtToDate(completeAt);
+  const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
      let todo = await prisma.todo.create({
       data: {
@@ -282,7 +282,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
   }
   const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate} = data;
 
-  const completeAtDate = convertCompleteAtToDate(completeAt);
+  const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
     const existingTodo = await prisma.todo.findFirst({
       where :{

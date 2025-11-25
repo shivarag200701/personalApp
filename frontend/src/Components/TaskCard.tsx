@@ -58,8 +58,8 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
       {todos.map((todo, index) => {
         const colors =
           priorityColors[
-            todo.priority.toString().toLowerCase() as PriorityKey
-          ] || priorityColors.low;
+            todo.priority?.toString().toLowerCase() as PriorityKey
+          ] ?? priorityColors.low;
           
         const handleComplete = () => {
           if (!todo.id) {
@@ -134,11 +134,12 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
                   {todo.description}
                 </div>
                 <div className="flex mt-3 gap-2">
+                  {todo.priority && (
                   <div
                     className={`py-1 px-2 ${colors.bg} ${colors.text} rounded-md text-xs`}
                   >
                     {todo.priority}
-                  </div>
+                  </div>)}
                   <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
                     <div className="flex justify-center items-center">
                       <Tag className="w-3 h-3" />

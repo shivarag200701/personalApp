@@ -117,11 +117,11 @@ const DraggableTask = ({
             description: todo.description,
             completeAt: todo.completeAt,
             category: todo.category,
-            priority: todo.priority,
+            priority: todo.priority ?? null,
             isRecurring: todo.isRecurring,
-            recurrencePattern: todo.recurrencePattern || undefined,
-            recurrenceInterval: todo.recurrenceInterval || undefined,
-            recurrenceEndDate: todo.recurrenceEndDate || undefined,
+            recurrencePattern: todo.recurrencePattern ?? null,
+            recurrenceInterval: todo.recurrenceInterval ?? null,
+            recurrenceEndDate: todo.recurrenceEndDate ?? null,
           });
           onTaskUpdated(response.data.todo);
         } catch (error) {
@@ -203,7 +203,7 @@ const DraggableTask = ({
                       key={index}
                       onClick={(e) => {
                         e.stopPropagation();
-                        todo.priority = index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : undefined as unknown as string;
+                        todo.priority = index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : null;
                         handlePrioritySelect(todo);
                         setOpenDropdownId(null);
                       }}
@@ -662,7 +662,7 @@ const UpcomingView = ({
             description: todo.description,
             completeAt: newCompleteAt,
             category: todo.category,
-            priority: todo.priority,
+            priority: todo.priority ?? null,
             isRecurring: todo.isRecurring || false,
         };
         

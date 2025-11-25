@@ -14,14 +14,14 @@ export const signInSchema = z.object({
 export const todoSchema = z.object({
   title: z.string(),
   description: z.string(),
-  priority: z.string(),
-  completeAt: z.iso.datetime().optional(),
+  priority: z.string().nullish(),
+  completeAt: z.iso.datetime().nullish(),
   category: z.string(),
   isRecurring: z.boolean().optional(),
-  recurrencePattern: z.enum(["daily", "weekly", "monthly", "yearly"]).optional(),
-  recurrenceInterval: z.number().int().positive().optional(),
-  recurrenceEndDate: z.string().optional(),
-  nextOccurrence: z.string().optional(),
+  recurrencePattern: z.enum(["daily", "weekly", "monthly", "yearly"]).nullish(),
+  recurrenceInterval: z.number().int().positive().nullish(),
+  recurrenceEndDate: z.string().nullish(),
+  nextOccurrence: z.string().nullish(),
 });
 
 export type SignUp = z.infer<typeof signUpSchema>;

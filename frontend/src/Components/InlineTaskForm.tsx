@@ -19,12 +19,12 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [priority, setPriority] = useState<"high" | "medium" | "low" | "undefined">("undefined");
+  const [priority, setPriority] = useState<"high" | "medium" | "low" | null>(null);
   const [category, setCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly" | undefined>(undefined);
-  const [recurrenceInterval, setRecurrenceInterval] = useState<number | undefined>(undefined);
+  const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly" | null>(null);
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number | null>(null);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
@@ -74,11 +74,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setTitle(todo.title || "");
       setDescription(todo.description || "");
       setSelectedDate(todo.completeAt ? isoToDateInput(todo.completeAt) : dateToInput(preselectedDate));
-      setPriority((todo.priority as "high" | "medium" | "low" | "undefined") || "undefined");
+      setPriority((todo.priority as "high" | "medium" | "low") ?? null);
       setCategory(todo.category || "");
       setIsRecurring(todo.isRecurring || false);
-      setRecurrencePattern(todo.recurrencePattern || undefined);
-      setRecurrenceInterval(todo.recurrenceInterval || undefined);
+      setRecurrencePattern(todo.recurrencePattern ?? null);
+      setRecurrenceInterval(todo.recurrenceInterval ?? null);
       setRecurrenceEndDate(todo.recurrenceEndDate 
         ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
         : "");
@@ -87,11 +87,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setTitle("");
       setDescription("");
       setSelectedDate(dateToInput(preselectedDate));
-      setPriority("undefined");
+      setPriority(null);
       setCategory("");
       setIsRecurring(false);
-      setRecurrencePattern(undefined);
-      setRecurrenceInterval(undefined);
+      setRecurrencePattern(null);
+      setRecurrenceInterval(null);
       setRecurrenceEndDate("");
     }
   }, [todo]);
@@ -112,11 +112,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           description,
           completeAt: completeAtIso,
           category,
-          priority,
+          priority: priority ?? null,
           isRecurring,
-          recurrencePattern: recurrencePattern || undefined,
-          recurrenceInterval: recurrenceInterval || undefined,
-          recurrenceEndDate: recurrenceEndDate || undefined,
+          recurrencePattern: recurrencePattern ?? null,
+          recurrenceInterval: recurrenceInterval ?? null,
+          recurrenceEndDate: recurrenceEndDate ?? null,
         });
         onUpdate(res.data.todo);
       } else {
@@ -128,11 +128,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           description,
           completeAt: completeAtIso,
           category,
-          priority,
+          priority: priority ?? null,
           isRecurring,
-          recurrencePattern: recurrencePattern || undefined,
-          recurrenceInterval: recurrenceInterval || undefined,
-          recurrenceEndDate: recurrenceEndDate || undefined,
+          recurrencePattern: recurrencePattern ?? null,
+          recurrenceInterval: recurrenceInterval ?? null,
+          recurrenceEndDate: recurrenceEndDate ?? null,
         });
       }
 
@@ -145,12 +145,12 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           description,
           completeAt: completeAtIso,
           category,
-          priority,
+          priority: priority ?? null,
           completed: todo?.completed || false,
           completedAt: todo?.completedAt || null,
           isRecurring,
-          recurrencePattern: recurrencePattern || undefined,
-          recurrenceInterval: recurrenceInterval || undefined ,
+          recurrencePattern: recurrencePattern ?? null,
+          recurrenceInterval: recurrenceInterval ?? null ,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
         });
@@ -160,11 +160,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setTitle("");
       setDescription("");
       setSelectedDate(dateToInput(preselectedDate));
-      setPriority("undefined");
+      setPriority(null);
       setCategory("");
       setIsRecurring(false);
-      setRecurrencePattern("daily");
-      setRecurrenceInterval(1);
+      setRecurrencePattern(null);
+      setRecurrenceInterval(null);
       setRecurrenceEndDate("");
       onCancel();
     } catch (error) {
@@ -359,7 +359,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 `}
           >
             <Flag 
-              className={`w-4 h-4 ${priorityColors[priority]}`}
+              className={`w-4 h-4 ${priority ? priorityColors[priority] : "text-gray-500"}`}
               style={{ 
                 fill: priority === "high" ? "#DC2828" : 
                       priority === "medium" ? "#3B82F6" : 

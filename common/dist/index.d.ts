@@ -11,19 +11,19 @@ export declare const signInSchema: z.ZodObject<{
 export declare const todoSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
-    priority: z.ZodString;
-    completeAt: z.ZodOptional<z.ZodISODateTime>;
+    priority: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    completeAt: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
     category: z.ZodString;
     isRecurring: z.ZodOptional<z.ZodBoolean>;
-    recurrencePattern: z.ZodOptional<z.ZodEnum<{
+    recurrencePattern: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
         daily: "daily";
         weekly: "weekly";
         monthly: "monthly";
         yearly: "yearly";
-    }>>;
-    recurrenceInterval: z.ZodOptional<z.ZodNumber>;
-    recurrenceEndDate: z.ZodOptional<z.ZodString>;
-    nextOccurrence: z.ZodOptional<z.ZodString>;
+    }>>>;
+    recurrenceInterval: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    recurrenceEndDate: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    nextOccurrence: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 export type SignUp = z.infer<typeof signUpSchema>;
 export type SignIn = z.infer<typeof signInSchema>;

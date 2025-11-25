@@ -202,13 +202,13 @@ const Dashboard = () => {
       const res = await api.post("v1/todo/",{
         title: todo.title,
         description: todo.description,
-        priority: todo.priority,
+        priority: todo.priority ?? null,
         completeAt: todo.completeAt,
         category: todo.category,
         isRecurring: todo.isRecurring,
-        recurrencePattern: todo.recurrencePattern || undefined,
-        recurrenceInterval: todo.recurrenceInterval || undefined,
-        recurrenceEndDate: todo.recurrenceEndDate || undefined,
+        recurrencePattern: todo.recurrencePattern ?? null,
+        recurrenceInterval: todo.recurrenceInterval ?? null,
+        recurrenceEndDate: todo.recurrenceEndDate ?? null,
       });
       const createdTodo = res.data.todo;
       addTodo(createdTodo);

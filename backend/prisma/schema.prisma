@@ -31,7 +31,7 @@ model Todo {
   id            Int         @id @default(autoincrement())
   title         String
   description   String
-  priority      String      @default("low")
+  priority      String?    
   completeAt    DateTime?
   category      String
   user          User        @relation(fields: [userId], references: [id])

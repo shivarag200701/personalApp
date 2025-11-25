@@ -151,7 +151,7 @@ userRouter.post("/logout", async (req, res) => {
         return res.status(500).json({ msg: "Failed to logout" });
       }
 
-      return res.status(200).json({ msg: "Logged out successfully" });
+      return res.status(200).json({ msg: "Logged out successfully"});
     });
   } else {
     return res.status(401).json({

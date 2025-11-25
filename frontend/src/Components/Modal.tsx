@@ -8,14 +8,14 @@ export interface Todo {
   id?: number;
   title: string;
   description: string;
-  priority: string;
+  priority: "high" | "medium" | "low" | null;
   completeAt: string | null;
   category: string;
   completed: boolean;
   completedAt: string | null;
   isRecurring?: boolean;
-  recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
-  recurrenceInterval?: number;
+  recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly" | null;
+  recurrenceInterval?: number | null;
   recurrenceEndDate?: string | null;
   parentRecurringId?: number | null;
   nextOccurrence?: string | null;
@@ -35,7 +35,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [priority, setPriority] = useState("high");
+  const [priority, setPriority] = useState<"high" | "medium" | "low" | null>(null);
   const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
@@ -97,7 +97,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
       } else {
         setSelectedDate(isoToDateInput(null));
       }
-      setPriority("high");
+      setPriority(null);
       setCategory("");
       setIsRecurring(false);
       setRecurrencePattern("daily");
@@ -118,7 +118,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
     setTitle("");
     setDescription("");
     setSelectedDate(isoToDateInput(null));
-    setPriority("high");
+    setPriority(null);
     setCategory("");
     onClose();
   };
@@ -132,11 +132,11 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         description,
         completeAt: completeAtIso,
         category,
-        priority,
+        priority: priority ?? null,
         isRecurring,
         recurrencePattern,
         recurrenceInterval,
-        recurrenceEndDate: recurrenceEndDate || undefined,
+        recurrenceEndDate: recurrenceEndDate ?? null,
       });
       if(res.data.todo){
         addTodo(res.data.todo);
@@ -148,7 +148,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         description,
         completeAt: completeAtIso,
         category,
-        priority,
+        priority: priority ?? null,
         completed: false,
         completedAt: null,
         isRecurring,
@@ -178,11 +178,11 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         description,
         completeAt: completeAtIso,
         category,
-        priority,
+        priority: priority ?? null,
         isRecurring,
         recurrencePattern,
         recurrenceInterval,
-        recurrenceEndDate: recurrenceEndDate || undefined,
+        recurrenceEndDate: recurrenceEndDate ?? null,
         parentRecurringId: null,
       });
       console.log("Todo updated");
@@ -193,7 +193,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
           description,
           completeAt: completeAtIso,
           category,
-          priority,
+          priority: priority ?? null,
           isRecurring,
           recurrencePattern,
           recurrenceInterval,

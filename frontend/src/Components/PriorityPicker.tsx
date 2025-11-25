@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Flag, Check } from "lucide-react";
 
 interface PriorityPickerProps {
-  selectedPriority: "high" | "medium" | "low" | "undefined";
-  onPrioritySelect: (priority: "high" | "medium" | "low" | "undefined") => void;
+  selectedPriority: "high" | "medium" | "low" | null;
+  onPrioritySelect: (priority: "high" | "medium" | "low" | null) => void;
   onClose: () => void;
   buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }
@@ -74,7 +74,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
     },
     {
       label: "None",
-      value: "undefined" as const,
+      value: null,
       color: "text-gray-500",
       iconColor: "none",
     }

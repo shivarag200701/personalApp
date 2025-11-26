@@ -201,7 +201,7 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
     <>
       {/* Backdrop - only closes CategoryPicker, not parent */}
       <div
-        className="fixed inset-0 z-[45]"
+        className="fixed inset-0 z-[45px]"
         onMouseDown={(e) => {
           // Don't close if clicking on the picker or title input
           if (
@@ -214,15 +214,25 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
           onClose();
         }}
       />
-      <div className="dropdown-arrow absolute w-5 h-5 -top-[7px] left-5 bg-[#1B1B1E] border border-gray-800" style={{ left: `${position.left + 120}px`,
-        top: `${position.top - 3}px`,
-        transform: 'rotate(45deg)',
-    
-       }}></div>
-      {/* Category Picker */}
+      <div>
+  
+  {/* Category Picker / Dropdown Menu */}
+  <div className='w-full h-full bg-[#1B1B1E]'> {/* This acts as the page background */}
+      
+      {/* The dropdown arrow now matches the menu's background color */}
+      <div 
+        className="dropdown-arrow absolute w-6 h-6 -top-[7px] left-5 bg-[#27272B] border border-gray-800" 
+        style={{ 
+          left: `${position.left + 120}px`, 
+          top: `${position.top - 3}px`,
+          transform: 'rotate(45deg)',
+        }}
+      ></div>
+      
+      {/* Category Picker (Now with lighter gray background and padding) */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50"
+        className="fixed bg-[#27272B] border border-gray-800 rounded-xs shadow-2xl z-50 p-1.5" /* Added p-2 padding and lighter background */
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -231,8 +241,8 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="space-y-1">
-          {presetCategories.map((category) => {
+        <div className="space-y-1 bg-[#1B1B1E] rounded-xs">
+          {presetCategories.map((category, index) => {
             const isSelected = selectedCategory === category;
             return (
               <button
@@ -242,8 +252,8 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
                   handlePresetCategorySelect(category);
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`w-full flex items-center gap-3 p-2 rounded-t-md hover:bg-[#27272B] transition-colors cursor-pointer ${
-                  isSelected ? "bg-[#27272B]" : ""
+                className={`w-full flex items-center gap-3 p-2 ${index === 0 ? "rounded-t-xs" : ""} hover:bg-[#3A3A3D] transition-colors cursor-pointer ${
+                  isSelected ? "bg-[#3A3A3D]" : "" /* Subtle color change for selected */
                 }`}
               >
                 <Tag className="w-5 h-5 text-[#A2A2A9] " />
@@ -254,21 +264,26 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
             );
           })}
           {showCustomInput ? (
-            <form onSubmit={handleCustomCategorySubmit} className="p-2">
+            <div className='p-2'>
               <input
                 ref={inputRef}
                 type="text"
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 placeholder="Category name"
-                className="w-full bg-[#27272B] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-[#A2A2A9] outline-none focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full bg-[#1B1B1E] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-[#A2A2A9] outline-none focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                 onBlur={() => {
                   if (!customCategory.trim()) {
                     setShowCustomInput(false);
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCustomCategorySubmit(e);
+                  }
+                }}
               />
-            </form>
+              </div>
           ) : (
             <button
               onClick={(e) => {
@@ -276,13 +291,15 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
                 handleCreateLabel();
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[#27272B] transition-colors cursor-pointer text-[#A2A2A9] text-sm"
+              className="w-full flex items-center gap-3 p-2 rounded-b-xs hover:bg-[#3A3A3D] transition-colors cursor-pointer text-[#A2A2A9] text-sm"
             >
               <span>Create label</span>
             </button>
           )}
         </div>
       </div>
+</div>
+</div>
     </>
   );
 };

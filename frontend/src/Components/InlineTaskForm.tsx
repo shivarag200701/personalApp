@@ -275,16 +275,16 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   
   return (
     <>
-    <form onSubmit={handleSubmit} className="p-2 bg-[#1B1B1E] border border-gray-700 rounded-xl mt-3 w-full min-w-0">
+    <form onSubmit={handleSubmit} className="p-2 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl mt-3 w-full min-w-0 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
       {/* Category Tag */}
       {category && (
         <div className="mb-2">
-          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#DC2828] text-white text-xs font-medium">
+          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/10 border border-white/10 text-white text-xs font-medium">
             <span>@{category}</span>
             <button
               type="button"
               onClick={() => setCategory("")}
-              className="ml-1 hover:bg-[#B91C1C] rounded-full p-0.5 transition-colors"
+              className="ml-1 hover:bg-white/10 rounded-full p-0.5 transition-colors"
             >
               <X className="w-3 h-3" />
             </button>
@@ -325,7 +325,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               e.preventDefault();
               setShowDatePicker(!showDatePicker);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border border-gray-700 text-xs font-medium hover:bg-[#323238] transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400  cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-xs font-medium hover:bg-white/5 hover:border-white/20 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
               isTodaySelected ? "rounded-full" : "rounded-md"
             }`}
           >
@@ -379,7 +379,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               e.preventDefault();
               setShowPriorityPicker(!showPriorityPicker);
             }}
-            className={`p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 `}
+            className={`p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
           >
             <Flag 
               className={`w-4 h-4 ${priority ? priorityColors[priority] : "text-gray-500"}`}
@@ -408,7 +408,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         {/* Reminder Button (placeholder) */}
         <button
           type="button"
-          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
+          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
         >
           <AlarmClock className="w-4 h-4" />
         </button>
@@ -417,7 +417,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         <button
           ref={moreOptionsButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           onClick={(e) => {
             e.preventDefault();
             setShowMoreOptionsPicker(!showMoreOptionsPicker);
@@ -448,7 +448,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       </div>
 
       {/* Bottom Row: Project and Submit */}
-      <div className="flex items-center justify-end pt-1.5 border-t border-gray-800 gap-2 min-w-0">
+      <div className="flex items-center justify-end pt-1.5 border-t border-white/10 gap-2 min-w-0">
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 shrink-0">
@@ -457,14 +457,14 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             onClick={() =>{
               setIsWarningModalOpen(true);
             }}
-            className="p-1.5 rounded-md bg-[#27272B] hover:bg-[#323238] transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+            className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
           >
             <X className="w-5 h-5 text-white" />
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-2 rounded-md bg-[#A0522D] hover:bg-[#8B4513] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+            className="p-2 rounded-md bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
           >
             <SendHorizontal className="w-4 h-4 text-white" />
           </button>

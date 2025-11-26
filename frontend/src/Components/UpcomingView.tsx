@@ -147,7 +147,7 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      className="p-3 bg-[#131315] border-2 border-gray-800 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-gray-700 transition-all duration-300 "
+      className="p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
@@ -172,7 +172,7 @@ const DraggableTask = ({
           }}
         >
           <button
-            className="text-gray-500 hover:text-white p-1 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               toggleDropdown(todo.id!, e);
@@ -185,9 +185,9 @@ const DraggableTask = ({
 
           {/* Dropdown Menu */}
           {openDropdownId === todo.id && (
-            <div className="absolute right-0 w-45 bg-[#1B1B1E] border border-gray-700 rounded-sm shadow-lg z-50 ">
+            <div className="absolute right-0 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-50">
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-gray-700"
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-white/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditing(true);
@@ -213,7 +213,7 @@ const DraggableTask = ({
                   ))}
                 </div>
                 <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer "
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicateTask(todo as Todo);
@@ -225,7 +225,7 @@ const DraggableTask = ({
                 <span>Duplicate</span>
               </button>
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer "
+                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteClick(todo);
@@ -315,12 +315,12 @@ const DroppableDateColumn = ({
     return (
         <div
             ref={setNodeRef}
-            className={`flex flex-col bg-[#1B1B1E] border border-gray-800 rounded-2xl p-4 min-h-[400px] shadow-lg shadow-black/50 transition-colors ${
-                isToday ? "ring-2 ring-purple-500/50" : ""
-              } ${isOver ? "ring-2 ring-purple-500 border-purple-500/50" : ""}`}
+            className={`flex flex-col bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 min-h-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-colors ${
+                isToday ? "ring-2 ring-purple-500/50 border-purple-500/30" : ""
+              } ${isOver ? "ring-2 ring-purple-500/70 border-purple-500/50 bg-[#101018]/90" : ""}`}
         >
             {/* Date Header */}
-            <div className="mb-4 pb-3 border-b border-gray-800">
+            <div className="mb-4 pb-3 border-b border-white/10">
                 <div className="flex items-center justify-between mb-1">
                     <div className="text-white text-sm font-semibold">
                         {formatUpcomingDateHeader(date)}
@@ -339,9 +339,9 @@ const DroppableDateColumn = ({
                 {!isFormOpen ? (
                     <button
                         onClick={handleAddTaskClick}
-                        className=" group flex items-center gap-2 text-[#A2A2A9] hover:text-red-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-[0.2px] focus:ring-blue-400 focus:ring-inset focus:border-blue-400 focus:bg-[#262626] p-3 rounded-md w-full border border-transparent"
+                        className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
                     >
-                        <Plus className="w-4 h-4 group-hover:bg-red-400 group-hover:text-white transition-colors rounded-full text-red-400" />
+                        <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
                         <span>Add task</span>
                     </button>
                 ) : (
@@ -700,7 +700,7 @@ const UpcomingView = ({
           <h1 className="text-white text-3xl md:text-4xl font-bold hidden sm:block">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
-              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors"
+              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
               onClick={handleShowMonthYearPicker}
             >
               <span className="text-lg">{getCurrentMonthYear()}</span>
@@ -711,7 +711,7 @@ const UpcomingView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-[#1B1B1E] border border-gray-700 rounded-2xl p-5 shadow-2xl z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px] backdrop-blur-sm">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px]">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>
@@ -734,8 +734,8 @@ const UpcomingView = ({
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
                                 : isDisabled
-                                ? "text-[#4A4A4A] cursor-not-allowed! opacity-40"
-                                : "text-[#A2A2A9] hover:bg-[#131315] hover:text-white hover:scale-105 active:scale-95"
+                                ? "text-[#4A4A4A] cursor-not-allowed opacity-40"
+                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:scale-105 active:scale-95"
                             }`}
                           >
                             {month.label.slice(0, 3)}
@@ -767,7 +767,7 @@ const UpcomingView = ({
                             className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer ${
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
-                                : "text-[#A2A2A9] hover:bg-[#131315] hover:text-white hover:translate-x-1"
+                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:translate-x-1"
                             }`}
                           >
                             {year}
@@ -777,8 +777,8 @@ const UpcomingView = ({
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-800">
-                  <div className="text-[#6B6B75] text-xs text-center">
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="text-[#9EA0BB] text-xs text-center">
                     Only future dates are available
                   </div>
                 </div>
@@ -789,19 +789,19 @@ const UpcomingView = ({
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  rounded-lg hover:bg-[#1B1B1E] text-sm font-medium cursor-pointer "
+            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2 rounded-lg hover:bg-white/5 text-sm font-medium cursor-pointer"
           >
             Today
           </button>
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-[#1B1B1E] cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -867,7 +867,7 @@ const UpcomingView = ({
       {/* Drag Overlay for better UX */}
       <DragOverlay>
         {activeTodo ? (
-          <div className="p-3 bg-[#131315] border-none rounded-xl shadow-lg opacity-90 cursor-grabbing"
+          <div className="p-3 bg-[#101018]/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] opacity-90 cursor-grabbing"
           style={{
             transform: 'rotate(3deg)'
           }}>

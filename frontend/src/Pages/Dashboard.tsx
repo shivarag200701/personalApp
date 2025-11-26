@@ -233,7 +233,48 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[#131315] w-full px-4 md:px-16 pb-12 overflow-x-hidden">
+      <div className="relative min-h-screen bg-[#05050a] w-full px-4 md:px-16 pb-12 overflow-x-hidden">
+        <style>{`
+          /* Custom dark scrollbar */
+          ::-webkit-scrollbar {
+            width: 8px;
+          }
+          ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #1a1a2e;
+            border-radius: 4px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #2a2a3e;
+          }
+          /* Firefox scrollbar */
+          * {
+            scrollbar-width: thin;
+            scrollbar-color: #1a1a2e #0a0a0f;
+          }
+        `}</style>
+
+        {/* Grid backdrop */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+            backgroundSize: "80px 80px",
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-[#0a0a11]/60 to-[#05050a]" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 60% 40%, rgba(168,85,247,0.15), transparent 55%)",
+          }}
+        />
+
+        <div className="relative z-10">
         <div className="mb-8">
           <AppBar />
         </div>
@@ -274,6 +315,7 @@ const Dashboard = () => {
             onViewDetails={handleViewDetails}
           />
         )}
+        </div>
       </div>
       <Modal
         isOpen={isModalOpen}

@@ -75,7 +75,7 @@ app.use(
     store: redisStore,
     secret: secretString,
     resave: false,
-    saveUninitialized: true, // Change to true - this will create session even if not modified
+    saveUninitialized: false, // Change to true - this will create session even if not modified
     name: 'connect.sid', // Explicitly set cookie name
     cookie: {
       secure: NODE_ENV === "production",
@@ -98,6 +98,9 @@ app.get("/", (req, res) => {
 
 //routes
 app.get("/v1/auth-check", requireLogin, (req, res) => {
+  console.log("auth-check cookie:", req.headers.cookie);
+  console.log("auth-check sessionID:", req.sessionID);
+  console.log("auth-check session:", req.session);
   res.status(200).json({
     isAuthenticated: "true",
   });

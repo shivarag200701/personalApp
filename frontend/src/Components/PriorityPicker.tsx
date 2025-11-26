@@ -15,6 +15,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
   // Calculate position based on button
   useEffect(() => {
     const updatePosition = () => {
+      console.log("buttonRef", buttonRef);
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
         const spacing = 8;

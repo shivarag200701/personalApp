@@ -15,7 +15,6 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       error,
     });
   }
-  console.log("data", data);
   const userId = req.session.userId;
   if (!userId) {
     return res.status(401).json({
@@ -117,7 +116,6 @@ todoRouter.get("/", requireLogin, async (req, res) => {
       },
     });
 
-    console.log("todos", todos);
 
     // Filter out parent templates that already have instances (in-memory filtering)
     // const childInstanceParentIds = new Set(

@@ -6,6 +6,7 @@ import CustomDatePicker from "./CustomDatePicker";
 import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 import WarningModal from "./WarningModal";
+import MoreOptionsPicker, { CategoryPicker } from "./MoreOptionsPicker";
 interface InlineTaskFormProps {
   todo?: Todo;
   preselectedDate: Date;
@@ -28,10 +29,15 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
+  const [showMoreOptionsPicker, setShowMoreOptionsPicker] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
+  const moreOptionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -270,8 +276,25 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   return (
     <>
     <form onSubmit={handleSubmit} className="p-2 bg-[#1B1B1E] border border-gray-700 rounded-xl mt-3 w-full min-w-0">
+      {/* Category Tag */}
+      {category && (
+        <div className="mb-2">
+          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#DC2828] text-white text-xs font-medium">
+            <span>@{category}</span>
+            <button
+              type="button"
+              onClick={() => setCategory("")}
+              className="ml-1 hover:bg-[#B91C1C] rounded-full p-0.5 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Task Name Input */}
       <input
+        ref={titleInputRef}
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -392,11 +415,36 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
 
         {/* More Options Button */}
         <button
+          ref={moreOptionsButtonRef}
           type="button"
           className="p-1.5 rounded-md border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          onClick={(e) => {
+            e.preventDefault();
+            setShowMoreOptionsPicker(!showMoreOptionsPicker);
+          }}
         >
           <MoreHorizontal className="w-4 h-4" />
         </button>
+        {showMoreOptionsPicker && (
+          <MoreOptionsPicker
+            onClose={() => setShowMoreOptionsPicker(false)}
+            buttonRef={moreOptionsButtonRef}
+            onCategoryClick={() => {
+              setShowCategoryPicker(true);
+            }}
+          />
+        )}
+        {showCategoryPicker && (
+          <CategoryPicker
+            onClose={() => setShowCategoryPicker(false)}
+            onCategorySelect={(category: string) => {
+              setCategory(category);
+              setShowCategoryPicker(false);
+            }}
+            selectedCategory={category}
+            titleInputRef={titleInputRef}
+          />
+        )}
       </div>
 
       {/* Bottom Row: Project and Submit */}

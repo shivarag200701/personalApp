@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag } from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
@@ -257,6 +257,14 @@ const DraggableTask = ({
           {todo.description && (
             <div className="text-[#A2A2A9] text-xs mt-1 line-clamp-2">
               {todo.description}
+            </div>
+          )}
+          {todo.category && (
+            <div className="mt-2 text-gray-500  w-fit  rounded-md text-xs flex gap-1">
+              <div className="flex justify-center items-center">
+                <Tag className="w-3 h-3" />
+              </div>
+              <div>{todo.category}</div>
             </div>
           )}
         </div>

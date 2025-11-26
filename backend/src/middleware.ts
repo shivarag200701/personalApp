@@ -5,7 +5,7 @@ export function requireLogin(
   res: Response,
   next: NextFunction
 ): Response<any, Record<string, any>> | void {
-  console.log("req.session?.userId", req.session?.userId);
+  // console.log("req.session", req.session);
   if (req.session?.userId) {
     console.log("user is authenticated");
     next();

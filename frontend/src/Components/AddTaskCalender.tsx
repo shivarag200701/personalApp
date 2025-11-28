@@ -16,7 +16,7 @@ interface InlineTaskFormProps {
   index: number;
   backgroundColor?: string;
   width?: string;
-  calendarRef: React.RefObject<HTMLDivElement>;
+  calendarRef: React.RefObject<HTMLDivElement|null>;
 }
 
 const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full", calendarRef }: InlineTaskFormProps) => {
@@ -262,6 +262,15 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
     }
     return { left: 0, top: 0 };
   });
+  useEffect(() => {
+    if (calendarRef.current) {
+      const rect = calendarRef.current.getBoundingClientRect();
+      setPosition({
+        left: rect.left + rect.width/2,
+        top: rect.top ,
+      });
+    }
+  }, [calendarRef]);
 
   useEffect(() =>{
     if(!title.trim()){

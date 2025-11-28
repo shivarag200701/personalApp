@@ -720,7 +720,7 @@ const UpcomingView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-[9999] min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
+              <div className="absolute top-full left-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-9999 min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>

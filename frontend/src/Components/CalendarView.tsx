@@ -2,7 +2,6 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, X } from "lucide-react";
 import type { Todo } from "./Modal";
 import { isTaskOnDate } from "@shiva200701/todotypes";
-import InlineTaskForm from "./InlineTaskForm";
 import AddTaskCalender from "./AddTaskCalender";
 
 interface CalendarViewProps {
@@ -20,14 +19,8 @@ interface CalendarViewProps {
 
 const CalendarView = ({
   todos,
-  onToggleComplete,
-  onDelete,
-  onEdit,
-  onUpdateTodo,
-  onAddTask,
   onViewDetails,
   onTaskCreated,
-  onDuplicateTask,
   onTaskUpdated,
 }: CalendarViewProps) => {
   const [currentDate, setCurrentDate] = useState<Date>(() => {
@@ -39,12 +32,11 @@ const CalendarView = ({
   const [openFormDate, setOpenFormDate] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const [formPosition, setFormPosition] = useState<{ left?: number, right?: number, top: number } | null>(null);
   const [isViewingMoreTasks, setIsViewingMoreTasks] = useState(false);
   const [viewMoreTasks, setViewMoreTasks] = useState<Todo[]>([]);
   const [viewMoreDate, setViewMoreDate] = useState<Date | null>(null);
   const [viewMorePosition, setViewMorePosition] = useState<{ top: number; left: number } | null>(null);
-  const calendarRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement|null>(null);
   // Get first day of the month and number of days
   const monthStart = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -412,22 +404,6 @@ const CalendarView = ({
                 }`}
                 onClick={(e) => {
                     e.stopPropagation();
-                    const clickedCell = dayRefs.current.get(dateKey);
-
-                    if (clickedCell) {
-                        const cellWidth = clickedCell?.getBoundingClientRect().width;
-                        if(colIndex >= 5) {
-                            setFormPosition({
-                                top: 0,
-                                right: cellWidth + 10,
-                            });
-                        } else {
-                        setFormPosition({
-                            left: cellWidth + 10,
-                            top: 0,
-                        });
-                        }
-                    }
                     setOpenFormDate(dateKey);
                 }}
                 ref={(el) => {

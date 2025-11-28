@@ -1,13 +1,15 @@
 import { CalendarDays, Calendar, CheckCircle2 } from "lucide-react";
+import type { ReactNode } from "react";
 
 export type TabType = "today" | "upcoming" | "completed";
 
 interface TabNavigationProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
+  rightContent?: ReactNode;
 }
 
-const TabNavigation = ({ activeTab, onTabChange }: TabNavigationProps) => {
+const TabNavigation = ({ activeTab, onTabChange, rightContent }: TabNavigationProps) => {
   const tabs = [
     {
       id: "today" as TabType,
@@ -27,7 +29,8 @@ const TabNavigation = ({ activeTab, onTabChange }: TabNavigationProps) => {
   ];
 
   return (
-    <div className="flex gap-2 mb-8 border-b border-gray-800">
+    <div className="flex justify-between items-center mb-5  border-b border-gray-800">
+      <div className="flex gap-2">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -51,6 +54,12 @@ const TabNavigation = ({ activeTab, onTabChange }: TabNavigationProps) => {
           </button>
         );
       })}
+      </div>
+      {rightContent && (
+        <div className="flex items-center">
+          {rightContent}
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles} from "lucide-react";
 import { parseNaturalLanguageDate , type ParsedDateResult} from "../utils/nlpDateParser";
 import { RefreshCw} from 'lucide-react';
+import { createPortal } from "react-dom";
 
 interface CustomDatePickerProps {
   selectedDate: string; // YYYY-MM-DD format
@@ -34,13 +35,13 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       if (isMobile) {
         return {
           left: rect.left,
-          top: rect.bottom,
+          top: rect.top,
         };
       } else {
         if (index <= 2) {
           return {
-            left: rect.right,
-            top: rect.bottom - 400,
+            left: rect.right + 100,
+            top: rect.top,
           };
         }
         if (index >= 3) {
@@ -78,13 +79,13 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             if (index <= 2){
                 setPosition({
                     left: rect.right,
-                    top: rect.bottom - 400,
+                    top: rect.top - pickerHeight/2,
                 })
             }
             if (index >= 3){
                 setPosition({
-                    left: rect.left,
-                    top: rect.top - pickerHeight,
+                    left: rect.right,
+                    top: rect.top - pickerHeight/1.5,
                 })
             }
         }
@@ -320,7 +321,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   const nextMonthDays = getDaysInMonth(nextMonth);
   const nextMonthLabel = nextMonth.toLocaleDateString('en-US', { month: 'short' });
   
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -540,7 +541,8 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             Repet
         </div>
     </div>
-    </>
+    </>,
+    document.body
   );
 };
 

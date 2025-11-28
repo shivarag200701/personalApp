@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Flag, Check } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface PriorityPickerProps {
   selectedPriority: "high" | "medium" | "low" | null;
@@ -18,12 +19,10 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
       console.log("buttonRef", buttonRef);
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
-        const spacing = 8;
-        
         
         setPosition({
           left: rect.left,
-          top: rect.bottom + spacing,
+          top: rect.top + rect.height,
         });
       }
     };
@@ -81,7 +80,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
     }
   ];
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -91,7 +90,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
       {/* Priority Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[200px]"
+        className="absolute bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[200px]"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -129,7 +128,8 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
           })}
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 };
 

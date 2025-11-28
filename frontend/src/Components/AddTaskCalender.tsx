@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Calendar, Flag, AlarmClock, MoreHorizontal, X, SendHorizontal , RefreshCw} from "lucide-react";
+import { Calendar, Flag, AlarmClock, MoreHorizontal, X, RefreshCw} from "lucide-react";
 import api from "../utils/api";
 import type { Todo } from "./Modal";
 import CustomDatePicker from "./CustomDatePicker";
 import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
-import WarningModal from "./WarningModal";
 import MoreOptionsPicker, { CategoryPicker } from "./MoreOptionsPicker";
+import { createPortal } from "react-dom";
 interface InlineTaskFormProps {
   todo?: Todo;
   preselectedDate: Date;
@@ -16,9 +16,10 @@ interface InlineTaskFormProps {
   index: number;
   backgroundColor?: string;
   width?: string;
+  calendarRef: React.RefObject<HTMLDivElement>;
 }
 
-const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full"}: InlineTaskFormProps) => {
+const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full", calendarRef }: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -38,7 +39,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const moreOptionsButtonRef = useRef<HTMLButtonElement | null>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
 
 
   // Helper function to convert Date to YYYY-MM-DD format
@@ -252,6 +252,16 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       }
     }
   }, [description, todo]);
+  const [position, setPosition] = useState(() => {
+    if (calendarRef.current) {
+      const rect = calendarRef.current.getBoundingClientRect();
+      return {
+        left: rect.left + rect.width/2,
+        top: rect.top ,
+      };
+    }
+    return { left: 0, top: 0 };
+  });
 
   useEffect(() =>{
     if(!title.trim()){
@@ -266,18 +276,16 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     return () => clearTimeout(timeoutId);
   },[title])
 
-  const handleCancel = () => {
-    setIsWarningModalOpen(false);
-  }
-  const handleDiscard = () => {
-    onCancel();
-    setIsWarningModalOpen(false);
-  }
-  console.log("date label", dateLabel);
   
-  return (
+  return createPortal(
     <>
-    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} backdrop-blur-sm border border-white/10 rounded-xl ${width} min-w-0 shadow-[0_4px_12px_rgba(0,0,0,0.3)]`}>
+    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-3xl`}
+    style={{
+      top: `${position.top}px`,
+      left: `${position.left}px`,
+      transform: 'translate(-50%, 50%)',
+    }}
+    >
       {/* Category Tag */}
       {category && (
         <div className="mb-2">
@@ -301,7 +309,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] font-bold text-xl! outline-none focus:outline-none min-w-0 mb-1"
         autoFocus
       />
 
@@ -312,7 +320,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
         rows={1}
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-md! mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
         style={{ minHeight: '20px', maxHeight: '200px' }}
       />
 
@@ -416,7 +424,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         </button>
 
         {/* More Options Button */}
-        <div className="relative">
         <button
           ref={moreOptionsButtonRef}
           type="button"
@@ -437,7 +444,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             }}
           />
         )}
-        </div>
         {showCategoryPicker && (
           <CategoryPicker
             onClose={() => setShowCategoryPicker(false)}
@@ -455,37 +461,30 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       <div className="flex items-center justify-end pt-1.5 border-t border-white/10 gap-2 min-w-0">
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 py-1.5">
           <button
             type="button"
             onClick={() =>{
-              setIsWarningModalOpen(true);
+              onCancel();
             }}
             className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
           >
-            <X className="w-5 h-5 text-white" />
+            Cancel
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-2 rounded-md bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
+            className="p-1.5 rounded-sm bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
           >
-            <SendHorizontal className="w-4 h-4 text-white" />
+            Add Task
           </button>
         </div>
       </div>
     </form>
-    <WarningModal
-      isOpen={isWarningModalOpen}
-      onClose={handleCancel}
-      onDiscard={handleDiscard}
-      title="Discard unsaved changes"
-      description="Your unsaved changes will be discarded."
-      buttonText="Discard"
-    />
-    </>
+    </>,
+    document.body
   );
 };
 
-export default InlineTaskForm;
+export default AddTaskCalender;
 

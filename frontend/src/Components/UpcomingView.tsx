@@ -7,6 +7,7 @@ import WarningModal from "./WarningModal";
 import InlineTaskForm from "./InlineTaskForm";
 import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
+import CalendarView from "./CalendarView";
 
 
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
@@ -24,6 +25,8 @@ interface UpcomingViewProps {
   onTaskCreated?: (todo: Todo) => void;
   onDuplicateTask: (todo: Todo) => void;
   onTaskUpdated: (todo: Todo) => void;
+  viewType?: "board" | "calendar";
+  onViewTypeChange?: (viewType: "board" | "calendar") => void;
 }
 
 interface DraggableTaskProps {
@@ -147,7 +150,7 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      className="p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+      className={`p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] ${openDropdownId === todo.id ? "z-50": ""}`}
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
@@ -185,7 +188,7 @@ const DraggableTask = ({
 
           {/* Dropdown Menu */}
           {openDropdownId === todo.id && (
-            <div className="absolute right-0 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-50">
+            <div className="absolute z-9999 right-0 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <button
                 className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-white/10"
                 onClick={(e) => {
@@ -369,6 +372,7 @@ const UpcomingView = ({
   onTaskCreated,
   onDuplicateTask,
   onTaskUpdated,
+  viewType: externalViewType,
 }: UpcomingViewProps) => {
   const [startDate, setStartDate] = useState<Date>(() => {
     const today = new Date();
@@ -382,6 +386,9 @@ const UpcomingView = ({
   const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
   const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
   const [openFormDate, setOpenFormDate] = useState<string | null>(null);
+  
+  // Use external viewType if provided, otherwise default to "board"
+  const viewType = externalViewType ?? "board";
 
   const pickerRef = useRef<HTMLDivElement>(null);
   const dropdownRefs = useRef<Map<number | string, HTMLDivElement>>(new Map());
@@ -493,6 +500,7 @@ const UpcomingView = ({
   };
 
   const handleShowMonthYearPicker = () => {
+    console.log("handleShowMonthYearPicker");
     setShowMonthYearPicker(!showMonthYearPicker);
   };
 
@@ -691,16 +699,17 @@ const UpcomingView = ({
     }
   }
 
-  return(
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-    <div className="flex-col space-y-6">
+  return (
+    <div className="flex-col space-y-6 ">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 overflow-hidden">
+      <div className="flex justify-between items-center">
+        {viewType === "board" && (
+          <>
         <div className="flex items-center gap-4">
           <h1 className="text-white text-3xl md:text-4xl font-bold hidden sm:block">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
-              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
+              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 select-none"
               onClick={handleShowMonthYearPicker}
             >
               <span className="text-lg">{getCurrentMonthYear()}</span>
@@ -711,7 +720,7 @@ const UpcomingView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px]">
+              <div className="absolute top-full left-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-[9999] min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>
@@ -730,7 +739,7 @@ const UpcomingView = ({
                               }
                             }}
                             disabled={isDisabled}
-                            className={`px-3 py-2.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                            className={`px-3 py-2.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center cursor-pointer select-none ${
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
                                 : isDisabled
@@ -764,7 +773,7 @@ const UpcomingView = ({
                                 : startDate.getMonth();
                               handleMonthYearSelect(year, monthToUse, true);
                             }}
-                            className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer ${
+                            className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer select-none ${
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
                                 : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:translate-x-1"
@@ -786,7 +795,11 @@ const UpcomingView = ({
             )}
           </div>
         </div>
+        </>
+        )}
         <div className="flex items-center gap-1 sm:gap-2">
+          {viewType === "board" && (
+            <>
           <button
             onClick={navigatePrevious}
             className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
@@ -805,9 +818,14 @@ const UpcomingView = ({
           >
             <ChevronRight className="w-5 h-5" />
           </button>
+            </>
+          )}
         </div>
       </div>
 
+      {/* Conditional Rendering: Board View or Calendar View */}
+      {viewType === "board" ? (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {/* Calendar Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">
         {dateRange.map((date, index) => {
@@ -886,7 +904,21 @@ const UpcomingView = ({
           </div>
         ) : null}
       </DragOverlay>
-    </div>
+        </DndContext>
+      ) : (
+        <CalendarView
+          todos={todos}
+          onToggleComplete={onToggleComplete}
+          onDelete={onDelete}
+          onEdit={onEdit}
+          onUpdateTodo={onUpdateTodo}
+          onAddTask={onAddTask}
+          onViewDetails={onViewDetails}
+          onTaskCreated={onTaskCreated}
+          onDuplicateTask={onDuplicateTask}
+          onTaskUpdated={onTaskUpdated}
+        />
+      )}
 
     <WarningModal
       isOpen={isWarningModalOpen}
@@ -896,7 +928,7 @@ const UpcomingView = ({
       description="Are you sure you want to delete this task?"
       buttonText="Delete"
     />
-  </DndContext>
+    </div>
   );
 };
 

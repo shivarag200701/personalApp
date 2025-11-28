@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppBar from "../Components/AppBar";
 import type { Todo } from "@/Components/Modal";
@@ -11,6 +11,7 @@ import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
+import { LayoutGrid, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -21,6 +22,9 @@ const Dashboard = () => {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<TabType>("today");
+  const [viewType, setViewType] = useState<"board" | "calendar">("board");
+  const [showViewDropdown, setShowViewDropdown] = useState(false);
+  const viewDropdownRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { refreshAuth } = Auth();
 
@@ -35,6 +39,23 @@ const Dashboard = () => {
       });
     }
   }, [searchParams, refreshAuth, setSearchParams]);
+
+  // Close view dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (viewDropdownRef.current && !viewDropdownRef.current.contains(event.target as Node)) {
+        setShowViewDropdown(false);
+      }
+    };
+
+    if (showViewDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showViewDropdown]);
 
   const openModal = (preselectedDate?: string) => {
     setIsModalOpen(true);
@@ -230,6 +251,8 @@ const Dashboard = () => {
     }
     fetchTodo();
   }, []);
+console.log("activeTab", activeTab);
+console.log("viewType", viewType);
 
   return (
     <>
@@ -276,9 +299,73 @@ const Dashboard = () => {
 
         <div className="relative z-10">
         <div className="mb-8">
-          <AppBar />
+          {(activeTab !== "upcoming" || viewType !== "calendar") && (
+            <AppBar />
+          )}
         </div>
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          rightContent={
+            activeTab === "upcoming" ? (
+              <div className="relative" ref={viewDropdownRef}>
+                <button
+                  onClick={() => setShowViewDropdown(!showViewDropdown)}
+                  className="flex items-center gap-2 text-[#A2A2A9] hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer"
+                >
+                  {viewType === "board" ? (
+                    <>
+                      <LayoutGrid className="w-4 h-4 hidden sm:block" />
+                      <span className="text-sm hidden sm:inline">Board</span>
+                    </>
+                  ) : (
+                    <>
+                      <CalendarIcon className="w-4 h-4 hidden sm:block" />
+                      <span className="text-sm hidden sm:inline">Calendar</span>
+                    </>
+                  )}
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform hidden sm:block ${showViewDropdown ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {/* View Dropdown Menu */}
+                {showViewDropdown && (
+                  <div className="absolute top-full right-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]">
+                    <button
+                      onClick={() => {
+                        setViewType("board");
+                        setShowViewDropdown(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-sm text-left transition-colors flex items-center gap-3 cursor-pointer ${
+                        viewType === "board"
+                          ? "bg-purple-500/20 text-purple-400"
+                          : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                      <span>Board</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewType("calendar");
+                        setShowViewDropdown(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-sm text-left transition-colors flex items-center gap-3 cursor-pointer ${
+                        viewType === "calendar"
+                          ? "bg-purple-500/20 text-purple-400"
+                          : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <CalendarIcon className="w-4 h-4" />
+                      <span>Calendar</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : null
+          }
+        />
         {activeTab === "today" && (
           <TodayView
             todos={todos}
@@ -302,6 +389,8 @@ const Dashboard = () => {
             onTaskCreated={addTodo}
             onTaskUpdated={updateTodo}
             onDuplicateTask={duplicateTodo}
+            viewType={viewType}
+            onViewTypeChange={setViewType}
           />
         )}
         {activeTab === "completed" && (

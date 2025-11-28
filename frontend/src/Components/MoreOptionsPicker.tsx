@@ -1,5 +1,6 @@
 import { Tag } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface MoreOptionsPickerProps {
   onClose: () => void;
@@ -8,7 +9,19 @@ interface MoreOptionsPickerProps {
 }
 
 const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsPickerProps) => {
-  const [position, setPosition] = useState({ left: 0, top: 0 });
+  // Calculate initial position synchronously to avoid flash at (0, 0)
+  const getInitialPosition = () => {
+    if (buttonRef?.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top + rect.height,
+      };
+    }
+    return { left: 0, top: 0 };
+  };
+
+  const [position, setPosition] = useState(getInitialPosition);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   // Calculate position based on button
@@ -16,11 +29,10 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
     const updatePosition = () => {
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
-        const spacing = 8;
         
         setPosition({
           left: rect.left,
-          top: rect.bottom + spacing,
+          top: rect.top + rect.height,
         });
       }
     };
@@ -59,7 +71,7 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
     onClose(); // Close MoreOptionsPicker
   };
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -78,7 +90,7 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
       {/* More Options Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[200px]"
+        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[150px] md:w-[200px]"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -97,7 +109,8 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
 
@@ -109,7 +122,20 @@ interface CategoryPickerProps {
 }
 
 const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInputRef }: CategoryPickerProps) => {
-  const [position, setPosition] = useState({ left: 0, top: 0, width: 250 });
+  // Calculate initial position synchronously to avoid flash at (0, 0)
+  const getInitialPosition = () => {
+    if (titleInputRef?.current) {
+      const rect = titleInputRef.current.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top + rect.height,
+        width: rect.width,
+      };
+    }
+    return { left: 0, top: 0, width: 250 };
+  };
+
+  const [position, setPosition] = useState(getInitialPosition);
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -121,28 +147,12 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
   useEffect(() => {
     const updatePosition = () => {
       if (titleInputRef?.current) {
-        const inputRect = titleInputRef.current.getBoundingClientRect();
-        // Find the form element (parent of the input)
-        const formElement = titleInputRef.current.closest('form');
-        const padding = 8; // Padding on each side
-        
-        if (formElement) {
-          const formRect = formElement.getBoundingClientRect();
-          const width = formRect.width - (padding * 2); // Form width minus padding on both sides
-          
-          setPosition({
-            left: formRect.left + padding, // Align with form, add padding
-            top: inputRect.bottom + 6,
-            width: Math.max(200, width), // Minimum width of 200px
-          });
-        } else {
-          // Fallback if form not found
-          setPosition({
-            left: inputRect.left,
-            top: inputRect.bottom,
-            width: 250,
-          });
-        }
+        const rect = titleInputRef.current.getBoundingClientRect();
+        setPosition({
+          left: rect.left,
+          top: rect.top + rect.height,
+          width: rect.width,
+        });
       }
     };
 
@@ -197,7 +207,7 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
     }
   };
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop - only closes CategoryPicker, not parent */}
       <div
@@ -217,27 +227,22 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
       <div>
   
   {/* Category Picker / Dropdown Menu */}
-  <div className='w-full h-full bg-[#1B1B1E]'> {/* This acts as the page background */}
+  <div className='bg-[#1B1B1E] fixed z-10' style={{ top: `${position.top}px`, left: `${position.left}px`, width: `${position.width}px` }}> {/* This acts as the page background */}
       
       {/* The dropdown arrow now matches the menu's background color */}
       <div 
-        className="dropdown-arrow absolute w-6 h-6 -top-[7px] left-5 bg-[#27272B] border border-gray-800" 
+        className="dropdown-arrow absolute w-3 h-3 bg-[#27272B] border border-gray-800 z-40" 
         style={{ 
-          left: `${position.left + 120}px`, 
-          top: `${position.top - 3}px`,
-          transform: 'rotate(45deg)',
+          left: `50%`, 
+          top: `-5px`,
+          transform: 'translateX(-50%) rotate(45deg)',
         }}
       ></div>
       
       {/* Category Picker (Now with lighter gray background and padding) */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#27272B] border border-gray-800 rounded-xs shadow-2xl z-50 p-1.5" /* Added p-2 padding and lighter background */
-        style={{
-          left: `${position.left}px`,
-          top: `${position.top}px`,
-          width: `${position.width}px`,
-        }}
+        className="relative bg-[#27272B] border border-gray-800 rounded-xs shadow-2xl z-50 p-1.5" /* Added p-2 padding and lighter background */
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
@@ -300,7 +305,8 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
       </div>
 </div>
 </div>
-    </>
+    </>,
+    document.body,
   );
 };
 

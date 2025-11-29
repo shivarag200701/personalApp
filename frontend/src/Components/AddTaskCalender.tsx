@@ -17,9 +17,10 @@ interface InlineTaskFormProps {
   index: number;
   backgroundColor?: string;
   width?: string;
+  isEditMode?: boolean;
 }
 
-const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full"}: InlineTaskFormProps) => {
+const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate, isEditMode=false , index, backgroundColor, width="w-full"}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -41,7 +42,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
   const colorButtonRef = useRef<HTMLButtonElement | null>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const [selectedColor, setSelectedColor] = useState<string>("bg-red-600");
+  const [selectedColor, setSelectedColor] = useState<string>(todo?.color ?? "bg-red-600");
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -439,6 +440,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
           }}
         >
           <div className={`w-4 h-4 ${selectedColor} rounded-full`}></div>
+          {/* Color Picker */}
         </button>
         {showColorPicker && (
           <ColorPicker
@@ -493,7 +495,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
             disabled={!title.trim() || isSubmitting}
             className="p-1.5 rounded-sm bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)] text-white"
           >
-            Add Task
+            {isEditMode ? "Save" : "Add Task"}
           </button>
         </div>
       </div>

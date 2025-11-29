@@ -10,9 +10,11 @@ import {
   Trash,
   X,
   Check,
+  Pencil,
 } from "lucide-react";
 import { formatCompleteAt } from "@shiva200701/todotypes";
 import api from "../utils/api";
+import AddTaskCalender from "./AddTaskCalender";
 
 interface TaskDetailDrawerProps {
   todo: Todo | null;
@@ -22,6 +24,8 @@ interface TaskDetailDrawerProps {
   onToggleComplete: (todoId: string | number) => void;
   onDelete: (todoId: string | number) => void;
   handleDuplicate: (todo: Todo) => void;
+  editAllowed: boolean;
+
 }
 
 const labelClass = "text-xs uppercase tracking-wide text-gray-400";
@@ -48,6 +52,7 @@ const TaskDetailDrawer = ({
   onToggleComplete,
   onDelete,
   handleDuplicate,
+  editAllowed,
 }: TaskDetailDrawerProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
@@ -58,6 +63,7 @@ const TaskDetailDrawer = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const justClosedDropdownRef = useRef(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     if (todo) {
@@ -127,6 +133,7 @@ const TaskDetailDrawer = ({
     
     setIsSaving(true);
     try {
+      console.log("todo", todo);
       const payload: any = {
         title: editedTitle,
         description: editedDescription,
@@ -134,6 +141,7 @@ const TaskDetailDrawer = ({
         category: todo.category,
         priority: todo.priority ?? null,
         isRecurring: todo.isRecurring || false,
+        color: todo.color ?? null,
       };
 
       if (todo.isRecurring) {
@@ -163,64 +171,7 @@ const TaskDetailDrawer = ({
     }
   };
 
-  // const priorityTone = useMemo(() => {
-  //   if (!todo) {
-  //     return { text: "text-white", bg: "bg-white/10" };
-  //   }
-  //   const dictionary: Record<string, { text: string; bg: string }> = {
-  //     high: { text: "text-[#DC2828]", bg: "bg-[#DC282833]" },
-  //     medium: { text: "text-[#F39C12]", bg: "bg-[#F39C1233]" },
-  //     low: { text: "text-[#28A745]", bg: "bg-[#28A74533]" },
-  //   };
-  //   return dictionary[todo.priority?.toLowerCase()] ?? dictionary.low;
-  // }, [todo]);
-
-  // const metadata = useMemo(() => {
-  //   if (!todo) return [];
-  //   return [
-  //     {
-  //       label: "Due",
-  //       value: formatCompleteAt(todo.completeAt),
-  //       icon: Calendar,
-  //     },
-  //     {
-  //       label: "Completed at",
-  //       value: todo.completedAt ? formatDateTime(todo.completedAt) : "—",
-  //       icon: CheckCircle2,
-  //     },
-  //     {
-  //       label: "Category",
-  //       value: todo.category || "Uncategorized",
-  //       icon: Tag,
-  //     },
-  //     {
-  //       label: "Recurring",
-  //       value: todo.isRecurring
-  //         ? `${todo.recurrenceInterval ?? 1} ${todo.recurrencePattern}`
-  //         : "Does not repeat",
-  //       icon: Repeat,
-  //     },
-  //     {
-  //       label: "Next occurrence",
-  //       value: todo.nextOccurrence
-  //         ? formatCompleteAt(todo.nextOccurrence)
-  //         : todo.isRecurring
-  //         ? "Auto-scheduling on complete"
-  //         : "—",
-  //       icon: AlarmClock,
-  //     },
-  //     {
-  //       label: "Recurrence end",
-  //       value: todo.recurrenceEndDate
-  //         ? formatDateTime(todo.recurrenceEndDate)
-  //         : todo.isRecurring
-  //         ? "No end date"
-  //         : "—",
-  //       icon: Bell,
-  //     },
-  //   ];
-  // }, [todo]);
-
+  
   if (!todo) {
     return null;
   }
@@ -283,6 +234,33 @@ const TaskDetailDrawer = ({
                 </div>
               )}
             </div>
+            {editAllowed && (
+              <button
+                className="text-gray-400 p-2 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                  setIsFormOpen(true);
+                }}
+                title="Edit"
+              >
+                <Pencil className="h-5 w-5" />
+              </button>
+            )}
+            {isFormOpen && (
+              <AddTaskCalender
+                index={0}
+                todo={todo}
+                preselectedDate={new Date(todo.completeAt || "")}
+                onCancel={() => setIsFormOpen(false)}
+                onSuccess={onEdit}
+                onUpdate={onEdit}
+                isEditMode={true}
+                width="w-[500px]"
+                backgroundColor="bg-[#1e1f20]"
+                
+              />
+            )}
             <button
               className="text-gray-400 p-2 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
               onClick={onClose}

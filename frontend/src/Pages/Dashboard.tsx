@@ -418,6 +418,7 @@ console.log("viewType", viewType);
         todo={selectedTodo}
         isOpen={isDetailOpen}
         onClose={closeDetailDrawer}
+        editAllowed={activeTab === "upcoming" && viewType === "calendar"}
         onEdit={updateTodo}
         onToggleComplete={toggleTodoCompletion}
         onDelete={deleteTodo}

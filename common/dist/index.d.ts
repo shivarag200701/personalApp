@@ -24,6 +24,7 @@ export declare const todoSchema: z.ZodObject<{
     recurrenceInterval: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     recurrenceEndDate: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     nextOccurrence: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    color: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 export type SignUp = z.infer<typeof signUpSchema>;
 export type SignIn = z.infer<typeof signInSchema>;

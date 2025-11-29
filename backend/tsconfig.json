@@ -45,7 +45,8 @@
     "node_modules",
     "dist",
     "**/*.spec.ts",
-    // 💡 Add the problematic file here
+    // Prisma config is used by the CLI, not compiled into the app
+    "prisma.config.ts",
     "prisma.config.ts.bak"
   ]
 }

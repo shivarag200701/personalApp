@@ -151,6 +151,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrencePattern: recurrencePattern ?? null,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
+          color: 'bg-purple-500',
         });
       }
 

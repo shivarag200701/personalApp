@@ -205,7 +205,7 @@ const CalendarView = ({
     return date < today;
   };
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -354,14 +354,14 @@ const CalendarView = ({
 
       {/* Calendar Grid */}
       <div 
-      className="relative    bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+      className="relative bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)] ">
         {/* Backdrop - appears when form is open, covers the calendar */}
         {openFormDate && (
           <div
             className="absolute inset-0 bg-transparent  z-40 rounded-2xl"
             onClick={() => setOpenFormDate(null)}
           />
-        )}`
+        )}
         {/* Week Day Headers */}
         <div className="grid grid-cols-7">
           {weekDays.map((day, dayIndex) => (
@@ -389,18 +389,10 @@ const CalendarView = ({
             const isLastRow = rowIndex === Math.floor((calendarDays.length - 1) / 7);
 
             return (
-              <div
+              <div  
                 key={index}
-                className={`max-h-[150px] min-h-[150px] transition-all relative z-10 ${
-                  colIndex < 6 ? "border-r border-white/10" : ""
-                } ${
+                className={`max-h-[170px] min-h-[170px] transition-all relative z-10 ${colIndex < 6 ? "border-r border-white/10" : ""} ${
                   !isLastRow ? "border-b border-white/10" : ""
-                } ${
-                  isTodayDate
-                    ? "bg-purple-500/10"
-                    : isCurrentMonthDate
-                    ? "bg-[#101018]/40 hover:bg-[#101018]/60"
-                    : "bg-[#0a0a0f]/40 opacity-50"
                 }`}
                 onClick={(e) => {
                     e.stopPropagation();
@@ -414,16 +406,18 @@ const CalendarView = ({
 
               >
                 {/* Date Number */}
+                <div className="flex items-center justify-center">
                 <div
-                  className={`text-sm font-semibold mb-2 text-center ${
+                  className={`text-sm font-semibold mt-1 mb-2 text-center w-7 h-7  rounded-full flex items-center justify-center ${
                     isTodayDate
-                      ? "text-purple-400"
+                      ? "bg-purple-500 text-white"
                       : isCurrentMonthDate
                       ? "text-white"
                       : "text-[#A2A2A9]"
                   }`}
-                >
-                  {date.getDate()}
+                  >
+                    {date.getDate()}
+                  </div>
                 </div>
                 {/* Tasks */}
                 <div className="mb-5 ">
@@ -434,7 +428,7 @@ const CalendarView = ({
                         e.stopPropagation();
                         onViewDetails(todo);
                       }}
-                      className="text-xs p-1 bg-purple-500/20 border border-purple-500/30 rounded-md cursor-pointer hover:bg-purple-500/30 transition-colors line-clamp-1 text-white"
+                      className={`text-xs p-1 my-0.5 border border-purple-500/30 rounded-md cursor-pointer transition-opacity line-clamp-1 text-white ${todo.color ?? 'bg-purple-500'} hover:opacity-90`}
                       title={todo.title}
                     >
                       {todo.title}
@@ -444,7 +438,7 @@ const CalendarView = ({
                   {dayTasks.length > 3 && (
                     <button
                       type="button"
-                      className="text-xs text-[#A2A2A9] px-1.5 rounded-md hover:bg-white/5 transition-colors cursor-pointer p-1.5 w-full text-left "
+                      className="text-xs text-[#A2A2A9] my-0.5 px-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer p-1 w-full text-left "
                       onClick={(e) => {
                         e.stopPropagation();
                         const anchor = dayRefs.current.get(dateKey);
@@ -471,7 +465,7 @@ const CalendarView = ({
                   <div>
                     {isFormOpen && (
                       <div 
-                        className=' fixed z-50 bg-[#101018] '
+                        className='z-50 bg-[#101018] '
                         style={{
                                   top: '0px',
                                   left: '50%',
@@ -498,7 +492,6 @@ const CalendarView = ({
                             }
                             setOpenFormDate(null);
                           }}
-                          calendarRef={calendarRef}
                         />
                         </div>
                       </div>

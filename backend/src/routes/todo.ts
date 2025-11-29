@@ -21,7 +21,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "unauthorized",
     });
   }
-  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate } = data;
+  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color } = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
@@ -37,6 +37,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         recurrenceInterval: isRecurring ? (recurrenceInterval ?? 1) : null,
         recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
         nextOccurrence:null,
+        color: color ?? null,
         user: {
           connect: {
             id: userId,
@@ -69,6 +70,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
         createdAt: todo.createdAt.toISOString(),
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
+        color: todo.color ?? null,
       },
     })
   } catch (error) {
@@ -151,6 +153,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
         nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
         createdAt: todo.createdAt.toISOString(),
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
+        color: todo.color ?? null,
       })),
     });
   } catch (error) {
@@ -278,7 +281,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       error,
     });
   }
-  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate} = data;
+  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color} = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
@@ -305,6 +308,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
         recurrenceInterval: isRecurring ? (recurrenceInterval ?? 1) : null,
         recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
+        color: color ?? null,
       },
     })
     return res.status(200).json({
@@ -317,6 +321,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         nextOccurrence: updatedTodo.nextOccurrence ? updatedTodo.nextOccurrence.toISOString() : null,
         createdAt: updatedTodo.createdAt.toISOString(),
         updatedAt: updatedTodo.updatedAt ? updatedTodo.updatedAt.toISOString() : null,
+        color: updatedTodo.color ?? null,
       },
     });
   }catch(error){

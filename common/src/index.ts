@@ -22,6 +22,7 @@ export const todoSchema = z.object({
   recurrenceInterval: z.number().int().positive().nullish(),
   recurrenceEndDate: z.string().nullish(),
   nextOccurrence: z.string().nullish(),
+  color: z.string().nullish(),
 });
 
 export type SignUp = z.infer<typeof signUpSchema>;

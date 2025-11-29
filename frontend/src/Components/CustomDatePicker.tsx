@@ -79,7 +79,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             if (index <= 2){
                 setPosition({
                     left: rect.right,
-                    top: rect.top - pickerHeight/2,
+                    top: 50,
                 })
             }
             if (index >= 3){

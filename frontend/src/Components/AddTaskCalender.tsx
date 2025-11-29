@@ -7,6 +7,7 @@ import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 import MoreOptionsPicker, { CategoryPicker } from "./MoreOptionsPicker";
 import { createPortal } from "react-dom";
+import ColorPicker from "./ColorPicker";
 interface InlineTaskFormProps {
   todo?: Todo;
   preselectedDate: Date;
@@ -16,10 +17,9 @@ interface InlineTaskFormProps {
   index: number;
   backgroundColor?: string;
   width?: string;
-  calendarRef: React.RefObject<HTMLDivElement|null>;
 }
 
-const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full", calendarRef }: InlineTaskFormProps) => {
+const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full"}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -34,12 +34,14 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
   const [showMoreOptionsPicker, setShowMoreOptionsPicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
   const moreOptionsButtonRef = useRef<HTMLButtonElement | null>(null);
+  const colorButtonRef = useRef<HTMLButtonElement | null>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
-
+  const [selectedColor, setSelectedColor] = useState<string>("bg-red-600");
 
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -125,6 +127,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
           recurrencePattern: recurrencePattern ?? null,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
+          color: selectedColor ?? null,
         });
         onUpdate(res.data.todo);
       } else {
@@ -141,6 +144,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
           recurrencePattern: recurrencePattern ?? null,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
+          color: selectedColor ?? null,
         });
       }
 
@@ -161,6 +165,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
           recurrenceInterval: recurrenceInterval ?? null ,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
+          color: selectedColor ?? null,
         });
       }
 
@@ -252,26 +257,6 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
       }
     }
   }, [description, todo]);
-  const [position, setPosition] = useState(() => {
-    if (calendarRef.current) {
-      const rect = calendarRef.current.getBoundingClientRect();
-      return {
-        left: rect.left + rect.width/2,
-        top: rect.top ,
-      };
-    }
-    return { left: 0, top: 0 };
-  });
-  useEffect(() => {
-    if (calendarRef.current) {
-      const rect = calendarRef.current.getBoundingClientRect();
-      setPosition({
-        left: rect.left + rect.width/2,
-        top: rect.top ,
-      });
-    }
-  }, [calendarRef]);
-
   useEffect(() =>{
     if(!title.trim()){
       return;
@@ -290,9 +275,9 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
     <>
     <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
     style={{
-      top: `${position.top}px`,
-      left: `${position.left}px`,
-      transform: 'translate(-50%, 50%)',
+      top: '50px',
+      left: '50%',
+      transform: 'translate(-50%, 100%)',
     }}
     >
       {/* Category Tag */}
@@ -444,6 +429,29 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
         >
           <MoreHorizontal className="w-4 h-4" />
         </button>
+        <button
+          ref={colorButtonRef}
+          type="button"
+          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          onClick={(e) => {
+            e.preventDefault();
+            setShowColorPicker(!showColorPicker);
+          }}
+        >
+          <div className={`w-4 h-4 ${selectedColor} rounded-full`}></div>
+        </button>
+        {showColorPicker && (
+          <ColorPicker
+            selectedColor={selectedColor}
+            onColorSelect={(color: string) => {
+              console.log("color", color);
+              setSelectedColor(color);
+              setShowColorPicker(false);
+            }}
+            onClose={() => setShowColorPicker(false)}
+            buttonRef={colorButtonRef}
+          />
+        )}
         {showMoreOptionsPicker && (
           <MoreOptionsPicker
             onClose={() => setShowMoreOptionsPicker(false)}

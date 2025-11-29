@@ -1,4 +1,5 @@
 import { Button } from './ui/button';
+import { createPortal } from 'react-dom';
 
 type WarningModalProps = {
   isOpen: boolean;
@@ -12,7 +13,7 @@ type WarningModalProps = {
 
   const WarningModal = ({ isOpen, onClose, onDelete, onDiscard, title, description, buttonText }: WarningModalProps) => {
       if (!isOpen) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0  z-50 flex items-center justify-center">
         <div
         className={`fixed inset-0 bg-black/30 transition-opacity duration-100 ${isOpen ? "opacity-100 " : "pointer-events-none opacity-0"} transition-opacity duration-100`}
@@ -30,7 +31,8 @@ type WarningModalProps = {
           <Button variant="destructive" className='cursor-pointer' onClick={onDelete || onDiscard}>{buttonText}</Button>
         </div>
         </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

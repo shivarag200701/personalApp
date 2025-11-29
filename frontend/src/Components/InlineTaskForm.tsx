@@ -39,8 +39,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-
-
+  // Track whether any field has changed using a ref so it updates synchronously
+  const hasChangesRef = useRef(false);
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
     const year = date.getFullYear();
@@ -80,27 +80,37 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   useEffect(() => {
     if (todo) {
       setTitle(todo.title || "");
-      setDescription(todo.description || "");
-      setSelectedDate(todo.completeAt ? isoToDateInput(todo.completeAt) : dateToInput(preselectedDate));
-      setPriority((todo.priority as "high" | "medium" | "low") ?? null);
-      setCategory(todo.category || "");
-      setIsRecurring(todo.isRecurring || false);
-      setRecurrencePattern(todo.recurrencePattern ?? null);
-      setRecurrenceInterval(todo.recurrenceInterval ?? null);
-      setRecurrenceEndDate(todo.recurrenceEndDate 
-        ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
-        : "");
+    setDescription(todo.description || "");
+    const initSelectedDate = todo.completeAt
+      ? isoToDateInput(todo.completeAt)
+      : dateToInput(preselectedDate);
+    setSelectedDate(initSelectedDate);
+    const initPriority = (todo.priority as "high" | "medium" | "low") ?? null;
+    setPriority(initPriority);
+    setCategory(todo.category || "");
+    const initIsRecurring = todo.isRecurring || false;
+    const initRecurrencePattern = todo.recurrencePattern ?? null;
+    const initRecurrenceInterval = todo.recurrenceInterval ?? null;
+    const initRecurrenceEndDate = todo.recurrenceEndDate
+      ? new Date(todo.recurrenceEndDate).toISOString().split("T")[0]
+      : "";
+
+    setIsRecurring(initIsRecurring);
+    setRecurrencePattern(initRecurrencePattern);
+    setRecurrenceInterval(initRecurrenceInterval);
+    setRecurrenceEndDate(initRecurrenceEndDate);
     } else {
       // Reset form for new todo
-      setTitle("");
-      setDescription("");
-      setSelectedDate(dateToInput(preselectedDate));
-      setPriority(null);
-      setCategory("");
-      setIsRecurring(false);
-      setRecurrencePattern(null);
-      setRecurrenceInterval(null);
-      setRecurrenceEndDate("");
+      const initSelectedDate = dateToInput(preselectedDate);
+    setTitle("");
+    setDescription("");
+    setSelectedDate(initSelectedDate);
+    setPriority(null);
+    setCategory("");
+    setIsRecurring(false);
+    setRecurrencePattern(null);
+    setRecurrenceInterval(null);
+    setRecurrenceEndDate("");
     }
   }, [todo]);
 
@@ -175,6 +185,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       setRecurrenceInterval(null);
       setRecurrenceEndDate("");
       onCancel();
+      hasChangesRef.current = false;
     } catch (error) {
       console.error(todo?.id ? "Error updating todo" : "Error creating todo", error);
     } finally {
@@ -266,6 +277,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     return () => clearTimeout(timeoutId);
   },[title])
 
+
+
   const handleCancel = () => {
     setIsWarningModalOpen(false);
   }
@@ -273,7 +286,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     onCancel();
     setIsWarningModalOpen(false);
   }
-  console.log("date label", dateLabel);
   
   return (
     <>
@@ -299,7 +311,10 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         ref={titleInputRef}
         type="text"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {
+          setTitle(e.target.value);
+          hasChangesRef.current = true;
+        }}
         placeholder="Task name"
         className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm outline-none focus:outline-none min-w-0"
         autoFocus
@@ -309,7 +324,10 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       <textarea
         ref={descriptionTextareaRef}
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(e) => {
+          setDescription(e.target.value);
+          hasChangesRef.current = true;
+        }}
         placeholder="Description"
         rows={1}
         className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
@@ -351,6 +369,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               selectedDate={selectedDate}
               onDateSelect={(date: string) => {
                 setSelectedDate(date);
+                hasChangesRef.current = true;
                 // setShowDatePicker(false);
               }}
               onRecurringSelect={(config) => {
@@ -364,6 +383,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
                 if (config.recurrenceEndDate !== undefined) {
                   setRecurrenceEndDate(config.recurrenceEndDate || "");
                 }
+                hasChangesRef.current = true;
               }}
               index={index}
               onClose={() => setShowDatePicker(false)}
@@ -400,6 +420,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               onPrioritySelect={(newPriority) => {
                 setPriority(newPriority);
                 setShowPriorityPicker(false);
+                hasChangesRef.current = true;
               }}
               onClose={() => setShowPriorityPicker(false)}
               buttonRef={priorityButtonRef}
@@ -444,6 +465,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             onCategorySelect={(category: string) => {
               setCategory(category);
               setShowCategoryPicker(false);
+                hasChangesRef.current = true;
             }}
             selectedCategory={category}
             titleInputRef={titleInputRef}
@@ -459,7 +481,12 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           <button
             type="button"
             onClick={() =>{
-              setIsWarningModalOpen(true);
+              console.log("hasChangesRef", hasChangesRef.current);
+              if(hasChangesRef.current){
+                setIsWarningModalOpen(true);
+              } else {
+                onCancel();
+              }
             }}
             className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
           >

@@ -288,7 +288,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
   
   return createPortal(
     <>
-    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-3xl`}
+    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
     style={{
       top: `${position.top}px`,
       left: `${position.left}px`,
@@ -476,14 +476,14 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate 
             onClick={() =>{
               onCancel();
             }}
-            className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
+            className="p-1.5 rounded-md text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-1.5 rounded-sm bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
+            className="p-1.5 rounded-sm bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)] text-white"
           >
             Add Task
           </button>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat } from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
@@ -97,6 +97,18 @@ const DraggableTask = ({
       none: "text-gray-500",
     };
     
+    // Check if todo.completeAt is for today (comparing local dates)
+    const isToday = (completeAt: string | null | undefined): boolean => {
+      if (!completeAt) return false;
+      const todoDate = new Date(completeAt);
+      const now = new Date();
+
+      return (
+        todoDate.getFullYear() === now.getFullYear() &&
+        todoDate.getMonth() === now.getMonth() &&
+        todoDate.getDate() === now.getDate()
+      );
+    };
 
     const isMobile = window.innerWidth < 768;
 
@@ -262,6 +274,7 @@ const DraggableTask = ({
               {todo.description}
             </div>
           )}
+          <div className="flex gap-2">
           {todo.category && (
             <div className="mt-2 text-gray-500  w-fit  rounded-md text-xs flex gap-1">
               <div className="flex justify-center items-center">
@@ -270,6 +283,15 @@ const DraggableTask = ({
               <div>{todo.category}</div>
             </div>
           )}
+          {todo.isRecurring  && (
+            <div className={`mt-2 ${isToday(todo.completeAt) ? "text-green-500" : "text-blue-500"}  w-fit  rounded-md text-xs flex gap-1`}>
+              <div className="flex justify-center items-center">
+                <Repeat className="w-3 h-3" />
+              </div>
+              <div>{todo.recurrencePattern}</div>
+            </div>
+          )}
+          </div>
         </div>
       </div>
     </div>

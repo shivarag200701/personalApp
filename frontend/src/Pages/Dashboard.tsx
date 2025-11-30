@@ -11,7 +11,7 @@ import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
-import { LayoutGrid, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { SquareKanban, CalendarDays } from "lucide-react";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -315,51 +315,55 @@ console.log("viewType", viewType);
                 >
                   {viewType === "board" ? (
                     <>
-                      <LayoutGrid className="w-4 h-4 hidden sm:block" />
-                      <span className="text-sm hidden sm:inline">Board</span>
+                      <SquareKanban className="w-5 h-5 hidden sm:block" />
+                      <span className="text-base hidden sm:inline">Board</span>
                     </>
                   ) : (
                     <>
-                      <CalendarIcon className="w-4 h-4 hidden sm:block" />
-                      <span className="text-sm hidden sm:inline">Calendar</span>
+                      <CalendarDays className="w-5 h-5 hidden sm:block" />
+                      <span className="text-base hidden sm:inline">Calendar</span>
                     </>
                   )}
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform hidden sm:block ${showViewDropdown ? "rotate-180" : ""}`}
-                  />
                 </button>
 
                 {/* View Dropdown Menu */}
                 {showViewDropdown && (
                   <div className="absolute top-full right-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]">
+                    <div className="text-white text-sm font-semibold px-4 pt-2">Layout</div>
+                    <div className="p-2">
+                    <div className="flex gap-2 p-2 rounded-lg bg-white/5 min-w-[200px] max-w-[200px]">
                     <button
                       onClick={() => {
                         setViewType("board");
-                        setShowViewDropdown(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-sm text-left transition-colors flex items-center gap-3 cursor-pointer ${
+                      className={`w-full px-4 py-2.5 text-sm text-center transition-colors flex-col items-center justify-center gap-3 cursor-pointer rounded-lg ${
                         viewType === "board"
                           ? "bg-purple-500/20 text-purple-400"
                           : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      <LayoutGrid className="w-4 h-4" />
+                      <div className="flex items-center justify-center">
+                      <SquareKanban className="w-4 h-4" />
+                      </div>
                       <span>Board</span>
                     </button>
                     <button
                       onClick={() => {
                         setViewType("calendar");
-                        setShowViewDropdown(false);
                       }}
-                      className={`w-full px-4 py-2.5 text-sm text-left transition-colors flex items-center gap-3 cursor-pointer ${
+                      className={`w-full px-4 py-2.5 text-sm text-center transition-colors flex-col items-center justify-center gap-3 cursor-pointer rounded-lg ${
                         viewType === "calendar"
                           ? "bg-purple-500/20 text-purple-400"
                           : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      <CalendarIcon className="w-4 h-4" />
-                      <span>Calendar</span>
-                    </button>
+                      <div className="flex items-center justify-center">
+                      <CalendarDays className="w-4 h-4" />
+                      </div>
+                        <span>Calendar</span>
+                      </button>
+                    </div>
+                    </div>
                   </div>
                 )}
               </div>

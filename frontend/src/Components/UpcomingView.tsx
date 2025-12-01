@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat} from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
 import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
@@ -8,10 +8,11 @@ import InlineTaskForm from "./InlineTaskForm";
 import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 import CalendarView from "./CalendarView";
-
+import { toast } from "sonner";
 
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
+import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 
 
 interface UpcomingViewProps {
@@ -652,6 +653,19 @@ const UpcomingView = ({
     setActiveTodo(todo);
   }
 
+  // Helper function to format date: day name if in current week, else "MMM d, yyyy"
+  const formatDateForToast = (date: Date): string => {
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
+    const weekEnd = endOfWeek(today, { weekStartsOn: 1 }); // Sunday
+    
+    if (isWithinInterval(date, { start: weekStart, end: weekEnd })) {
+      return format(date, "EEEE"); // Day name (Monday, Tuesday, etc.)
+    } else {
+      return format(date, "MMM d, yyyy"); // Month day, year
+    }
+  };
+
   async function handleDragEnd(event: DragEndEvent) {
     
     console.log("handleDragEnd");
@@ -689,6 +703,36 @@ const UpcomingView = ({
         completeAt: newCompleteAt,
     };
     onUpdateTodo(updatedTodo);
+    toast(
+      <div className="flex items-center gap-25 sm:gap-15">
+        <span>Date updated to <span className="underline cursor-pointer" onClick={() => {
+          console.log("Undo");
+        }}>{formatDateForToast(newDate)}</span></span>
+        <div className="hover:bg-white/10 p-1  rounded-md cursor-pointer">Undo</div>
+      </div>,{
+      position: "bottom-left",
+      style: {
+        background: '#2A2A3D',
+        color: 'white',
+        border: '1px solid #2A2A35',
+        fontWeight: 'light',
+      },
+      action:{
+        label: "X",
+        onClick: () => {
+          console.log("Undo");
+        },
+      },
+      actionButtonStyle: {
+        background: '#2A2A3D',
+        color: 'white',
+        fontWeight: 'light',
+        borderRadius: 'full',
+        width: '20px',
+        height: '20px',
+      },
+
+    });
 
 
     //call backend

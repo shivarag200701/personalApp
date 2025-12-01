@@ -311,27 +311,30 @@ console.log("viewType", viewType);
               <div className="relative" ref={viewDropdownRef}>
                 <button
                   onClick={() => setShowViewDropdown(!showViewDropdown)}
-                  className="flex items-center gap-2 text-[#A2A2A9] hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer"
+                  className={`flex items-center gap-2 transition-colors px-3 py-1.5 rounded-lg cursor-pointer ${
+                    showViewDropdown 
+                      ? "bg-white/10 text-white" 
+                      : "text-[#A2A2A9] hover:text-white hover:bg-white/10"
+                  }`}
                 >
                   {viewType === "board" ? (
                     <>
-                      <SquareKanban className="w-5 h-5 hidden sm:block" />
-                      <span className="text-base hidden sm:inline">Board</span>
+                      <SquareKanban className="w-4.5 h-4.5 hidden sm:block" />
+                      <span className="text-sm hidden sm:inline">Board</span>
                     </>
                   ) : (
                     <>
-                      <CalendarDays className="w-5 h-5 hidden sm:block" />
-                      <span className="text-base hidden sm:inline">Calendar</span>
+                      <CalendarDays className="w-4.5 h-4.5 hidden sm:block" />
+                      <span className="text-sm hidden sm:inline">Calendar</span>
                     </>
                   )}
                 </button>
-
                 {/* View Dropdown Menu */}
                 {showViewDropdown && (
-                  <div className="absolute top-full right-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]">
+                  <div className="absolute top-full right-0  bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]">
                     <div className="text-white text-sm font-semibold px-4 pt-2">Layout</div>
                     <div className="p-2">
-                    <div className="flex gap-2 p-2 rounded-lg bg-white/5 min-w-[200px] max-w-[200px]">
+                    <div className="flex gap-2 p-1 rounded-lg bg-white/5 min-w-[200px] max-w-[200px]">
                     <button
                       onClick={() => {
                         setViewType("board");

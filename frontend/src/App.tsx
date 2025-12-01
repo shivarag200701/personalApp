@@ -6,6 +6,7 @@ import { AuthProvider } from "./Context/AuthContext";
 import RequireAuth from "./Components/RequireAuth";
 import Dashboard from "./Pages/Dashboard";
 import Landing from "./Pages/Landing";
+import { Toaster } from "sonner";
 
 function App() {
   return (
@@ -27,6 +28,8 @@ function App() {
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      <Toaster
+       />
     </div>
   );
 }

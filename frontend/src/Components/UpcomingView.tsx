@@ -357,29 +357,29 @@ const DroppableDateColumn = ({
                 </div>
             </div>
 
-            {/* Tasks Container - Includes tasks, Add task button, and inline form */}
-            <div className="mb-4 space-y-3 ">
+            {/* Tasks Container - Only tasks should scroll */}
+            <div className="mb-4 space-y-3 max-h-[350px] overflow-y-auto">
                 {children}
-                
-                {/* Add Task Button and Inline Form - Below all tasks */}
-                {!isFormOpen ? (
-                    <button
-                        onClick={handleAddTaskClick}
-                        className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
-                    >
-                        <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
-                        <span>Add task</span>
-                    </button>
-                ) : (
-                    <InlineTaskForm
-                        index={dayTasks.length}
-                        preselectedDate={date}
-                        onCancel={handleCancel}
-                        onSuccess={handleTaskCreated}
-                        onUpdate={handleTaskUpdated}
-                    />
-                )}
             </div>
+            
+            {/* Add Task Button and Inline Form - Outside scroll container, always visible */}
+            {!isFormOpen ? (
+                <button
+                    onClick={handleAddTaskClick}
+                    className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
+                >
+                    <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
+                    <span>Add task</span>
+                </button>
+            ) : (
+                <InlineTaskForm
+                    index={dayTasks.length}
+                    preselectedDate={date}
+                    onCancel={handleCancel}
+                    onSuccess={handleTaskCreated}
+                    onUpdate={handleTaskUpdated}
+                />
+            )}
         </div>
     )
 }

@@ -677,6 +677,8 @@ const UpcomingView = ({
     const todo = active.data.current?.todo as Todo;
     const newDateString = over.id as string;
     console.log("todo",todo);
+    //old date for undo
+    const oldDate = todo.completeAt ? new Date(todo.completeAt) : null;
 
     //parse
     const newDate = new Date(newDateString);
@@ -704,11 +706,19 @@ const UpcomingView = ({
     };
     onUpdateTodo(updatedTodo);
     toast(
-      <div className="flex items-center gap-25 sm:gap-15">
-        <span>Date updated to <span className="underline cursor-pointer" onClick={() => {
-          console.log("Undo");
-        }}>{formatDateForToast(newDate)}</span></span>
-        <div className="hover:bg-white/10 p-1  rounded-md cursor-pointer">Undo</div>
+      <div className="flex items-center gap-30 sm:gap-20">
+        <span>Date updated to <span className="underline cursor-pointer">{formatDateForToast(newDate)}</span></span>
+        <div className="hover:bg-white/10 px-3 py-1   rounded-md cursor-pointer" onClick={async () => {
+          onUpdateTodo({
+            ...todo,
+            completeAt: oldDate?.toISOString() ?? null,
+          });
+          //call backend
+          await api.put(`/v1/todo/${todo.id}`, {
+            ...todo,
+            completeAt: oldDate?.toISOString() ?? null,
+          });
+        }}>Undo</div>
       </div>,{
       position: "bottom-left",
       style: {
@@ -720,7 +730,7 @@ const UpcomingView = ({
       action:{
         label: "X",
         onClick: () => {
-          console.log("Undo");
+
         },
       },
       actionButtonStyle: {

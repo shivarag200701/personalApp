@@ -51,6 +51,7 @@ interface DroppableDateColumnProps {
     date: Date;
     dayTasks: Todo[];
     isToday: boolean;
+    isOverdue?: boolean;
     onAddTask: (date: Date) => void;
     onTaskCreated: (todo: Todo) => void;
     onTaskUpdated: (todo: Todo) => void;
@@ -305,6 +306,7 @@ const DroppableDateColumn = ({
     date,
     dayTasks,
     isToday,
+    isOverdue = false,
     onTaskCreated,
     onTaskUpdated,
     children,
@@ -345,11 +347,12 @@ const DroppableDateColumn = ({
                 isToday ? "ring-2 ring-purple-500/50 border-purple-500/30" : ""
               } ${isOver ? "ring-2 ring-purple-500/70 border-purple-500/50 bg-[#101018]/90" : ""}`}
         >
+            
             {/* Date Header */}
             <div className="mb-4 pb-3 border-b border-white/10">
                 <div className="flex items-center justify-between mb-1">
                     <div className="text-white text-sm font-semibold">
-                        {formatUpcomingDateHeader(date)}
+                        {isOverdue ? "Overdue" : formatUpcomingDateHeader(date)}
                     </div>
                     <div className="text-[#A2A2A9] text-xs">
                         {dayTasks.length}
@@ -363,23 +366,28 @@ const DroppableDateColumn = ({
             </div>
             
             {/* Add Task Button and Inline Form - Outside scroll container, always visible */}
-            {!isFormOpen ? (
-                <button
-                    onClick={handleAddTaskClick}
-                    className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
-                >
-                    <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
-                    <span>Add task</span>
-                </button>
-            ) : (
-                <InlineTaskForm
-                    index={dayTasks.length}
-                    preselectedDate={date}
-                    onCancel={handleCancel}
-                    onSuccess={handleTaskCreated}
-                    onUpdate={handleTaskUpdated}
-                />
+            {!isOverdue && (
+                <>
+                    {!isFormOpen ? (
+                        <button
+                            onClick={handleAddTaskClick}
+                            className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
+                        >
+                            <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
+                            <span>Add task</span>
+                        </button>
+                    ) : (
+                        <InlineTaskForm
+                            index={dayTasks.length}
+                            preselectedDate={date}
+                            onCancel={handleCancel}
+                            onSuccess={handleTaskCreated}
+                            onUpdate={handleTaskUpdated}
+                        />
+                    )}
+                </>
             )}
+            <div className="flex items-center gap-2"></div>
         </div>
     )
 }
@@ -427,18 +435,35 @@ const UpcomingView = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Helper function to check if there are overdue tasks
+  const hasOverdueTasks = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getDate();
+    const endOfTodayUTC = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    
+    return todos.some(
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfTodayUTC
+    );
+  }, [todos]);
+
   // Calculate number of days based on screen size
   const getDayCount = () => {
     const smallTablet = windowWidth >= 768 && windowWidth <= 850;
     const isTablet = windowWidth <= 1024;
     
+    let dayCount;
     if(smallTablet){
-        return 3;
+        dayCount = 3;
+    } else if(isTablet){
+        dayCount = 4;
+    } else {
+        dayCount = 5;
     }
-    if(isTablet){
-        return 4;
-    }
-    return 5;
+    
+    // Reduce by 1 if overdue tasks are present (to make room for overdue column)
+    return hasOverdueTasks ? dayCount - 1 : dayCount;
   };
 
   const dayCount = getDayCount();
@@ -613,6 +638,21 @@ const UpcomingView = ({
     );
   };
 
+  const getOverDueTasks = (): Todo[] => {
+    const now = new Date();
+    // Get end of current LOCAL date, then convert to UTC
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getDate();
+    // Create UTC date at end of day for today's local date
+    const endOfTodayUTC = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    console.log("endOfTodayUTC", endOfTodayUTC);
+    
+    return todos.filter(
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfTodayUTC
+    );
+  };
+  console.log("overDueTasks", getOverDueTasks());
   const handleAddTask = (date: Date) => {
     // Create UTC date at end of day for the selected date
     const year = date.getFullYear();
@@ -706,19 +746,21 @@ const UpcomingView = ({
     };
     onUpdateTodo(updatedTodo);
     toast(
-      <div className="flex items-center gap-30 sm:gap-20">
-        <span>Date updated to <span className="underline cursor-pointer">{formatDateForToast(newDate)}</span></span>
-        <div className="hover:bg-white/10 px-3 py-1   rounded-md cursor-pointer" onClick={async () => {
-          onUpdateTodo({
-            ...todo,
-            completeAt: oldDate?.toISOString() ?? null,
-          });
-          //call backend
-          await api.put(`/v1/todo/${todo.id}`, {
-            ...todo,
-            completeAt: oldDate?.toISOString() ?? null,
-          });
-        }}>Undo</div>
+      <div className="flex items-center justify-between gap-10 w-full">
+        <span className="pl-2">Date updated to <span className="underline cursor-pointer">{formatDateForToast(newDate)}</span></span>
+        <div className="flex items-center">
+          <div className="hover:bg-white/10 px-3 py-1 rounded-md cursor-pointer" onClick={async () => {
+            onUpdateTodo({
+              ...todo,
+              completeAt: oldDate?.toISOString() ?? null,
+            });
+            //call backend
+            await api.put(`/v1/todo/${todo.id}`, {
+              ...todo,
+              completeAt: oldDate?.toISOString() ?? null,
+            });
+          }}>Undo</div>
+        </div>
       </div>,{
       position: "bottom-left",
       style: {
@@ -738,7 +780,9 @@ const UpcomingView = ({
         color: 'white',
         fontWeight: 'light',
         borderRadius: 'full',
-        width: '20px',
+        width: '5px',
+        padding: '0px',
+        margin: '0px',
         height: '20px',
       },
 
@@ -904,6 +948,66 @@ const UpcomingView = ({
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {/* Calendar Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">
+        {/* Overdue Section */}
+        {(() => {
+          const overDueTasks = getOverDueTasks();
+          if (overDueTasks.length > 0) {
+            const overdueDate = new Date();
+            overdueDate.setDate(overdueDate.getDate() - 1); // Use yesterday's date as placeholder
+            const overdueDateKey = "overdue";
+            const isFormOpen = openFormDate === overdueDateKey;
+            return (
+              <DroppableDateColumn
+                key={overdueDateKey}
+                date={overdueDate}
+                dayTasks={overDueTasks}
+                isToday={false}
+                isOverdue={true}
+                onAddTask={handleAddTask}
+                isFormOpen={isFormOpen}
+                onOpenForm={() => setOpenFormDate(overdueDateKey)}
+                onCloseForm={() => setOpenFormDate(null)}
+                onTaskCreated={(todo) => {
+                  if (onTaskCreated) {
+                    onTaskCreated(todo);
+                  }
+                }}
+                onTaskUpdated={(todo) => {
+                  if (onTaskUpdated) {
+                    onTaskUpdated(todo);
+                  }
+                }}
+              >
+                {overDueTasks.map((todo, taskIndex) => (
+                  <DraggableTask
+                    key={todo.id || `temp-overdue-${todo.title}`}
+                    todo={todo}
+                    index={taskIndex}
+                    onToggleComplete={onToggleComplete}
+                    onDelete={handleDeleteClick}
+                    onEdit={handleEditClick}
+                    onViewDetails={onViewDetails}
+                    openDropdownId={openDropdownId}
+                    setOpenDropdownId={setOpenDropdownId}
+                    hoveredTodoId={hoveredTodoId}
+                    setHoveredTodoId={setHoveredTodoId}
+                    dropdownRefs={dropdownRefs}
+                    playSound={playSound}
+                    onDuplicateTask={onDuplicateTask}
+                    onTaskUpdated={(todo) => {
+                      if (onTaskUpdated) {
+                        onTaskUpdated(todo);
+                      }
+                    }}
+                  />
+                ))}
+              </DroppableDateColumn>
+            );
+          }
+          return null;
+        })()}
+        
+        {/* Regular Date Columns */}
         {dateRange.map((date, index) => {
           const dayTasks = getTasksForDate(date);
           const isToday = date.toDateString() === new Date().toDateString();

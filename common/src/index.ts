@@ -300,6 +300,7 @@ export function formatUpcomingDateHeader(date: Date): string {
   
   const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   
+  
   if (date >= today && date <= endToday) {
     return `${dateStr} • Today`;
   } else if (date >= tomorrow && date <= endTomorrow) {

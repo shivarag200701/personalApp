@@ -343,7 +343,7 @@ const DroppableDateColumn = ({
     return (
         <div
             ref={setNodeRef}
-            className={`flex flex-col bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 min-h-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-colors ${
+            className={`group flex flex-col bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 min-h-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-colors ${
                 isToday ? "ring-2 ring-purple-500/50 border-purple-500/30" : ""
               } ${isOver ? "ring-2 ring-purple-500/70 border-purple-500/50 bg-[#101018]/90" : ""}`}
         >
@@ -361,7 +361,7 @@ const DroppableDateColumn = ({
             </div>
 
             {/* Tasks Container - Only tasks should scroll */}
-            <div className="mb-4 space-y-3 max-h-[350px] overflow-y-auto">
+            <div className="mb-4 space-y-3 max-h-[350px] overflow-y-auto scrollbar-hide-on-hover">
                 {children}
             </div>
             

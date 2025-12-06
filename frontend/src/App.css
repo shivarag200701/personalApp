@@ -152,3 +152,40 @@ html {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6B6B75;
 }
+
+/* Hide scrollbar by default, show on hover */
+.scrollbar-hide-on-hover::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-hide-on-hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hide-on-hover::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+/* Show scrollbar on group hover */
+.group:hover .scrollbar-hide-on-hover::-webkit-scrollbar-thumb {
+  background: #4A4A4A;
+}
+
+.group:hover .scrollbar-hide-on-hover::-webkit-scrollbar-track {
+  background: #131315;
+}
+
+.group:hover .scrollbar-hide-on-hover::-webkit-scrollbar-thumb:hover {
+  background: #6B6B75;
+}
+
+/* Firefox */
+.scrollbar-hide-on-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.group:hover .scrollbar-hide-on-hover {
+  scrollbar-color: #4A4A4A #131315;
+}

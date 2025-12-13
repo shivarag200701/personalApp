@@ -639,27 +639,21 @@ const UpcomingView = ({
   };
 
   const getOverDueTasks = (): Todo[] => {
-    const now = new Date();
-    // Get end of current LOCAL date, then convert to UTC
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const day = now.getDate();
-    // Create UTC date at end of day for today's local date
-    const endOfTodayUTC = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
-    console.log("endOfTodayUTC", endOfTodayUTC);
+    // Get end of current LOCAL date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999);
     
     return todos.filter(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfTodayUTC
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfToday
     );
   };
   console.log("overDueTasks", getOverDueTasks());
   const handleAddTask = (date: Date) => {
-    // Create UTC date at end of day for the selected date
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const day = date.getDate();
-    // Create date in UTC at end of day (23:59:59.999)
-    const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    // Create date in local timezone at end of day (23:59:59.999)
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
     onAddTask(endOfDay.toISOString());
   };
 
@@ -734,10 +728,9 @@ const UpcomingView = ({
     ){
         return;
     }
-    const year = newDate.getFullYear();
-    const month = newDate.getMonth();
-    const day = newDate.getDate();
-    const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    // Use local timezone to create end of day, not UTC
+    const endOfDay = new Date(newDate);
+    endOfDay.setHours(23, 59, 59, 999);
     const newCompleteAt = endOfDay.toISOString();
     console.log("newCompleteAt", newCompleteAt);
     const updatedTodo = {

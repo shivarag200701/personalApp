@@ -175,17 +175,20 @@ export function timeSelectionToDate(timeSelection: TimeSelection): string {
 
 /**
  * Checks if a date string represents today
+ * Compares by local date components to handle timezone differences correctly
  */
 export function isToday(dateString: string | null | undefined): boolean {
   if (!dateString) return false;
   const taskDate = new Date(dateString);
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
   
-  const endToday = new Date(today);
-  endToday.setHours(23, 59, 59, 999);
-  
-  return taskDate >= today && taskDate <= endToday;
+  // Compare by local date components (year, month, day) instead of timestamps
+  // This ensures it works correctly across all timezones
+  return (
+    taskDate.getFullYear() === today.getFullYear() &&
+    taskDate.getMonth() === today.getMonth() &&
+    taskDate.getDate() === today.getDate()
+  );
 }
 
 /**
@@ -313,6 +316,7 @@ export function formatUpcomingDateHeader(date: Date): string {
 
 /**
  * Checks if a task's completeAt date falls on a specific date (ignoring time)
+ * Uses local date components for both dates to ensure timezone consistency
  */
 export function isTaskOnDate(taskDateString: string | null | undefined, targetDate: Date): boolean {
   if (!taskDateString) return false;
@@ -320,17 +324,12 @@ export function isTaskOnDate(taskDateString: string | null | undefined, targetDa
   const taskDate = new Date(taskDateString);
   const target = new Date(targetDate);
   
-  // Compare date components only (timezone-agnostic)
-  const taskYear = taskDate.getUTCFullYear();
-  const taskMonth = taskDate.getUTCMonth();
-  const taskDay = taskDate.getUTCDate();
-  
-  const targetYear = target.getFullYear();
-  const targetMonth = target.getMonth();
-  const targetDay = target.getDate();
-  
-  return taskYear === targetYear && 
-         taskMonth === targetMonth && 
-         taskDay === targetDay;
+  // Compare date components using local timezone for both dates
+  // This ensures consistency regardless of how the date was stored
+  return (
+    taskDate.getFullYear() === target.getFullYear() &&
+    taskDate.getMonth() === target.getMonth() &&
+    taskDate.getDate() === target.getDate()
+  );
   
 }

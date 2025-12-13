@@ -442,11 +442,21 @@ const UpcomingView = ({
     const month = now.getMonth();
     const day = now.getDate();
     const endOfTodayUTC = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
-    
     return todos.some(
       (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfTodayUTC
     );
   }, [todos]);
+  const getOverDueTasks = (): Todo[] => {
+    // Get end of current LOCAL date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999);
+    
+    return todos.filter(
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfToday
+    );
+  };
 
   // Calculate number of days based on screen size
   const getDayCount = () => {
@@ -461,9 +471,9 @@ const UpcomingView = ({
     } else {
         dayCount = 5;
     }
-    
+    console.log("hasOverdueTasks", hasOverdueTasks);
     // Reduce by 1 if overdue tasks are present (to make room for overdue column)
-    return hasOverdueTasks ? dayCount - 1 : dayCount;
+    return getOverDueTasks().length > 0 ? dayCount - 1 : dayCount;
   };
 
   const dayCount = getDayCount();
@@ -638,17 +648,7 @@ const UpcomingView = ({
     );
   };
 
-  const getOverDueTasks = (): Todo[] => {
-    // Get end of current LOCAL date
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
-    
-    return todos.filter(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfToday
-    );
-  };
+  
   console.log("overDueTasks", getOverDueTasks());
   const handleAddTask = (date: Date) => {
     // Create date in local timezone at end of day (23:59:59.999)

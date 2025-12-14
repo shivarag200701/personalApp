@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat} from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
@@ -83,7 +84,8 @@ const DraggableTask = ({
         }
     })
 
-    
+    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     const style = {
         opacity: isDragging ? 0 : 1,
@@ -117,12 +119,32 @@ const DraggableTask = ({
     const toggleDropdown = (todoId: number | string | undefined, event: React.MouseEvent) => {
         event.stopPropagation();
         if (!todoId) return;
-        setOpenDropdownId(openDropdownId === todoId ? null : todoId);
-      };
+        const willOpen = openDropdownId !== todoId;
+        setOpenDropdownId(willOpen ? todoId : null);
+        
+        if (willOpen && buttonRef.current) {
+            // Calculate position when opening
+            const rect = buttonRef.current.getBoundingClientRect();
+            setDropdownPosition({
+                top: rect.bottom + 4,
+                right: window.innerWidth - rect.right,
+            });
+        } else {
+            setDropdownPosition(null);
+        }
+    };
+
+    // Reset position when dropdown closes externally
+    useEffect(() => {
+        if (openDropdownId !== todo.id) {
+            setDropdownPosition(null);
+        }
+    }, [openDropdownId, todo.id]);
 
     
       const handleDeleteClick = (todo: Todo) => {
         setOpenDropdownId(null);
+        setDropdownPosition(null);
         onDelete(todo);
       };
       const [isEditing, setIsEditing] = useState(false);
@@ -141,6 +163,8 @@ const DraggableTask = ({
             recurrenceEndDate: todo.recurrenceEndDate ?? null,
           });
           onTaskUpdated(response.data.todo);
+          setOpenDropdownId(null);
+          setDropdownPosition(null);
         } catch (error) {
           console.error("Error updating priority", error);
         }
@@ -189,6 +213,7 @@ const DraggableTask = ({
           }}
         >
           <button
+            ref={buttonRef}
             className="text-[#A2A2A9] hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
@@ -199,15 +224,25 @@ const DraggableTask = ({
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>
+        </div>
+      )}
 
-          {/* Dropdown Menu */}
-          {openDropdownId === todo.id && (
-            <div className="absolute z-9999 right-0 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+      {/* Dropdown Menu - Rendered via Portal */}
+      {openDropdownId === todo.id && dropdownPosition && createPortal(
+          <div 
+            className="fixed z-9999 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              right: `${dropdownPosition.right}px`,
+            }}
+          >
               <button
                 className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-white/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditing(true);
+                  setOpenDropdownId(null);
+                  setDropdownPosition(null);
                 }}
               >
                 <PencilLine className="w-4 h-4" />
@@ -222,7 +257,6 @@ const DraggableTask = ({
                         e.stopPropagation();
                         todo.priority = index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : null;
                         handlePrioritySelect(todo);
-                        setOpenDropdownId(null);
                       }}
                     >
                     <Flag className={`w-7 h-7 hover:bg-gray-800 p-[5px] rounded-md cursor-pointer ${priorityColors[index === 0 ? "high" : index === 1 ? "medium" : index === 2 ? "low" : "none"]}`} style={{ fill: index === 0 ? "#DC2828" : index === 1 ? "#3B82F6" : index === 2 ? "#28A745" : "none"  }} />
@@ -235,7 +269,7 @@ const DraggableTask = ({
                   e.stopPropagation();
                   onDuplicateTask(todo as Todo);
                   setOpenDropdownId(null);
-
+                  setDropdownPosition(null);
                 }}
               >
                 <CopyPlus className="w-4 h-4" />
@@ -251,10 +285,10 @@ const DraggableTask = ({
                 <Trash2 className="w-4 h-4 text-red-500" />
                 <span className="text-red-500">Delete</span>
               </button>
-            </div>
-          )}
-        </div>
-      )}
+            </div>,
+          document.body
+        )
+      }
       <div className="flex gap-3 pr-4">
         <div className="pt-0.5">
           <Checkbox

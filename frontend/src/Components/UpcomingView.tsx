@@ -231,6 +231,7 @@ const DraggableTask = ({
       {openDropdownId === todo.id && dropdownPosition && createPortal(
           <div 
             className="fixed z-9999 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+            data-dropdown-menu="true"
             style={{
               top: `${dropdownPosition.top}px`,
               right: `${dropdownPosition.right}px`,
@@ -240,6 +241,7 @@ const DraggableTask = ({
                 className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-white/10"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   setIsEditing(true);
                   setOpenDropdownId(null);
                   setDropdownPosition(null);
@@ -545,7 +547,10 @@ const UpcomingView = ({
       // Close dropdowns when clicking outside
       if (openDropdownId !== null) {
         const dropdownElement = dropdownRefs.current.get(openDropdownId);
-        if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        // Check if click is on the portal dropdown menu
+        const isPortalDropdown = target.closest('[data-dropdown-menu="true"]');
+        if (dropdownElement && !dropdownElement.contains(target) && !isPortalDropdown) {
           setOpenDropdownId(null);
         }
       }

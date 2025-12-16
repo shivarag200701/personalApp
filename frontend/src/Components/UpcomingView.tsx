@@ -481,14 +481,12 @@ const UpcomingView = ({
     );
   }, [todos]);
   const getOverDueTasks = (): Todo[] => {
-    // Get end of current LOCAL date
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
+    // Get start of today - tasks before today are overdue
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
     
     return todos.filter(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfToday
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < startOfToday
     );
   };
 

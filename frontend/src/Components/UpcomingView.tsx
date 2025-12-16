@@ -473,13 +473,11 @@ const UpcomingView = ({
 
   // Helper function to check if there are overdue tasks
   const hasOverdueTasks = useMemo(() => {
+    // Check for overdue tasks using local timezone
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const day = now.getDate();
-    const endOfTodayUTC = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    now.setHours(0, 0, 0, 0);
     return todos.some(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < endOfTodayUTC
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < now
     );
   }, [todos]);
   const getOverDueTasks = (): Todo[] => {
@@ -690,10 +688,10 @@ const UpcomingView = ({
   
   console.log("overDueTasks", getOverDueTasks());
   const handleAddTask = (date: Date) => {
-    // Create date in local timezone at end of day (23:59:59.999)
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-    onAddTask(endOfDay.toISOString());
+    // Create date in local timezone at noon to avoid timezone rollover issues
+    const noonOfDay = new Date(date);
+    noonOfDay.setHours(12, 0, 0, 0);
+    onAddTask(noonOfDay.toISOString());
   };
 
   const handleDeleteClick = (todo: Todo) => {
@@ -767,10 +765,10 @@ const UpcomingView = ({
     ){
         return;
     }
-    // Use local timezone to create end of day, not UTC
-    const endOfDay = new Date(newDate);
-    endOfDay.setHours(23, 59, 59, 999);
-    const newCompleteAt = endOfDay.toISOString();
+    // Use local timezone at noon to avoid timezone rollover issues
+    const noonOfDay = new Date(newDate);
+    noonOfDay.setHours(12, 0, 0, 0);
+    const newCompleteAt = noonOfDay.toISOString();
     console.log("newCompleteAt", newCompleteAt);
     const updatedTodo = {
         ...todo,

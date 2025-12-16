@@ -91,11 +91,17 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     });
   }
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Use UTC for consistent queries regardless of server location
+    const now = new Date();
+    const today = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0, 0, 0, 0
+    ));
     
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
     const todos = await prisma.todo.findMany({
       where: {
@@ -412,7 +418,8 @@ todoRouter.post("/child_task", requireLogin, async(req,res)=>{
       }
 
       const completeAtDate = new Date(childCompleteAt);
-      completeAtDate.setUTCHours(23, 59, 59, 999);
+      // Use noon UTC to avoid timezone rollover issues
+      completeAtDate.setUTCHours(12, 0, 0, 0);
 
       const childTask = await tx.todo.create({
         data: {

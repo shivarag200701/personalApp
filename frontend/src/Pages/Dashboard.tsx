@@ -135,13 +135,14 @@ const Dashboard = () => {
         const year = nextOccurrenceDate.getUTCFullYear();
         const month = nextOccurrenceDate.getUTCMonth();
         const day = nextOccurrenceDate.getUTCDate();
-        const nextOccurrenceEndOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999))
+        // Use noon (12:00 UTC) to avoid timezone rollover issues
+        const nextOccurrenceNoon = new Date(Date.UTC(year, month, day, 12, 0, 0, 0))
 
         const tempId = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
         const childTask: Todo = {
           ...todoToUpdate,
           id: parseInt(tempId),
-          completeAt: nextOccurrenceEndOfDay.toISOString(),
+          completeAt: nextOccurrenceNoon.toISOString(),
           parentRecurringId: todoToUpdate.id,
           completed: false,
           completedAt: null,

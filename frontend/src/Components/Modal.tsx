@@ -61,17 +61,17 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
     return `${year}-${month}-${day}`;
   };
 
-  // Helper function to convert YYYY-MM-DD to ISO string (end of day in UTC)
+  // Helper function to convert YYYY-MM-DD to ISO string
+  // Uses noon (12:00:00) in local timezone to avoid timezone rollover issues
   const dateInputToIso = (dateInput: string): string => {
     if (!dateInput) {
       const today = new Date();
-      today.setHours(23, 59, 59, 999);
+      today.setHours(12, 0, 0, 0);
       return today.toISOString();
     }
-    // Parse the date input (YYYY-MM-DD) and create UTC date at end of day
+    // Parse the date input (YYYY-MM-DD) and create date at noon in local timezone
     const [year, month, day] = dateInput.split('-').map(Number);
-    // Create date in UTC at end of day (23:59:59.999)
-    const date = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const date = new Date(year, month - 1, day, 12, 0, 0, 0);
     return date.toISOString();
   };
 

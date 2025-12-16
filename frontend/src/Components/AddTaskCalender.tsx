@@ -65,17 +65,18 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     return `${year}-${month}-${day}`;
   };
 
-  // Helper function to convert YYYY-MM-DD to ISO string (end of day in UTC)
+  // Helper function to convert YYYY-MM-DD to ISO string
+  // Uses noon (12:00:00) in local timezone to avoid timezone rollover issues
   const dateInputToIso = (dateInput: string): string => {
     if (!dateInput) {
       // If no date, use tomorrow as default
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(23, 59, 59, 999);
+      tomorrow.setHours(12, 0, 0, 0);
       return tomorrow.toISOString();
     }
     const [year, month, day] = dateInput.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const date = new Date(year, month - 1, day, 12, 0, 0, 0);
     return date.toISOString();
   };
 

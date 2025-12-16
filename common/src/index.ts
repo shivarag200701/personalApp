@@ -35,32 +35,40 @@ export type TimeSelection = "Today" | "Tomorrow" | "This Week";
 /**
  * Converts "Today"/"Tomorrow"/"This Week" to actual Date object (end of period)
  * Used in backend to convert user selection to database DateTime
+ * Always uses UTC to ensure consistent behavior regardless of server location
  */
 export function convertCompleteAtToDate(completeAt: string| undefined): Date | null {
   if(!completeAt) {
     return null;
   }
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  
+  // Get current date in UTC to ensure consistent behavior regardless of server location
+  const now = new Date();
+  const today = new Date(Date.UTC(
+    now.getUTCFullYear(), 
+    now.getUTCMonth(), 
+    now.getUTCDate(), 
+    0, 0, 0, 0
+  ));
 
   switch(completeAt){
     case "Today":
       const endToday = new Date(today);
-      endToday.setHours(23,59,59,999);
+      endToday.setUTCHours(23, 59, 59, 999);
       return endToday;
 
     case "Tomorrow":
       const endTomorrow = new Date(today);
-      endTomorrow.setDate(endTomorrow.getDate() + 1);
-      endTomorrow.setHours(23,59,59,999);
+      endTomorrow.setUTCDate(endTomorrow.getUTCDate() + 1);
+      endTomorrow.setUTCHours(23, 59, 59, 999);
       return endTomorrow;
 
     case "This Week":
       const thisWeek = new Date(today);
-      const dayOfWeek = thisWeek.getDay(); // 0 = Sunday, 6 = Saturday
+      const dayOfWeek = thisWeek.getUTCDay(); // 0 = Sunday, 6 = Saturday
       const daysUntilSunday = 7 - dayOfWeek;
-      thisWeek.setDate(thisWeek.getDate() + daysUntilSunday);
-      thisWeek.setHours(23, 59, 59, 999);
+      thisWeek.setUTCDate(thisWeek.getUTCDate() + daysUntilSunday);
+      thisWeek.setUTCHours(23, 59, 59, 999);
       return thisWeek;
 
     default:
@@ -69,6 +77,73 @@ export function convertCompleteAtToDate(completeAt: string| undefined): Date | n
   }
 }
 
+
+/**
+ * Gets start of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export function getStartOfTodayUTC(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    0, 0, 0, 0
+  ));
+}
+
+/**
+ * Gets end of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export function getEndOfTodayUTC(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
+    23, 59, 59, 999
+  ));
+}
+
+/**
+ * Checks if a UTC date string represents today in UTC
+ * Use this for backend business logic
+ */
+export function isTodayUTC(dateString: string | null | undefined): boolean {
+  if (!dateString) return false;
+  const taskDate = new Date(dateString);
+  const now = new Date();
+  
+  return (
+    taskDate.getUTCFullYear() === now.getUTCFullYear() &&
+    taskDate.getUTCMonth() === now.getUTCMonth() &&
+    taskDate.getUTCDate() === now.getUTCDate()
+  );
+}
+
+/**
+ * Checks if a UTC date string represents tomorrow in UTC
+ * Use this for backend business logic
+ */
+export function isTomorrowUTC(dateString: string | null | undefined): boolean {
+  if (!dateString) return false;
+  const taskDate = new Date(dateString);
+  const now = new Date();
+  
+  const tomorrow = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    0, 0, 0, 0
+  ));
+  
+  return (
+    taskDate.getUTCFullYear() === tomorrow.getUTCFullYear() &&
+    taskDate.getUTCMonth() === tomorrow.getUTCMonth() &&
+    taskDate.getUTCDate() === tomorrow.getUTCDate()
+  );
+}
 
 /**
  * Calculates the next occurrence of a recurring task
@@ -174,7 +249,9 @@ export function timeSelectionToDate(timeSelection: TimeSelection): string {
 }
 
 /**
- * Checks if a date string represents today
+ * Checks if a date string represents today in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTodayUTC() instead
  * Compares by local date components to handle timezone differences correctly
  */
 export function isToday(dateString: string | null | undefined): boolean {
@@ -192,7 +269,9 @@ export function isToday(dateString: string | null | undefined): boolean {
 }
 
 /**
- * Checks if a date string represents tomorrow
+ * Checks if a date string represents tomorrow in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTomorrowUTC() instead
  */
 export function isTomorrow(dateString: string | null | undefined): boolean {
   if (!dateString) return false;

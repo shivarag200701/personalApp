@@ -33,8 +33,29 @@ export type TimeSelection = "Today" | "Tomorrow" | "This Week";
 /**
  * Converts "Today"/"Tomorrow"/"This Week" to actual Date object (end of period)
  * Used in backend to convert user selection to database DateTime
+ * Always uses UTC to ensure consistent behavior regardless of server location
  */
 export declare function convertCompleteAtToDate(completeAt: string | undefined): Date | null;
+/**
+ * Gets start of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export declare function getStartOfTodayUTC(): Date;
+/**
+ * Gets end of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export declare function getEndOfTodayUTC(): Date;
+/**
+ * Checks if a UTC date string represents today in UTC
+ * Use this for backend business logic
+ */
+export declare function isTodayUTC(dateString: string | null | undefined): boolean;
+/**
+ * Checks if a UTC date string represents tomorrow in UTC
+ * Use this for backend business logic
+ */
+export declare function isTomorrowUTC(dateString: string | null | undefined): boolean;
 /**
  * Calculates the next occurrence of a recurring task
  * Used in backend to calculate the next occurrence of a recurring task and also in frontend to calculate the next occurrence of a recurring task to display in the upcoming view
@@ -52,11 +73,16 @@ export declare function dateToTimeSelection(date: string | null | undefined): Ti
  */
 export declare function timeSelectionToDate(timeSelection: TimeSelection): string;
 /**
- * Checks if a date string represents today
+ * Checks if a date string represents today in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTodayUTC() instead
+ * Compares by local date components to handle timezone differences correctly
  */
 export declare function isToday(dateString: string | null | undefined): boolean;
 /**
- * Checks if a date string represents tomorrow
+ * Checks if a date string represents tomorrow in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTomorrowUTC() instead
  */
 export declare function isTomorrow(dateString: string | null | undefined): boolean;
 /**
@@ -79,6 +105,7 @@ export declare function getUpcomingDateRange(startDate: Date, days?: number): Da
 export declare function formatUpcomingDateHeader(date: Date): string;
 /**
  * Checks if a task's completeAt date falls on a specific date (ignoring time)
+ * Uses local date components for both dates to ensure timezone consistency
  */
 export declare function isTaskOnDate(taskDateString: string | null | undefined, targetDate: Date): boolean;
 //# sourceMappingURL=index.d.ts.map

@@ -24,34 +24,79 @@ export const todoSchema = z.object({
 /**
  * Converts "Today"/"Tomorrow"/"This Week" to actual Date object (end of period)
  * Used in backend to convert user selection to database DateTime
+ * Always uses UTC to ensure consistent behavior regardless of server location
  */
 export function convertCompleteAtToDate(completeAt) {
     if (!completeAt) {
         return null;
     }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get current date in UTC to ensure consistent behavior regardless of server location
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
     switch (completeAt) {
         case "Today":
             const endToday = new Date(today);
-            endToday.setHours(23, 59, 59, 999);
+            endToday.setUTCHours(23, 59, 59, 999);
             return endToday;
         case "Tomorrow":
             const endTomorrow = new Date(today);
-            endTomorrow.setDate(endTomorrow.getDate() + 1);
-            endTomorrow.setHours(23, 59, 59, 999);
+            endTomorrow.setUTCDate(endTomorrow.getUTCDate() + 1);
+            endTomorrow.setUTCHours(23, 59, 59, 999);
             return endTomorrow;
         case "This Week":
             const thisWeek = new Date(today);
-            const dayOfWeek = thisWeek.getDay(); // 0 = Sunday, 6 = Saturday
+            const dayOfWeek = thisWeek.getUTCDay(); // 0 = Sunday, 6 = Saturday
             const daysUntilSunday = 7 - dayOfWeek;
-            thisWeek.setDate(thisWeek.getDate() + daysUntilSunday);
-            thisWeek.setHours(23, 59, 59, 999);
+            thisWeek.setUTCDate(thisWeek.getUTCDate() + daysUntilSunday);
+            thisWeek.setUTCHours(23, 59, 59, 999);
             return thisWeek;
         default:
             const parsed = new Date(completeAt);
             return isNaN(parsed.getTime()) ? null : parsed;
     }
+}
+/**
+ * Gets start of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export function getStartOfTodayUTC() {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+}
+/**
+ * Gets end of today in UTC
+ * Use this for backend business logic to ensure consistent behavior
+ */
+export function getEndOfTodayUTC() {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+}
+/**
+ * Checks if a UTC date string represents today in UTC
+ * Use this for backend business logic
+ */
+export function isTodayUTC(dateString) {
+    if (!dateString)
+        return false;
+    const taskDate = new Date(dateString);
+    const now = new Date();
+    return (taskDate.getUTCFullYear() === now.getUTCFullYear() &&
+        taskDate.getUTCMonth() === now.getUTCMonth() &&
+        taskDate.getUTCDate() === now.getUTCDate());
+}
+/**
+ * Checks if a UTC date string represents tomorrow in UTC
+ * Use this for backend business logic
+ */
+export function isTomorrowUTC(dateString) {
+    if (!dateString)
+        return false;
+    const taskDate = new Date(dateString);
+    const now = new Date();
+    const tomorrow = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0, 0));
+    return (taskDate.getUTCFullYear() === tomorrow.getUTCFullYear() &&
+        taskDate.getUTCMonth() === tomorrow.getUTCMonth() &&
+        taskDate.getUTCDate() === tomorrow.getUTCDate());
 }
 export const calculateNextOccurence = (pattern, interval, lastOccurence) => {
     const next = new Date(lastOccurence);
@@ -138,20 +183,26 @@ export function timeSelectionToDate(timeSelection) {
     }
 }
 /**
- * Checks if a date string represents today
+ * Checks if a date string represents today in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTodayUTC() instead
+ * Compares by local date components to handle timezone differences correctly
  */
 export function isToday(dateString) {
     if (!dateString)
         return false;
     const taskDate = new Date(dateString);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endToday = new Date(today);
-    endToday.setHours(23, 59, 59, 999);
-    return taskDate >= today && taskDate <= endToday;
+    // Compare by local date components (year, month, day) instead of timestamps
+    // This ensures it works correctly across all timezones
+    return (taskDate.getFullYear() === today.getFullYear() &&
+        taskDate.getMonth() === today.getMonth() &&
+        taskDate.getDate() === today.getDate());
 }
 /**
- * Checks if a date string represents tomorrow
+ * Checks if a date string represents tomorrow in USER'S LOCAL TIMEZONE
+ * Use this ONLY for frontend display purposes
+ * For backend business logic, use isTomorrowUTC() instead
  */
 export function isTomorrow(dateString) {
     if (!dateString)
@@ -260,21 +311,17 @@ export function formatUpcomingDateHeader(date) {
 }
 /**
  * Checks if a task's completeAt date falls on a specific date (ignoring time)
+ * Uses local date components for both dates to ensure timezone consistency
  */
 export function isTaskOnDate(taskDateString, targetDate) {
     if (!taskDateString)
         return false;
     const taskDate = new Date(taskDateString);
     const target = new Date(targetDate);
-    // Compare date components only (timezone-agnostic)
-    const taskYear = taskDate.getUTCFullYear();
-    const taskMonth = taskDate.getUTCMonth();
-    const taskDay = taskDate.getUTCDate();
-    const targetYear = target.getFullYear();
-    const targetMonth = target.getMonth();
-    const targetDay = target.getDate();
-    return taskYear === targetYear &&
-        taskMonth === targetMonth &&
-        taskDay === targetDay;
+    // Compare date components using local timezone for both dates
+    // This ensures consistency regardless of how the date was stored
+    return (taskDate.getFullYear() === target.getFullYear() &&
+        taskDate.getMonth() === target.getMonth() &&
+        taskDate.getDate() === target.getDate());
 }
 //# sourceMappingURL=index.js.map

@@ -58,7 +58,8 @@ export async function createRecurringTask(
     );
 
     const completeAtDate = new Date(nextOccurrence);
-    completeAtDate.setHours(23, 59, 59, 999);
+    // Use noon UTC to avoid timezone rollover issues
+    completeAtDate.setUTCHours(12, 0, 0, 0);
 
     const newTask = await prisma.todo.create({
         data: {

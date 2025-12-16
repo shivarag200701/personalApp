@@ -157,7 +157,7 @@ const Dashboard = () => {
         try{
           const res = await api.post(`/v1/todo/child_task`,{
             parentId: todoToUpdate.id,
-            completeAt: nextOccurrenceEndOfDay.toISOString(),
+            completeAt: nextOccurrenceNoon.toISOString(),
           })
           const createdChildTask = res.data.childTask;
           console.log("createdChildTask", createdChildTask);

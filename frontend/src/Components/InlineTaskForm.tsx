@@ -145,7 +145,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     if (!title.trim()) return;
     
     try {
-      let res;
       if (todo?.id) {
         console.log("updating todo", todo)
         // Update existing todo
@@ -164,7 +163,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceEndDate: recurrenceEndDate ?? null,
           isAllDay,
         });
-        res = await api.put(`/v1/todo/${todo.id}`, {
+          await api.put(`/v1/todo/${todo.id}`, {
           title,
           description,
           completeAt: selectedDate,
@@ -193,7 +192,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           parentRecurringId: todo?.parentRecurringId || null,
           isAllDay,
         });
-        res = await api.post("/v1/todo/", {
+          await api.post("/v1/todo/", {
           title,
           description,
           completeAt: selectedDate,

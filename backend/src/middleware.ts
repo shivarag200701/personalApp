@@ -7,10 +7,8 @@ export function requireLogin(
 ): Response<any, Record<string, any>> | void {
   // console.log("req.session", req.session);
   if (req.session?.userId) {
-    console.log("user is authenticated");
     next();
   } else {
-    console.log("user is not authenticated");
      return res.status(401).json({
       isAuthenticated: "false",
     });

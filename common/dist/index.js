@@ -12,7 +12,8 @@ export const todoSchema = z.object({
     title: z.string(),
     description: z.string(),
     priority: z.string().nullish(),
-    completeAt: z.iso.datetime().nullish(),
+    completeAt: z.string().nullish(),
+    isAllDay: z.boolean(),
     category: z.string(),
     isRecurring: z.boolean().optional(),
     recurrencePattern: z.enum(["daily", "weekly", "monthly", "yearly"]).nullish(),
@@ -100,7 +101,6 @@ export function isTomorrowUTC(dateString) {
 }
 export const calculateNextOccurence = (pattern, interval, lastOccurence) => {
     const next = new Date(lastOccurence);
-    next.setUTCHours(0, 0, 0, 0);
     switch (pattern) {
         case "daily":
             next.setUTCDate(next.getUTCDate() + interval);

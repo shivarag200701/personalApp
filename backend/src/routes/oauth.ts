@@ -74,9 +74,6 @@ oauthRouter.get("/google/connect", async (req,res) => {
 
 oauthRouter.get("/google/callback", async (req,res) => {
     const {code, state, error} = req.query;
-    console.log("code:", code);
-    console.log("state:", state);
-    console.log("error:", error);
 
     if(error){
         console.error('Google OAuth error:',error);
@@ -101,8 +98,6 @@ oauthRouter.get("/google/callback", async (req,res) => {
 
         //exchange code for tokens
         const {accessToken, refreshToken, expiresAt, userInfo} = await getGoogleTokens(code as string);
-        console.log("type:", stateData.type);
-        console.log("userInfo:", userInfo);
         
 
             if(stateData.type === 'login'){
@@ -113,9 +108,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                     email: userInfo.email,
                 },
             });
-            console.log('user:',user);
             if(user){
-                console.log("here");
                 
                 await prisma.oAuthAccount.upsert({
                     where:{
@@ -144,7 +137,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                     },
                 });
                 await setSessionCookie(req, res, user.id);
-                return res.redirect(`${FRONTEND_URL}/dashboard?success=google_sign_in`);
+                return res.redirect(`${FRONTEND_URL}/dashboard`);
             }
 
             if(!user){
@@ -196,7 +189,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
                         },
                     });
                     await setSessionCookie(req, res, user.id);
-                    return res.redirect(`${FRONTEND_URL}/dashboard?success=google_sign_in`);
+                    return res.redirect(`${FRONTEND_URL}/dashboard`);
                 }
             }
             else if(stateData.type === 'connect' && stateData.userId){

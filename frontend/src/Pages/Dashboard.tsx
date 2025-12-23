@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppBar from "../Components/AppBar";
 import type { Todo } from "@/Components/Modal";
-import Modal from "@/Components/Modal";
 import TabNavigation, { type TabType } from "../Components/TabNavigation";
 import TodayView from "../Components/TodayView";
 import UpcomingView from "../Components/UpcomingView";
@@ -12,15 +11,14 @@ import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
 import { SquareKanban, CalendarDays } from "lucide-react";
+import AddTaskCalendar from "../Components/AddTaskCalender";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddTaskCalendarOpen, setIsAddTaskCalendarOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
-  const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<TabType>("today");
   const [viewType, setViewType] = useState<"board" | "calendar">("board");
   const [showViewDropdown, setShowViewDropdown] = useState(false);
@@ -57,26 +55,22 @@ const Dashboard = () => {
     };
   }, [showViewDropdown]);
 
-  const openModal = (preselectedDate?: string) => {
-    setIsModalOpen(true);
-    setTodoToEdit(null);
-    setPreselectedDate(preselectedDate);
+  const openModal = (date?: string) => {
+    setIsAddTaskCalendarOpen(true);
+    console.log("date", date);
+    
   }
   const closeModal = () => {
-    setIsModalOpen(false);
-    setTodoToEdit(null);
-    setPreselectedDate(undefined);
+    setIsAddTaskCalendarOpen(false);
   }
   const closeDetailDrawer = () => {
     setIsDetailOpen(false);
   };
 
   function addTodo(newTask: Todo) {
-    console.log("new task", newTask);
     setTodos((prev) => [...prev, newTask]);
   }
   function updateTodo(updatedTask: Todo) {
-    console.log("updated task", updatedTask);
     setTodos((prev) => prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo));
     setSelectedTodo((prev) => {
       if (prev?.id === updatedTask.id) {
@@ -87,9 +81,8 @@ const Dashboard = () => {
   }
   const handleEdit = (todo: Todo) => {
     setSelectedTodo(todo);
-    setTodoToEdit(todo);
     setIsDetailOpen(false);
-    setIsModalOpen(true);
+    setIsAddTaskCalendarOpen(true);
   };
 
   const handleViewDetails = (todo: Todo) => {
@@ -102,107 +95,179 @@ const Dashboard = () => {
     if (!todoToUpdate) {
       return;
     }
-
+    console.log("todoToUpdate", todoToUpdate);
+    
     const newCompletedStatus = !todoToUpdate?.completed;
+    console.log("newCompletedStatus", newCompletedStatus);
 
-    //upadate parent task optimistically
-    setTodos((prev) => {
+    if(newCompletedStatus === true){}
+    //If the task is not recurring, update the task as completed in the UI
+    if(!todoToUpdate.isRecurring){
+      setTodos((prev) => {
+          return prev.map((todo) => {
+            if(todo.id === todoId){
+              return {...todo, completed: newCompletedStatus}
+            }
+            return todo;
+          })
+      })
+      setSelectedTodo((prev) => {
+        if (prev?.id === todoId) {
+          return { ...prev, completed: newCompletedStatus };
+        }
+        return prev;
+      });
+      //send data to backend
+      try{
+        await api.post(`/v1/todo/${todoId}/completed`, {
+          completed: newCompletedStatus,
+        });
+      }catch(error){
+        console.error("Error cant mark as completed", error);
+        setTodos((prev) => {
+          return prev.map((todo) => {
+            if(todo.id === todoId){
+              return {...todo, completed: !newCompletedStatus}
+            }
+            return todo;
+          })
+        })
+        setSelectedTodo((prev) => {
+          if(prev?.id === todoId){
+            return {...prev, completed: !newCompletedStatus}
+          }
+          return prev;
+        });
+      }
+    }
+    //If the task is recurring, update the completeAt date to next occurrence
+    else if (todoToUpdate?.isRecurring && todoToUpdate?.recurrencePattern  && todoToUpdate?.recurrenceInterval  && todoToUpdate?.completeAt &&
+    newCompletedStatus) { 
+
+        const baseDate = new Date(todoToUpdate.completeAt);
+        console.log("base date", baseDate);
+        const nextOccurrenceDate = calculateNextOccurence(todoToUpdate.recurrencePattern as RecurrencePattern, todoToUpdate.recurrenceInterval, baseDate);
+        //optimistic update to UI
+        if(todoToUpdate.recurrenceEndDate && nextOccurrenceDate > new Date(todoToUpdate.recurrenceEndDate)){
+          setTodos((prev) => {
+            return prev.map((todo) => {
+              if(todo.id === todoId){
+                return {...todo, completed: true, nextOccurrence: null}
+              }
+              return todo;
+            })
+          })
+          setSelectedTodo((prev) => {
+            if (prev?.id === todoId) {
+              return { ...prev, completed: true, nextOccurrence: null };
+            }
+            return prev;
+          });
+        }
+        else{
+          console.log("next occurrence date", nextOccurrenceDate);
+          
+            setTodos((prev) => {
+              return prev.map((todo) => {
+                if(todo.id === todoId){
+                  return {...todo, completeAt: nextOccurrenceDate.toISOString()}
+                }
+                return todo;
+              })
+            })
+            setSelectedTodo((prev) => {
+              if (prev?.id === todoId) {
+                return { ...prev, completeAt: nextOccurrenceDate.toISOString() };
+              }
+              return prev;
+            });
+        }
+      //send data to backend
+      try{
+        await api.post(`/v1/todo/${todoId}/completed`, {
+          completed: newCompletedStatus,
+        });
+      }catch(error){
+        console.error("Error cant mark recurring task as completed", error);
+        setTodos((prev) => {
+          return prev.map((todo) => {
+            if(todo.id === todoId){
+              return {...todo, completeAt: baseDate.toISOString()}
+            }
+            return todo;
+          })
+        })
+        setSelectedTodo((prev) => {
+          if(prev?.id === todoId){
+            return {...prev, completeAt: baseDate.toISOString()}
+          }
+          return prev;
+        });
+      }
+    }
+    else{
+      //to handle the case where the task is recurring and the completed status is changed to not completed
+      setTodos((prev) => {
         return prev.map((todo) => {
           if(todo.id === todoId){
             return {...todo, completed: newCompletedStatus}
           }
           return todo;
         })
-    })
-    setSelectedTodo((prev) => {
-      if (prev?.id === todoId) {
-        return { ...prev, completed: newCompletedStatus };
-      }
-      return prev;
-    });
-
-    if (todoToUpdate?.isRecurring && 
-      todoToUpdate?.recurrencePattern  && 
-      todoToUpdate?.recurrenceInterval  &&
-      todoToUpdate?.completeAt &&
-      !todoToUpdate.completed &&
-      newCompletedStatus) { 
-
-        const baseDate = new Date(todoToUpdate.completeAt);
-
-        const nextOccurrenceDate = calculateNextOccurence(todoToUpdate.recurrencePattern as RecurrencePattern, todoToUpdate.recurrenceInterval, baseDate);
-
-        const year = nextOccurrenceDate.getUTCFullYear();
-        const month = nextOccurrenceDate.getUTCMonth();
-        const day = nextOccurrenceDate.getUTCDate();
-        // Use noon (12:00 UTC) to avoid timezone rollover issues
-        const nextOccurrenceNoon = new Date(Date.UTC(year, month, day, 12, 0, 0, 0))
-
-        const tempId = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
-        const childTask: Todo = {
-          ...todoToUpdate,
-          id: parseInt(tempId),
-          completeAt: nextOccurrenceNoon.toISOString(),
-          parentRecurringId: todoToUpdate.id,
-          completed: false,
-          completedAt: null,
-          nextOccurrence: null,
-        }
-        //optimistic update to UI
-        setTodos((prev) => {
-          const newTodos = [...prev, childTask];
-          return newTodos;
-        });
-
-        try{
-          const res = await api.post(`/v1/todo/child_task`,{
-            parentId: todoToUpdate.id,
-            completeAt: nextOccurrenceNoon.toISOString(),
-          })
-          const createdChildTask = res.data.childTask;
-          console.log("createdChildTask", createdChildTask);
-
-          //update UI with new child task
-          setTodos((prev) => {
-            return prev.map((todo) =>{
-              if(todo.id === parseInt(tempId)){
-                return createdChildTask
-              }
-              return todo;
-            })
-          })
-        }catch(error){
-          console.error("Error creating child task:", error);
-          // Remove temp task on error
-          setTodos((prev) => prev.filter((todo) => todo.id !== parseInt(tempId)));
-        }
-        
-  }
-    try {
-      await api.post(`/v1/todo/${todoId}/completed`, {
-        completed: newCompletedStatus,
-      });
-    } catch (error) {
-      console.error("Error cant mark as completed", error);
-      setTodos((prev) => {
-        return prev.map((todo) => {
-          if (todo.id == todoId) {
-            return { ...todo, completed: !newCompletedStatus };
-          }
-          return todo;
-        });
-      });
+      })
       setSelectedTodo((prev) => {
-        if (prev?.id === todoId) {
-          return { ...prev, completed: !newCompletedStatus };
+        if(prev?.id === todoId){
+          return {...prev, completed: newCompletedStatus}
         }
         return prev;
       });
+      //send data to backend
+      try{
+        await api.post(`/v1/todo/${todoId}/completed`, {
+          completed: newCompletedStatus,
+        });
+      }catch(error){
+        console.error("Error cant mark as not completed", error);
+        setTodos((prev) => {
+          return prev.map((todo) => {
+            if(todo.id === todoId){
+              return {...todo, completed: !newCompletedStatus}
+            }
+            return todo;
+          })
+        })
+        setSelectedTodo((prev) => {
+          if(prev?.id === todoId){
+            return {...prev, completed: !newCompletedStatus}
+          }
+          return prev;
+        });
+      }
     }
+    // try {
+    //   await api.post(`/v1/todo/${todoId}/completed`, {
+    //     completed: newCompletedStatus,
+    //   });
+    // } catch (error) {
+    //   console.error("Error cant mark as completed", error);
+    //   setTodos((prev) => {
+    //     return prev.map((todo) => {
+    //       if (todo.id == todoId) {
+    //         return { ...todo, completed: !newCompletedStatus };
+    //       }
+    //       return todo;
+    //     });
+    //   });
+    //   setSelectedTodo((prev) => {
+    //     if (prev?.id === todoId) {
+    //       return { ...prev, completed: !newCompletedStatus };
+    //     }
+    //     return prev;
+    //   });
+    // }
   };
 
   const deleteTodo = async (todoId: string | number) => {
-    console.log("deleting todo", todoId);
     if (!todoId) {
       return;
     }
@@ -213,7 +278,6 @@ const Dashboard = () => {
     }
     try {
       await api.delete(`/v1/todo/${todoId}`);
-      console.log("Todo deleted");
     } catch (error) {
       console.error("Error deleting todo", error);
     }
@@ -244,6 +308,7 @@ const Dashboard = () => {
       try {
         const res = await api.get("/v1/todo/");
         const todos = res.data.todos;
+        console.log("todos", todos);
         setTodos(todos);
         setLoading(false);
       } catch (error) {
@@ -252,8 +317,6 @@ const Dashboard = () => {
     }
     fetchTodo();
   }, []);
-console.log("activeTab", activeTab);
-console.log("viewType", viewType);
 
   return (
     <>
@@ -414,14 +477,17 @@ console.log("viewType", viewType);
         )}
         </div>
       </div>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        addTodo={addTodo}
-        editTodo={updateTodo}
-        todoToEdit={todoToEdit}
-        preselectedDate={preselectedDate}
-      />
+      {isAddTaskCalendarOpen && (
+        <AddTaskCalendar
+          preselectedDate={new Date()}
+          onCancel={closeModal}
+          onSuccess={addTodo}
+          onUpdate={updateTodo}
+          index={0}
+          backgroundColor="bg-[#1e1f20]"
+          width="w-[500px]"
+        />
+      )}
       <TaskDetailDrawer
         todo={selectedTodo}
         isOpen={isDetailOpen}

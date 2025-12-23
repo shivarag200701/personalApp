@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Todo" ALTER COLUMN "completeAt" SET DATA TYPE DATE;

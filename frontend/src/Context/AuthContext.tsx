@@ -23,7 +23,6 @@ const AuthContext = createContext<ContextProps>({
 });
 
 export function AuthProvider({ children }: AuthProps) {
-  console.log("AuthProvider ran");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +31,6 @@ export function AuthProvider({ children }: AuthProps) {
     async function fetchUserSession() {
       try {
         const user = await api.get("/v1/auth-check")
-        console.log("user", user.data);
         if (user.data.isAuthenticated == "true") {
           setIsAuthenticated(true);
         }

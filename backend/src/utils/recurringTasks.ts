@@ -9,7 +9,6 @@ export const calculateNextOccurence = (
     lastOccurence: Date
 ): Date => {
     const next = new Date(lastOccurence);
-    next.setUTCHours(0, 0, 0, 0);
     switch (pattern){
         case "daily":
             next.setUTCDate(next.getUTCDate() + interval);
@@ -40,7 +39,6 @@ export async function createRecurringTask(
             isRecurring: true,
         }
     })
-    console.log("recurring task template",template);
 
     if(!template){
         throw new Error("Recurring task template not found");
@@ -50,7 +48,9 @@ export async function createRecurringTask(
         return null;
     }
 
-    const lastOccurence = template.nextOccurrence || (template.completeAt && template.completeAt <= new Date() ? template.completeAt : template.createdAt);
+    const lastOccurence = template.nextOccurrence || (template.dueOn ? (template.dueOn <= new Date() ? template.dueOn : template.createdAt) :
+    (template.dueAt ? (template.dueAt <= new Date() ? template.dueAt : template.createdAt) :
+    template.createdAt));
     const nextOccurrence = calculateNextOccurence(
         template.recurrencePattern as RecurrencePattern,
         template.recurrenceInterval || 1,
@@ -66,7 +66,8 @@ export async function createRecurringTask(
             title: template.title,
             description: template.description,
             priority: template.priority,
-            completeAt: completeAtDate,
+            dueOn: template.dueOn ? completeAtDate : null,
+            dueAt: template.dueAt ? completeAtDate : null,
             category: template.category,
             userId: template.userId,
             isRecurring: true,
@@ -92,7 +93,6 @@ export async function createRecurringTask(
 
 export async function processRecurringTasks(): Promise<void> {
     const now = new Date();
-    console.log("now",now);
     const templatesToProcess = await prisma.todo.findMany({
         where:{
             isRecurring: true,
@@ -103,7 +103,6 @@ export async function processRecurringTasks(): Promise<void> {
             ]
         }
     })
-    console.log("templates to process",templatesToProcess);
     for (const template of templatesToProcess) {
         try{await createRecurringTask(template.id, template.userId);
         }catch(error){

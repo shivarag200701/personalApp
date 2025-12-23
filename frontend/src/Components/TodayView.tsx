@@ -34,7 +34,6 @@ const TodayView = ({
       (todo) => isToday(todo?.completeAt) && todo?.completed == false
     );
   }, [todos]);
-  console.log("todayTodos", todayTodos);
 
   const todayCompletedTodos = useMemo(() => {
     return todos.filter(

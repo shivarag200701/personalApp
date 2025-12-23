@@ -71,7 +71,6 @@ const TaskDetailDrawer = ({
       setEditedDescription(todo.description || "");
     }
   }, [todo]);
-  console.log("todo", todo?.id);
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
@@ -81,7 +80,6 @@ const TaskDetailDrawer = ({
   }, [isEditing]);
 
   useEffect(() => {
-    console.log("isDropdownOpen", isDropdownOpen);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -108,7 +106,6 @@ const TaskDetailDrawer = ({
 
   const handleStartEdit = () => {
     if (!todo) return;
-    console.log("clicked inside handleStartEdit");
     
     // Prevent edit from opening if dropdown was just closed (user clicked to close dropdown)
     if (justClosedDropdownRef.current) {
@@ -133,7 +130,6 @@ const TaskDetailDrawer = ({
     
     setIsSaving(true);
     try {
-      console.log("todo", todo);
       const payload: any = {
         title: editedTitle,
         description: editedDescription,

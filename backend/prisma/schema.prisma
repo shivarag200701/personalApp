@@ -32,13 +32,15 @@ model Todo {
   title         String
   description   String
   priority      String?    
-  completeAt    DateTime?
+  dueOn         DateTime? @db.Date
+  dueAt         DateTime? @db.Timestamp(3)
   category      String
   user          User        @relation(fields: [userId], references: [id])
   userId        Int    
   completed     Boolean     @default(false)
   completedAt   DateTime?
   color         String?
+  isAllDay      Boolean     @default(false)
 
   //Recurring tasks fields
   isRecurring         Boolean     @default(false)

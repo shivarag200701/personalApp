@@ -56,7 +56,6 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
         buttonRef?.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        console.log("clicked outside");
         onClose();
       }
     };
@@ -182,7 +181,6 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
         titleInputRef?.current &&
         !titleInputRef.current.contains(event.target as Node)
       ) {
-        console.log("clicked outside category picker");
         onClose();
       }
     };
@@ -220,7 +218,6 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
           ) {
             return;
           }
-          console.log("clicked outside category picker backdrop");
           onClose();
         }}
       />

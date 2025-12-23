@@ -8,7 +8,8 @@ import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 import MoreOptionsPicker, { CategoryPicker } from "./MoreOptionsPicker";
 import { createPortal } from "react-dom";
 import ColorPicker from "./ColorPicker";
-interface InlineTaskFormProps {
+import { getTimeFromDate } from "./InlineTaskForm";
+interface AddTaskCalenderProps {
   todo?: Todo;
   preselectedDate: Date;
   onCancel: () => void;
@@ -20,10 +21,12 @@ interface InlineTaskFormProps {
   isEditMode?: boolean;
 }
 
-const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate, isEditMode=false , index, backgroundColor, width="w-full"}: InlineTaskFormProps) => {
+const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate, isEditMode=false , index, backgroundColor, width="w-full"}: AddTaskCalenderProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>(roundToNearest15Minutes(new Date()));
+  const [isAllDay, setIsAllDay] = useState(true);
   const [priority, setPriority] = useState<"high" | "medium" | "low" | null>(null);
   const [category, setCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +47,20 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [selectedColor, setSelectedColor] = useState<string>(todo?.color ?? "bg-red-600");
 
+
+  function roundToNearest15Minutes(date: Date) {
+
+    const ms = 1000 * 60 * 15
+
+    const roundedDate = new Date(Math.ceil(date.getTime() / ms) * ms);
+    return roundedDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: false
+    })
+
+
+  }
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
     const year = date.getFullYear();
@@ -65,24 +82,21 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     return `${year}-${month}-${day}`;
   };
 
-  // Helper function to convert YYYY-MM-DD to ISO string
-  // Uses noon (12:00:00) in local timezone to avoid timezone rollover issues
-  const dateInputToIso = (dateInput: string): string => {
-    if (!dateInput) {
-      // If no date, use tomorrow as default
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(12, 0, 0, 0);
-      return tomorrow.toISOString();
-    }
-    const [year, month, day] = dateInput.split('-').map(Number);
-    const date = new Date(year, month - 1, day, 12, 0, 0, 0);
-    return date.toISOString();
-  };
+  const getDateFromDate = (date: string) => {
+    if(!date) return "";
+    return date.split("T")[0];
+  }
 
   // Initialize form fields from todo prop when editing
   useEffect(() => {
+
+    
     if (todo) {
+      setSelectedDate(todo?.completeAt ? getDateFromDate(todo.completeAt) : dateToInput(preselectedDate)); 
+      if(!todo.isAllDay){
+        setIsAllDay(false);
+        setSelectedTime(getTimeFromDate(todo?.completeAt ?? ""));
+      }
       setTitle(todo.title || "");
       setDescription(todo.description || "");
       setSelectedDate(todo.completeAt ? isoToDateInput(todo.completeAt) : dateToInput(preselectedDate));
@@ -112,7 +126,6 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     e.preventDefault();
     if (!title.trim()) return;
 
-    const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
     
     try {
@@ -122,7 +135,8 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         res = await api.put(`/v1/todo/${todo.id}`, {
           title,
           description,
-          completeAt: completeAtIso,
+          completeAt: selectedDate,
+          isAllDay,
           category,
           priority: priority ?? null,
           isRecurring,
@@ -133,14 +147,14 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         });
         onUpdate(res.data.todo);
       } else {
-        console.log("creating new todo");
         
         // Create new todo
         res = await api.post("/v1/todo/", {
           title,
           description,
-          completeAt: completeAtIso,
-          category,
+          completeAt: selectedDate,
+          isAllDay,
+          category,   
           priority: priority ?? null,
           isRecurring,
           recurrencePattern: recurrencePattern ?? null,
@@ -157,7 +171,8 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           ...todo,
           title,
           description,
-          completeAt: completeAtIso,
+          completeAt: selectedDate,
+          isAllDay,
           category,
           priority: priority ?? null,
           completed: todo?.completed || false,
@@ -189,27 +204,36 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     }
   };
 
-  const getDateLabel = (dateStr: string | null): string | null => {
-    if (!dateStr) return null;
-    
+  const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
+    if (!dateStr || !time) return null;
+    if(!isAllDay){
+      dateStr = dateStr.split("T")[0];
+    }
+
     // Parse YYYY-MM-DD string as local date (not UTC)
     const [year, month, day] = dateStr.split('-').map(Number);
     const selectedDate = new Date(year, month - 1, day);
     selectedDate.setHours(0, 0, 0, 0);
-    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
+
+    //covert 24hr to 12hr
+    const [hours, minutes] = time.split(":")
+    const hour24 = parseInt(hours);
+    const ampm = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 || 12;
+    const timeLabel = `${hour12}:${minutes} ${ampm}`;
     
     if (selectedDate.getTime() === today.getTime()) {
-      return "Today";
+      return !isAllDay ? `Today ${timeLabel}` : "Today";
     } else if (selectedDate.getTime() === tomorrow.getTime()) {
-      return "Tomorrow";
+      return !isAllDay ? `Tomorrow ${timeLabel}` : "Tomorrow";
     } else {
       // For other dates, return formatted date
-      return selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return !isAllDay ? `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${timeLabel}` : selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
   };
 
@@ -220,7 +244,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     undefined: "text-gray-500",
   };
 
-  const dateLabel = getDateLabel(selectedDate);
+  const dateLabel = getDateLabel(selectedDate,selectedTime);
   
   // Check if selected date is today
   const isTodaySelected = (() => {
@@ -266,7 +290,6 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     const timeoutId = setTimeout(() => {
       const result = parseNaturalLanguageDate(title);
       if(result.confidence === "high" && result.date){
-          console.log("matched string", result.matchedString);
       }
     }, 300);
     return () => clearTimeout(timeoutId);
@@ -275,7 +298,8 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   
   return createPortal(
     <>
-    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
+    <div className="fixed inset-0 z-40" onClick={onCancel}></div>
+    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
     style={{
       top: '50px',
       left: '50%',
@@ -305,7 +329,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] font-bold text-xl! outline-none focus:outline-none min-w-0 mb-1"
+        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] placeholder:font-bold font-bold text-xl! outline-none focus:outline-none min-w-0 mb-1"
         autoFocus
       />
 
@@ -336,7 +360,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
             }`}
           >
             <Calendar className="w-3.5 h-3.5 shrink-0 " />
-            {dateLabel && <span className="whitespace-nowrap truncate max-w-[100px]">{dateLabel}</span>}
+            {<span className="whitespace-nowrap max-w-[100px] font-extralight">{selectedDate ? dateLabel : "Date"}</span>}
             {isRecurring && <RefreshCw className="w-2.5 h-2.5 shrink-0 text-gray-300" />}
             {selectedDate && (
               <X
@@ -352,7 +376,15 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           {/* Custom Date Picker */}
           {showDatePicker && (
             <CustomDatePicker
+              isAllDay={isAllDay}
               selectedDate={selectedDate}
+              todo={todo}
+              selectedTime={selectedTime}
+              onTimeSelect={(time: string) => {
+                setSelectedTime(time);
+              }}
+              setIsAllDay={setIsAllDay}
+              todos={[]}
               onDateSelect={(date: string) => {
                 setSelectedDate(date);
                 // setShowDatePicker(false);
@@ -387,6 +419,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
             }}
             className={`p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
           >
+            <div className="flex items-center gap-1">
             <Flag 
               className={`w-4 h-4 ${priority ? priorityColors[priority] : "text-gray-500"}`}
               style={{ 
@@ -395,6 +428,8 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
                       priority === "low" ? "#28A745" : "none" 
               }}
             />
+            <span className="text-white text-xs font-extralight">{priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : "Priority"}</span>
+            </div>
           </button>
           
           {/* Priority Picker */}
@@ -416,7 +451,10 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           type="button"
           className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
         >
+          <div className="flex items-center gap-1">
           <AlarmClock className="w-4 h-4" />
+          <span className="text-white text-xs font-extralight">Reminders</span>
+          </div>
         </button>
 
         {/* More Options Button */}
@@ -447,7 +485,6 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           <ColorPicker
             selectedColor={selectedColor}
             onColorSelect={(color: string) => {
-              console.log("color", color);
               setSelectedColor(color);
               setShowColorPicker(false);
             }}

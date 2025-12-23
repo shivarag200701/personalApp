@@ -19,7 +19,6 @@ const Landing = () => {
     }
     return false;
   });
-  console.log("isAuthenticated from landing", isAuthenticated);
   
   const particles = useMemo(
     () =>

@@ -35,7 +35,6 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
   const [todoToDelete, setTodoToDelete] = useState<Todo | null>(null);
   const handleDeleteConfirm = async () => {
     if (!todoToDelete?.id) {
-      console.log("todo.id is not defined");
       return;
     }
     onDelete(todoToDelete.id);

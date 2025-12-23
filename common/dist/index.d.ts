@@ -12,7 +12,8 @@ export declare const todoSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
     priority: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    completeAt: z.ZodOptional<z.ZodNullable<z.ZodISODateTime>>;
+    completeAt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    isAllDay: z.ZodBoolean;
     category: z.ZodString;
     isRecurring: z.ZodOptional<z.ZodBoolean>;
     recurrencePattern: z.ZodOptional<z.ZodNullable<z.ZodEnum<{

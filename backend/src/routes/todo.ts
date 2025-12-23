@@ -4,6 +4,7 @@ import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
 import { todoSchema, convertCompleteAtToDate, type RecurrencePattern } from "@shiva200701/todotypes";
 import { calculateNextOccurence } from "../utils/recurringTasks.js";
+import { log } from "console";
 
 const todoRouter = express();
 
@@ -21,8 +22,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "unauthorized",
     });
   }
-  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color } = data;
-
+  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay } = data;
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
      let todo = await prisma.todo.create({
@@ -30,7 +30,9 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         title,
         description,
         priority: priority ?? null,
-        completeAt: completeAtDate, // Ensure compatibility between the two types
+        dueOn: isAllDay ? completeAtDate : null,
+        dueAt: !isAllDay ? completeAtDate : null,
+        isAllDay,
         category,
         isRecurring: isRecurring || false,
         recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
@@ -49,6 +51,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 
       const baseDate = completeAtDate || new Date();
       const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
+      console.log("next occurrence", nextOccurrence);
 
       todo =await prisma.todo.update({
         where: {
@@ -64,13 +67,14 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "Todo added sucessfully",
       todo: {
         ...todo,
-        completeAt: todo.completeAt ? todo.completeAt.toISOString() : null,
+        completeAt: completeAtDate ? completeAtDate.toISOString() : null,
         completedAt: todo.completedAt ? todo.completedAt.toISOString() : null,
         recurrenceEndDate: todo.recurrenceEndDate ? todo.recurrenceEndDate.toISOString() : null,
         nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
         createdAt: todo.createdAt.toISOString(),
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
         color: todo.color ?? null,
+        isAllDay: todo.isAllDay,
       },
     })
   } catch (error) {
@@ -153,7 +157,8 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     return res.status(200).json({
       todos: todos.map(todo => ({
         ...todo,
-        completeAt: todo.completeAt ? todo.completeAt.toISOString() : null,
+        completeAt: todo.dueOn ? todo.dueOn.toISOString() : todo.dueAt ? todo.dueAt.toISOString() : null,
+        isAllDay: todo.isAllDay,
         completedAt: todo.completedAt ? todo.completedAt.toISOString() : null,
         recurrenceEndDate: todo.recurrenceEndDate ? todo.recurrenceEndDate.toISOString() : null,
         nextOccurrence: todo.nextOccurrence ? todo.nextOccurrence.toISOString() : null,
@@ -192,23 +197,68 @@ todoRouter.post("/:id/completed", async (req, res) => {
 
   try {
     if (body.completed == true) {
-      const todo = await prisma.todo.update({
+
+      // find the todo to update and check if it is a recurring task
+      const todo = await prisma.todo.findUnique({
         where: {
-          id: parseInt(todoId),
-        },
-        data: {
-          completed: body.completed,
-          completedAt: new Date(),
-        },
-      });
-      if (!todo) {
-        return res.status(200).json({
-          msg: "No todo found",
-        });
+          id: todoIdInt,
+          userId,
+        }
+      })
+      if(!todo) {
+        return res.status(404).json({
+          msg: "Todo not found",
+        })
+      }
+
+      if(todo.isRecurring && todo.recurrencePattern && todo.recurrenceInterval && todo.nextOccurrence){
+        if(todo.recurrenceEndDate && todo.nextOccurrence > todo.recurrenceEndDate){
+          await prisma.todo.update({
+            where: {
+              id: todoIdInt,
+            },
+            data: {
+              completed: body.completed,
+              completedAt: body.completed ? new Date() : null,
+              nextOccurrence: null,
+            }
+          })
+          return res.status(200).json({
+            msg: "Todo completed and no more occurrences",
+          })
+        }
+        else{
+          const newCompleteAtDate = todo.nextOccurrence;
+          const nextOccurence = calculateNextOccurence(todo.recurrencePattern as RecurrencePattern, todo.recurrenceInterval || 1, newCompleteAtDate);
+          await prisma.todo.update({
+            where :{
+              id: todoIdInt,
+            },
+            data: {
+              dueAt: !todo.isAllDay ? newCompleteAtDate : null,
+              dueOn: todo.isAllDay ? newCompleteAtDate : null,
+              nextOccurrence: nextOccurence,
+            }
+          })
+          return res.status(200).json({
+            msg: "Todo completed and next occurrence set",
+          })
+        }
+      }
+      else{
+        await prisma.todo.update({
+          where: {
+            id: todoIdInt,
+          },
+          data: {
+            completed: body.completed,
+            completedAt: body.completed ? new Date() : null,
+          },
+        })
       }
       return res.status(200).json({
-        msg: "todo completed",
-      });
+        msg: "non-recurring Todo marked as not complete",
+      })
     } else {
       const todo = await prisma.todo.update({
         where: {
@@ -287,7 +337,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       error,
     });
   }
-  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color} = data;
+  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay} = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
@@ -302,18 +352,26 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         msg: "No todo found",
       });
     }
+    let nextOccurrence = null;
+    if(isRecurring && recurrencePattern){
+      const baseDate = completeAtDate || new Date();
+      nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
+    }
     const updatedTodo = await prisma.todo.update({
       where: {id: parseInt(todoId)},
       data: {
         title,
         description,
         priority: priority ?? null,
-        completeAt: completeAtDate,
+        dueOn: isAllDay ? completeAtDate : null,
+        dueAt: !isAllDay ? completeAtDate : null,
+        isAllDay,
         category,
         isRecurring: isRecurring || false,
         recurrencePattern: isRecurring ? (recurrencePattern ?? null) : null,
         recurrenceInterval: isRecurring ? (recurrenceInterval ?? 1) : null,
         recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
+        nextOccurrence: isRecurring ? nextOccurrence : null,
         color: color ?? null,
       },
     })
@@ -321,7 +379,8 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       msg: "Todo updated successfully",
       todo: {
         ...updatedTodo,
-        completeAt: updatedTodo.completeAt ? updatedTodo.completeAt.toISOString() : null,
+        completeAt: completeAtDate ? completeAtDate.toISOString() : null,
+        isAllDay: updatedTodo.isAllDay,
         completedAt: updatedTodo.completedAt ? updatedTodo.completedAt.toISOString() : null,
         recurrenceEndDate: updatedTodo.recurrenceEndDate ? updatedTodo.recurrenceEndDate.toISOString() : null,
         nextOccurrence: updatedTodo.nextOccurrence ? updatedTodo.nextOccurrence.toISOString() : null,
@@ -347,7 +406,7 @@ todoRouter.post("/child_task", requireLogin, async(req,res)=>{
     })
   }
 
-  const { parentId, completeAt } = req.body;
+  const { parentId, completeAt, isAllDay } = req.body;
 
   if(!parentId || !completeAt) {
     return res.status(400).json({
@@ -382,14 +441,15 @@ todoRouter.post("/child_task", requireLogin, async(req,res)=>{
         throw new Error("Invalid completeAt date");
       }
 
-      if(parent.completeAt && childCompleteAt <= parent.completeAt) {
+      if(parent.dueOn && childCompleteAt <= parent.dueOn) {
         throw new Error("Child task completeAt must be after parent task completeAt");
       }
 
       const existingChild = await tx.todo.findFirst({
         where: {
           parentRecurringId: parentId,
-          completeAt: childCompleteAt,
+          dueOn: isAllDay ? childCompleteAt : null,
+          dueAt: !isAllDay ? childCompleteAt : null,
           userId,
         }
       })
@@ -426,7 +486,8 @@ todoRouter.post("/child_task", requireLogin, async(req,res)=>{
           title: parent.title,
           description: parent.description,
           priority: parent.priority,
-          completeAt: completeAtDate,
+          dueOn: isAllDay ? completeAtDate : null,
+          dueAt: !isAllDay ? completeAtDate : null,
           category: parent.category,
           userId,
           isRecurring: true,
@@ -445,7 +506,8 @@ todoRouter.post("/child_task", requireLogin, async(req,res)=>{
     })
     const formattedChild = {
       ...result.childTask,
-      completeAt: result.childTask.completeAt ? result.childTask.completeAt.toISOString() : null,
+      dueOn: result.childTask.dueOn ? result.childTask.dueOn.toISOString() : null,
+      dueAt: result.childTask.dueAt ? result.childTask.dueAt.toISOString() : null,
       completedAt: result.childTask.completedAt ? result.childTask.completedAt.toISOString() : null,
       recurrenceEndDate: result.childTask.recurrenceEndDate ? result.childTask.recurrenceEndDate.toISOString() : null,
       nextOccurrence: result.childTask.nextOccurrence ? result.childTask.nextOccurrence.toISOString() : null,

@@ -29,7 +29,6 @@ const ColorPicker = ({ selectedColor, onColorSelect, onClose, buttonRef }: Color
   // Calculate position based on button
   useEffect(() => {
     const updatePosition = () => {
-      console.log("buttonRef", buttonRef);
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
         

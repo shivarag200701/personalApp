@@ -22,7 +22,7 @@ export interface ParsedDateResult {
 };
   
   // Helper function to format date as YYYY-MM-DD
-  function formatDate(date: Date): string {
+  export function formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -281,7 +281,6 @@ export interface ParsedDateResult {
     // Weekly patterns
     const weeklyMatch = normalized.match(/(every\s+)(\d+\s+)?weeks?|weekly|each\s+week/i);
     if (weeklyMatch) {
-        console.log("this");
       return {
         isRecurring: true,
         pattern: "weekly",
@@ -293,8 +292,6 @@ export interface ParsedDateResult {
     // Every [weekday]
     const weekdayMatch = normalized.match(/every\s+\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun|mon|tue|wed|thu|fri|sat)\b/i);
     if (weekdayMatch) {
-        console.log("that");
-
         const abbreviation = weekdayMatch[1].toLowerCase();
         const weekdayName = weekdayMap[abbreviation] || abbreviation;
       return {
@@ -331,8 +328,6 @@ export interface ParsedDateResult {
     // Parse end date for recurring tasks
     const forMatch = normalized.match(/for\s+(\d+)\s+(days?|weeks?|months?|years?)/i);
     const untilMatch = normalized.match(/until\s+([^,]+)/i);
-    console.log("forMatch", forMatch);
-    console.log("untilMatch", untilMatch);
     
     let endDate: Date | null = null;
     let endDateMatchedString: string | undefined = undefined;

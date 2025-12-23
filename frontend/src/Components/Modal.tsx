@@ -10,6 +10,7 @@ export interface Todo {
   description: string;
   priority: "high" | "medium" | "low" | null;
   completeAt: string | null;
+  isAllDay: boolean;
   category: string;
   completed: boolean;
   completedAt: string | null;
@@ -32,7 +33,6 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate }: ModalProps) => {
-  console.log("preselectedDate",preselectedDate);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -61,19 +61,6 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
     return `${year}-${month}-${day}`;
   };
 
-  // Helper function to convert YYYY-MM-DD to ISO string
-  // Uses noon (12:00:00) in local timezone to avoid timezone rollover issues
-  const dateInputToIso = (dateInput: string): string => {
-    if (!dateInput) {
-      const today = new Date();
-      today.setHours(12, 0, 0, 0);
-      return today.toISOString();
-    }
-    // Parse the date input (YYYY-MM-DD) and create date at noon in local timezone
-    const [year, month, day] = dateInput.split('-').map(Number);
-    const date = new Date(year, month - 1, day, 12, 0, 0, 0);
-    return date.toISOString();
-  };
 
   useEffect(() => {
     if (todoToEdit) {
@@ -124,14 +111,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
     onClose();
   };
   const createTodo = async () => {
-    const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
-    console.log("completeAtIso",completeAtIso);
     try {
       const res =await api.post("/v1/todo/", {
         title,
         description,
-        completeAt: completeAtIso,
+        completeAt: selectedDate,
         category,
         priority: priority ?? null,
         isRecurring,
@@ -143,11 +128,10 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         addTodo(res.data.todo);
       }
       else{
-      console.log("Todo created");
       addTodo({
         title,
         description,
-        completeAt: completeAtIso,
+        completeAt: selectedDate,
         category,
         priority: priority ?? null,
         completed: false,
@@ -157,6 +141,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         recurrenceInterval,
         recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
         parentRecurringId: null,
+        isAllDay: false
       });
     }
       onClose();
@@ -171,13 +156,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
   const updateTodo = async () => {
     if (!todoToEdit?.id) return;
     
-    const completeAtIso = dateInputToIso(selectedDate);
     setIsSubmitting(true);
     try {
       await api.put(`/v1/todo/${todoToEdit.id}`, {
         title,
         description,
-        completeAt: completeAtIso,
+        completeAt: selectedDate,
         category,
         priority: priority ?? null,
         isRecurring,
@@ -186,13 +170,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         recurrenceEndDate: recurrenceEndDate ?? null,
         parentRecurringId: null,
       });
-      console.log("Todo updated");
       if (editTodo) {
         editTodo({
           ...todoToEdit,
           title,
           description,
-          completeAt: completeAtIso,
+          completeAt: selectedDate,
           category,
           priority: priority ?? null,
           isRecurring,

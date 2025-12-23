@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 
 const RequireAuth = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isLoading } = Auth();
-  console.log("authentication", isAuthenticated);
 
   const location = useLocation();
   if (isLoading) {

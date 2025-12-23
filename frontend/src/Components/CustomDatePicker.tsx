@@ -1,9 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles} from "lucide-react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles, Clock, Repeat} from "lucide-react";
 import { parseNaturalLanguageDate , type ParsedDateResult} from "../utils/nlpDateParser";
 import { RefreshCw} from 'lucide-react';
 import { createPortal } from "react-dom";
-
+import TimePicker from "./TimePicker";
+import type { Todo } from "./Modal";
+import type { RecurrencePattern } from "@shiva200701/todotypes";
+import ReccurencePicker from "./ReccurencePicker";
 interface CustomDatePickerProps {
   selectedDate: string; // YYYY-MM-DD format
   onDateSelect: (date: string) => void;
@@ -16,9 +19,27 @@ interface CustomDatePickerProps {
     recurrenceInterval?: number;
     recurrenceEndDate?: string | null;
   }) => void;
+  selectedTime: string;
+  onTimeSelect: (time: string) => void;
+  setIsAllDay: (isAllDay: boolean) => void;
+  todos: Todo[];
+  todo?: Todo;
+  isAllDay: boolean;
+  columnIndex?: number;
 }
 
-const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, index, onRecurringSelect }: CustomDatePickerProps) => {
+interface TimeOption {
+  value: string;
+  label: string;
+}
+const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, index, onRecurringSelect, selectedTime, onTimeSelect, setIsAllDay, todos, todo, isAllDay, columnIndex }: CustomDatePickerProps) => {
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [hoverDate, setHoverDate] = useState<Date | null>(null);
+  const [showReccurencePicker, setShowReccurencePicker] = useState(false);
+  const timeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const reccurenceButtonRef = useRef<HTMLButtonElement | null>(null);
+  
+  
   const [currentMonth, setCurrentMonth] = useState(() => {
     if (selectedDate) {
       const [year, month] = selectedDate.split('-').map(Number);
@@ -26,94 +47,102 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     }
     return new Date();
   });
-  
-  // Calculate initial position synchronously to avoid flash
-  const [position, setPosition] = useState(() => {
+  const getInitialPosition = () => {
     if (buttonRef?.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
         return {
           left: rect.left,
-          top: rect.top,
+          top: rect.bottom,
         };
       } else {
-        if (index <= 2) {
-          return {
-            left: rect.right + 100,
-            top: rect.top,
-          };
-        }
-        if (index >= 3) {
-          // For index >= 3, we'll need pickerHeight which isn't available yet
-          // So use a reasonable default and update in useEffect
-          return {
-            left: rect.left,
-            top: rect.top - 400, // Default height, will be updated
-          };
+        if (index <= 2){
+          if (columnIndex && columnIndex >= 3){
+            return {
+              left: rect.left,
+              top: 100 , 
+            };
+          } else {
+            return {
+              left: rect.right,
+              top: 100,
+            };
+          }
+        } else{
+          if (columnIndex && columnIndex >= 3){
+            return {
+              left: rect.left,
+              top: 50 , 
+            };
+          } else {
+            return {
+              left: rect.right,
+              top: 50,
+            };
+          }
         }
       }
     }
     return { left: 0, top: 0 };
-  });
+  }
+  // Calculate initial position synchronously to avoid flash
+  const [position, setPosition] = useState(getInitialPosition);
   
   const pickerRef = useRef<HTMLDivElement>(null);
   const [nlpInput, setNlpInput] = useState("");
   const [parsedResult, setParsedResult] = useState<ParsedDateResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  // Track if position has been calculated (starts false, set to true after first calculation)
-  const [isPositioned, setIsPositioned] = useState(false);
 
-  // Calculate position based on button
   useEffect(() => {
-      if (buttonRef?.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        const pickerHeight = pickerRef.current?.offsetHeight || 400;
-        const isMobile = window.innerWidth < 768;
-        if (isMobile) {
-          setPosition({
-            left: rect.left,
-            top: rect.bottom,
-          });
-        } else {
-            if (index <= 2){
-                setPosition({
-                    left: rect.right,
-                    top: 50,
-                })
-            }
-            if (index >= 3){
-                setPosition({
-                    left: rect.right,
-                    top: rect.top - pickerHeight/1.5,
-                })
-            }
-        }
-        setIsPositioned(true);
+    const updatePosition = () => {
+    if (buttonRef?.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
         
+        setPosition({
+          left: rect.left,
+          top: rect.bottom,
+        });
+      } else {
+        if (index <= 2){
+          if (columnIndex && columnIndex >= 3){
+            setPosition({
+                  left: rect.left,
+                  top: 100 , 
+                });
+          } else {
+            setPosition({
+              left: rect.right,
+              top: 100,
+            });
+          }
+        } else{
+          if (columnIndex && columnIndex >= 3){
+            setPosition({
+                  left: rect.left,
+                  top: 50 , 
+                });
+          } else {
+            setPosition({
+              left: rect.right,
+              top: 50,
+            });
+          }
+        }
+      }
     }
-  }, [buttonRef, index]);
+    };
+    updatePosition();
+  }, [buttonRef, index, pickerRef,selectedDate]);
+
 
   useEffect(() => {
     if (inputRef.current && buttonRef?.current) {
       inputRef.current.focus();
     }
   }, [buttonRef]);
-  // Close on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        pickerRef.current && 
-        !pickerRef.current.contains(event.target as Node) &&
-        buttonRef?.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose, buttonRef]);
 
   // Debounced NLP parsing
   useEffect(() => {
@@ -124,7 +153,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
     const timeoutId = setTimeout(() => {
       const result = parseNaturalLanguageDate(nlpInput);
-      console.log(result);
       setParsedResult(result);
       
       // Auto-apply if high confidence
@@ -134,7 +162,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   }, [nlpInput, onDateSelect, onRecurringSelect]);
 
   function handleApplyDate(){
-    console.log("parsedResult", parsedResult);
     if (parsedResult?.confidence === "high" && parsedResult?.date) {
         onDateSelect(parsedResult.date);
         
@@ -196,11 +223,42 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return date;
   };
 
+  const calculateNextOccurence = (
+    pattern: RecurrencePattern,
+    interval: number,
+    lastOccurence: Date
+): Date => {
+    const next = new Date(lastOccurence);
+    next.setHours(0, 0, 0, 0);
+    switch (pattern){
+        case "daily":
+            next.setDate(next.getDate() + interval);
+            break;
+        case "weekly":
+            next.setDate(next.getDate() + interval * 7);
+            break;
+        case "monthly":
+            next.setMonth(next.getMonth() + interval);
+            break;
+        case "yearly":
+            next.setFullYear(next.getFullYear() + interval);
+            break;
+        default:
+            throw new Error(`Invalid recurrence pattern: ${pattern}`);
+    }
+    return next;
+}
+
   const dateToInput = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+  const dateToLocaleDate = (date: Date): string => {
+    const localeDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const formattedDate = localeDate.replace(",", "").trim();
+    return formattedDate;
   };
 
   const formatDateLabel = (date: Date): string => {
@@ -210,6 +268,16 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   const formatDayName = (date: Date): string => {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
+
+  const timeStringToTimeOption = (timeString: string): TimeOption => {
+    const [hours, minutes] = timeString.split(":")
+    const hour24 = parseInt(hours);
+    const ampm = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 || 12;
+    const label = `${hour12}:${minutes} ${ampm}`;
+
+    return {value: timeString, label: label};
+  }
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -247,11 +315,58 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
   };
 
+  
+
+  const recurringOccurenceDates = useMemo(() => {
+    
+    const occurenceSet = new Set<string>();
+
+
+    if (!todo?.recurrencePattern || !todo?.recurrenceInterval || !todo?.completeAt) return occurenceSet;
+
+    const startDate = new Date(todo.completeAt);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = todo.recurrenceEndDate ? new Date(todo.recurrenceEndDate) : null;
+
+    const calenderStart = new Date(currentMonth);
+    calenderStart.setDate(1);
+    calenderStart.setHours(0, 0, 0, 0);
+
+    const calenderEnd = new Date(currentMonth);
+    calenderEnd.setMonth(calenderEnd.getMonth() + 2);
+    calenderEnd.setDate(0);
+
+    let currentOccurence = new Date(startDate);
+
+    const maxIterations = 1000;
+    let iteration = 0;
+
+    while (iteration < maxIterations) {
+      if (currentOccurence > calenderEnd) break;
+      if (endDate && currentOccurence > endDate) break;
+
+      if (currentOccurence >= today && currentOccurence >= calenderStart) {
+        occurenceSet.add(dateToInput(currentOccurence));
+      }
+
+      currentOccurence = calculateNextOccurence(todo.recurrencePattern, todo.recurrenceInterval, currentOccurence);
+      iteration++;
+    }
+
+    return occurenceSet
+  },[todo?.recurrencePattern, todo?.recurrenceInterval, todo?.completeAt, todo?.recurrenceEndDate, currentMonth, today]);
+
+  const isRecurringOccurence = (date: Date): boolean => {
+    if (!date) return false;
+    return recurringOccurenceDates.has(dateToInput(date));
+  }
+
   const isSelectedDate = (date: Date | null): boolean => {
     if (!date) return false;
     if (!selectedDate) return false;
     const dateStr = dateToInput(date);
-    return dateStr === selectedDate;
+    return dateStr === selectedDate.split("T")[0];
   };
 
   const isToday = (date: Date | null): boolean => {
@@ -320,23 +435,52 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   const nextMonthDays = getDaysInMonth(nextMonth);
   const nextMonthLabel = nextMonth.toLocaleDateString('en-US', { month: 'short' });
+
+  const getTaskCountForDate = useMemo(() => {
+    
+    //hashmap for date to task
+    const dateCountMap = new Map<string, number>();
+
+    todos.forEach((todo) =>{
+      if(!todo.completed && todo.completeAt){
+        const date = todo.completeAt.split("T")[0];
+        dateCountMap.set(date, (dateCountMap.get(date) || 0) + 1);
+      }
+    })
+
+    return (date: string):number => {
+      return dateCountMap.get(date) || 0;
+    }
+  },[todos])
+
+  
+  
+  const convert24hrTo12hr = (time: string): string => {
+    const [hours, minutes] = time.split(":");
+    const hour24 = parseInt(hours);
+    const ampm = hour24 >= 12 ? "PM" : "AM";
+    const hour12 = hour24 % 12 || 12;
+    return `${hour12.toString()}:${minutes.toString()} ${ampm}`;
+  }
+ 
+  
   
   return createPortal(
     <>
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40"
-        onClick={onClose}
+        onClick={()=>{
+          onClose();
+        }}
       />
       {/* Date Picker */}
       <div
         ref={pickerRef}
         className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[250px] transition-opacity duration-150"
         style={{
-          left: `${position.left}px`,
-          top: `${position.top}px`,
-          opacity: isPositioned || (position.left !== 0 && position.top !== 0) ? 1 : 0,
-          pointerEvents: isPositioned || (position.left !== 0 && position.top !== 0) ? 'auto' : 'none',
+          ...position,
+          transform: `${columnIndex && columnIndex >= 3 ? "translateX(-100%)" : ""}`,
         }}
       >
       {/* NLP Input Section */}
@@ -381,12 +525,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         )}
       </div>
 
-      {/* Current Selected Date Header */}
-      {selectedDate && !nlpInput && (
-        <div className="p-3 border-b border-gray-800 text-gray-500 text-sm">
-          <div>Selected: {selectedDate}</div>
-        </div>
-      )}
 
       {/* Quick Options */}
       <div className="p-2 border-b border-gray-800 space-y-1">
@@ -459,32 +597,48 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         </div>
 
         {/* Days of Week */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        { !hoverDate ? (<div className="grid grid-cols-7 gap-1 mb-2">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
             <div key={idx} className="text-center text-xs text-[#6B6B75] py-1">
               {day}
             </div>
           ))}
-        </div>
+        </div>):(
+          <div className="flex items-center justify-center gap-1">
+            <div className=" font-light text-center text-[10px] text-[#6B6B75] py-2">
+              {dateToLocaleDate(hoverDate)}
+            </div>
+            <div className="w-[2px] h-[2px] bg-white font-light rounded-full"/>
+            <div className="text-center text-[10px] text-white font-light py-2">
+              {getTaskCountForDate(hoverDate?.toLocaleDateString("en-CA").split("T")[0])}
+            </div>
+            <div className="text-center text-[10px] text-white font-light py-2">
+              {getTaskCountForDate(hoverDate?.toISOString().split("T")[0]) == 0 ? "tasks" : getTaskCountForDate(hoverDate?.toISOString().split("T")[0]) > 1 ? "tasks" : "task"}
+              </div>
+          </div>
+
+      )}
 
         {/* Calendar Grid */}
         <div className="grid grid-cols-7 gap-1">
           {days.map((date, idx) => {
             if (!date) {
-              return <div key={`empty-${idx}`} className="aspect-square"></div>;
+              return <div key={`empty-${idx}`} className="aspect-square p-1"></div>;
             }
-
             const isSelected = isSelectedDate(date);
             const isTodayDate = isToday(date);
             const isPast = isPastDate(date);
             const isParsedDate = parsedResult?.date === dateToInput(date);
-
+            const isRecurringDate = isRecurringOccurence(date);
+            
             return (
               <button
+                onMouseEnter={() => {setHoverDate(date);}}
+                onMouseLeave={() => {setHoverDate(null);}}
                 key={date.getTime()}
                 onClick={() => handleDateClick(date)}
                 disabled={isPast}
-                className={`aspect-square rounded-lg text-sm transition-colors cursor-pointer ${
+                className={`w-full h-full aspect-square rounded-full text-sm transition-colors cursor-pointer ${
                   isSelected
                     ? "bg-red-500 text-white font-semibold"
                     : isParsedDate
@@ -493,10 +647,16 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                     ? "bg-[#27272B] text-white"
                     : isPast
                     ? "text-[#4A4A4A] cursor-not-allowed"
+                    : isRecurringDate
+                    ? "border border-dashed border-white/50 text-white "
                     : "text-[#A2A2A9] hover:bg-[#27272B] hover:text-white"
-                }`}
+                }
+                    `}
               >
+                <div className="flex flex-col items-center">
                 {date.getDate()}
+                {getTaskCountForDate(dateToInput(date)) > 0 && <div className="h-[3px] w-[3px] bg-white rounded-full"/>}
+                </div>
               </button>
             );
           })}
@@ -537,10 +697,41 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           </div>
         </div>
       </div>
-      <div className="border-t border-gray-800 p-2 text-xs text-[#6B6B75]">
-            Repet
+      <div className="flex-col items-center justify-between">
+      <div className="border-t border-gray-800 p-2.5 text-xs text-[#A2A2A9] flex items-center justify-center text-center gap-2">
+        <button ref={timeButtonRef} className="w-full p-1.5 border border-gray-600 flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-[#27272B] transition-colors duration-300" onClick={() => {setShowTimePicker(true)}}>
+            <Clock className="w-3.5 h-3.5 text-[#A2A2A9]" />
+            {!isAllDay ? (<div className="text-white">{convert24hrTo12hr(selectedTime)}</div>) : (<div className="text-white">Time</div>)}
+            </button>
+        </div>
+        <div className="w-full p-2.5 text-[#A2A2A9] text-xs flex items-center justify-center text-center gap-2">
+          <button ref={reccurenceButtonRef} className="w-full p-1.5 border border-gray-600 flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-[#27272B] transition-colors duration-300" onClick={() => {setShowReccurencePicker(true)}}>
+            <Repeat className="w-3.5 h-3.5 text-[#A2A2A9]" />
+            <div>Repeat</div>
+            </button>
+        </div>
         </div>
     </div>
+    {showTimePicker && (
+      <TimePicker
+        onClose={() => setShowTimePicker(false)}
+        buttonRef={timeButtonRef}
+        selectedTime={timeStringToTimeOption(selectedTime)}
+        onTimeSelect={(time: string) => {
+          onTimeSelect(time);
+        }}
+        setIsAllDay={setIsAllDay}
+      />
+    )}
+    {showReccurencePicker && (
+      <ReccurencePicker
+        onClose={() => setShowReccurencePicker(false)}
+        buttonRef={reccurenceButtonRef}
+        onDateSelect={onDateSelect}
+        onRecurringSelect={onRecurringSelect}
+
+      />
+    )}
     </>,
     document.body
   );

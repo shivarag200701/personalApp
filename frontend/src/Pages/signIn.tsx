@@ -24,9 +24,9 @@ const SignIn = () => {
       });
     }
   }, [searchParams, navigate, refreshAuth]);
-  useEffect(() => {
-    refreshAuth();
-  }, []); 
+  // useEffect(() => {
+  //   refreshAuth();
+  // }, []); 
 
   return <SignInForm />;
 };

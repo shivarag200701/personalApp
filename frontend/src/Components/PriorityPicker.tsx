@@ -10,13 +10,23 @@ interface PriorityPickerProps {
 }
 
 const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef }: PriorityPickerProps) => {
-  const [position, setPosition] = useState({ left: 0, top: 0 });
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  const getInitialPosition = () => {
+    if (buttonRef?.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top + rect.height,
+      };
+    }
+    return { left: 0, top: 0 };
+  };
+  const [position, setPosition] = useState(getInitialPosition);
 
   // Calculate position based on button
   useEffect(() => {
     const updatePosition = () => {
-      console.log("buttonRef", buttonRef);
       if (buttonRef?.current) {
         const rect = buttonRef.current.getBoundingClientRect();
         

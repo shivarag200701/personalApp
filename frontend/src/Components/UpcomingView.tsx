@@ -1,19 +1,19 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat, Calendar, AlarmClock} from "lucide-react";
 import type { Todo } from "./Modal";
 import { Checkbox } from "./ui/checkbox";
-import { getUpcomingDateRange, formatUpcomingDateHeader, isTaskOnDate } from "@shiva200701/todotypes";
+import { getUpcomingDateRange, formatUpcomingDateHeader} from "@shiva200701/todotypes";
 import WarningModal from "./WarningModal";
 import InlineTaskForm from "./InlineTaskForm";
 import completedSound from "@/assets/completed.wav";
 import {DndContext, useDraggable, useDroppable, DragOverlay, MouseSensor, useSensor, useSensors, TouchSensor } from "@dnd-kit/core";
 import CalendarView from "./CalendarView";
 import { toast } from "sonner";
-
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
 import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+
 
 
 interface UpcomingViewProps {
@@ -34,6 +34,7 @@ interface UpcomingViewProps {
 interface DraggableTaskProps {
     todo: Todo;
     index: number;
+    columnIndex: number;
     onToggleComplete: (todoId: string | number) => void;
     onDelete: (todo: Todo) => void;
     onEdit: (todo: Todo) => void;
@@ -46,6 +47,7 @@ interface DraggableTaskProps {
     playSound: () => void;
     onDuplicateTask: (todo: Todo) => void;
     onTaskUpdated: (todo: Todo) => void;
+    todos: Todo[];
 }
 
 interface DroppableDateColumnProps {
@@ -60,11 +62,14 @@ interface DroppableDateColumnProps {
     isFormOpen: boolean;
     onOpenForm: () => void;
     onCloseForm: () => void;
+    todos: Todo[];
+    columnIndex: number;
 }
 
 const DraggableTask = ({
     todo,
     index,
+    columnIndex,
     onToggleComplete,
     onDelete,
     onViewDetails,
@@ -76,6 +81,7 @@ const DraggableTask = ({
     playSound,
     onDuplicateTask,
     onTaskUpdated,
+    todos,
 }: DraggableTaskProps) => {
     const {attributes, listeners, setNodeRef, isDragging} = useDraggable({
         id: todo.id || `temp-${index}`,
@@ -111,6 +117,17 @@ const DraggableTask = ({
         todoDate.getFullYear() === now.getFullYear() &&
         todoDate.getMonth() === now.getMonth() &&
         todoDate.getDate() === now.getDate()
+      );
+    };
+
+    const isTomorrow = (completeAt: string | null | undefined): boolean => {
+      if (!completeAt) return false;
+      const todoDate = new Date(completeAt);
+      const now = new Date();
+      return (
+        todoDate.getFullYear() === now.getFullYear() &&
+        todoDate.getMonth() === now.getMonth() &&
+        todoDate.getDate() === now.getDate() + 1
       );
     };
 
@@ -169,18 +186,29 @@ const DraggableTask = ({
           console.error("Error updating priority", error);
         }
       }
+      const getTimeFromDate12hr = (date: string): string => {
+        if(!date) return "";
+        const dateObj = new Date(date);
+        return dateObj.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })
+      }
 
     
       return (
         <>
         {isEditing ? (
           <InlineTaskForm
+            columnIndex={columnIndex}
             index={index}
             preselectedDate={todo.completeAt ? new Date(todo.completeAt) : new Date()}
             todo={todo}
             onCancel={() => setIsEditing(false)}
             onSuccess={() => setIsEditing(false)}
             onUpdate={onTaskUpdated}
+            todos={todos}
           />
         ):(
         <div
@@ -321,14 +349,31 @@ const DraggableTask = ({
               <div>{todo.category}</div>
             </div>
           )}
+          <div className="flex items-center gap-2">
+          {!todo.isAllDay && (
+            <div className={`mt-2 ${isToday(todo.completeAt) ? "text-[#f46d63]" : isTomorrow(todo.completeAt) ? "text-[#b77424]" : "text-[#9062d4]"}  w-fit  rounded-md text-xs flex gap-1`}>
+              <div className="flex justify-center items-center">
+                <Calendar className="w-3 h-3" />
+              </div>
+              <div>{getTimeFromDate12hr(todo.completeAt ?? "")}</div>
+            </div>
+          )}
           {todo.isRecurring  && (
-            <div className={`mt-2 ${isToday(todo.completeAt) ? "text-green-500" : "text-blue-500"}  w-fit  rounded-md text-xs flex gap-1`}>
+            <div className={`mt-2 ${isToday(todo.completeAt) ? "text-[#f46d63]" : isTomorrow(todo.completeAt) ? "text-[#b77424]" : "text-[#9062d4]"}  w-fit  rounded-md text-xs flex gap-1`}>
               <div className="flex justify-center items-center">
                 <Repeat className="w-3 h-3" />
               </div>
               <div>{todo.recurrencePattern}</div>
             </div>
           )}
+          {!todo.isAllDay && (
+            <div className="mt-2 w-fit  rounded-md text-xs flex gap-1 text-gray-400 hover:text-white transition-colors cursor-pointer">
+                <div className="flex justify-center items-center">
+                  <AlarmClock className="w-3 h-3" />
+                </div>
+            </div>
+          )}
+          </div>
           </div>
         </div>
       </div>
@@ -349,16 +394,18 @@ const DroppableDateColumn = ({
     isFormOpen,
     onOpenForm,
     onCloseForm,
-}: DroppableDateColumnProps) => {
+    todos,
+    columnIndex,
+}: DroppableDateColumnProps) => {    
     const {setNodeRef, isOver} = useDroppable({
-        id: date.toISOString(),
+        id: date.toLocaleDateString('en-CA'),
         data:{
             date
-        }
+        },
     });
+    
 
     const handleAddTaskClick = () => {
-        console.log("handleAddTaskClick");
         onOpenForm();
     };
 
@@ -414,6 +461,8 @@ const DroppableDateColumn = ({
                         </button>
                     ) : (
                         <InlineTaskForm
+                            columnIndex={columnIndex}
+                            todos={todos}
                             index={dayTasks.length}
                             preselectedDate={date}
                             onCancel={handleCancel}
@@ -471,22 +520,13 @@ const UpcomingView = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Helper function to check if there are overdue tasks
-  const hasOverdueTasks = useMemo(() => {
-    // Check for overdue tasks using local timezone
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return todos.some(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < now
-    );
-  }, [todos]);
+
   const getOverDueTasks = (): Todo[] => {
-    // Get start of today - tasks before today are overdue
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    //For all day todo
+    const todayLocalStr = new Date().toLocaleDateString('en-CA');
     
     return todos.filter(
-      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt) < startOfToday
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt).toLocaleDateString('en-CA') < todayLocalStr
     );
   };
 
@@ -503,7 +543,6 @@ const UpcomingView = ({
     } else {
         dayCount = 5;
     }
-    console.log("hasOverdueTasks", hasOverdueTasks);
     // Reduce by 1 if overdue tasks are present (to make room for overdue column)
     return getOverDueTasks().length > 0 ? dayCount - 1 : dayCount;
   };
@@ -593,7 +632,6 @@ const UpcomingView = ({
   };
 
   const handleShowMonthYearPicker = () => {
-    console.log("handleShowMonthYearPicker");
     setShowMonthYearPicker(!showMonthYearPicker);
   };
 
@@ -678,18 +716,15 @@ const UpcomingView = ({
   };
 
   const getTasksForDate = (date: Date): Todo[] => {
+    const formatted = date.toLocaleDateString('en-CA')
     return todos.filter(
-      (todo) => !todo.completed && isTaskOnDate(todo.completeAt, date)
+      (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt).toLocaleDateString('en-CA') === formatted
     );
   };
 
-  
-  console.log("overDueTasks", getOverDueTasks());
   const handleAddTask = (date: Date) => {
     // Create date in local timezone at noon to avoid timezone rollover issues
-    const noonOfDay = new Date(date);
-    noonOfDay.setHours(12, 0, 0, 0);
-    onAddTask(noonOfDay.toISOString());
+    onAddTask(date.toISOString());
   };
 
   const handleDeleteClick = (todo: Todo) => {
@@ -734,27 +769,41 @@ const UpcomingView = ({
       return format(date, "MMM d, yyyy"); // Month day, year
     }
   };
+  const combineDateAndTime = (date: string, time: string) => {
+    if(!date || !time) return "";
+    const dateObj = new Date(date);
+    const [hours, minutes] = time.split(":").map(Number);
+
+    dateObj.setHours(hours, minutes, 0, 0);
+    return dateObj.toISOString();
+  }
 
   async function handleDragEnd(event: DragEndEvent) {
     
-    console.log("handleDragEnd");
     const {active, over} = event;
     setActiveTodo(null);
-
+    const overdueDate = new Date();
+    overdueDate.setDate(overdueDate.getDate() - 1);
     if(!over || !active.data.current) return;
 
+    if(over.id && over.id === overdueDate.toLocaleDateString('en-CA')){
+      return;
+    }
     const todo = active.data.current?.todo as Todo;
     const newDateString = over.id as string;
-    console.log("todo",todo);
     //old date for undo
     const oldDate = todo.completeAt ? new Date(todo.completeAt) : null;
-
+    const time = oldDate ? oldDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: false
+    }) : null;
     //parse
     const newDate = new Date(newDateString);
 
     //don't update if dropped on current data
     const currentDate = todo.completeAt ? new Date(todo.completeAt) : null;
-
+    const newDateTime = combineDateAndTime(newDateString, time ?? "");
     if(
         currentDate &&
         currentDate.getFullYear() === newDate.getFullYear() &&
@@ -763,14 +812,10 @@ const UpcomingView = ({
     ){
         return;
     }
-    // Use local timezone at noon to avoid timezone rollover issues
-    const noonOfDay = new Date(newDate);
-    noonOfDay.setHours(12, 0, 0, 0);
-    const newCompleteAt = noonOfDay.toISOString();
-    console.log("newCompleteAt", newCompleteAt);
+
     const updatedTodo = {
         ...todo,
-        completeAt: newCompleteAt,
+        completeAt: newDateTime,
     };
     onUpdateTodo(updatedTodo);
     toast(
@@ -824,10 +869,11 @@ const UpcomingView = ({
         const payload: any = {
             title: todo.title,
             description: todo.description,
-            completeAt: newCompleteAt,
+            completeAt: newDateTime,
             category: todo.category,
             priority: todo.priority ?? null,
             isRecurring: todo.isRecurring || false,
+            isAllDay: todo.isAllDay || false,
         };
         
         // Only include recurrence fields if the todo is recurring
@@ -838,7 +884,6 @@ const UpcomingView = ({
                 payload.recurrenceEndDate = todo.recurrenceEndDate;
             }
         }
-        console.log("payload", payload);
         await api.put(`/v1/todo/${todo.id}`, payload);
         }catch(error){
             console.error("Error updating todo", error);
@@ -986,6 +1031,7 @@ const UpcomingView = ({
             const isFormOpen = openFormDate === overdueDateKey;
             return (
               <DroppableDateColumn
+                columnIndex={-1}
                 key={overdueDateKey}
                 date={overdueDate}
                 dayTasks={overDueTasks}
@@ -1005,11 +1051,13 @@ const UpcomingView = ({
                     onTaskUpdated(todo);
                   }
                 }}
+                todos={todos}
               >
                 {overDueTasks.map((todo, taskIndex) => (
                   <DraggableTask
                     key={todo.id || `temp-overdue-${todo.title}`}
                     todo={todo}
+                    columnIndex={-1}
                     index={taskIndex}
                     onToggleComplete={onToggleComplete}
                     onDelete={handleDeleteClick}
@@ -1027,6 +1075,7 @@ const UpcomingView = ({
                         onTaskUpdated(todo);
                       }
                     }}
+                    todos={todos}
                   />
                 ))}
               </DroppableDateColumn>
@@ -1043,6 +1092,7 @@ const UpcomingView = ({
           const isFormOpen = openFormDate === dateKey;
           return (
             <DroppableDateColumn
+              columnIndex={index}
               key={dateKey}
               date={date}
               dayTasks={dayTasks}
@@ -1061,11 +1111,13 @@ const UpcomingView = ({
                   onTaskUpdated(todo);
                 }
               }}
+              todos={todos}
             >
                 {dayTasks.map((todo, taskIndex) => (
                   <DraggableTask
                     key={todo.id || `temp-${index}-${todo.title}`}
                     todo={todo}
+                    columnIndex={index}
                     index={taskIndex}
                     onToggleComplete={onToggleComplete}
                     onDelete={handleDeleteClick}
@@ -1083,6 +1135,7 @@ const UpcomingView = ({
                           onTaskUpdated(todo);
                         }
                       }}
+                      todos={todos}
                   />
                 ))}
             </DroppableDateColumn>

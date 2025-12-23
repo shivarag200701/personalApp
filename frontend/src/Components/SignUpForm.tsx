@@ -58,7 +58,6 @@ const SignUpForm = () => {
     } catch (error) {
       // console.error("error signing in", error);
       if (isAxiosError(error)) {
-        console.log(error.response?.data.msg);
 
         setError(error.response?.data.msg);
       } else {

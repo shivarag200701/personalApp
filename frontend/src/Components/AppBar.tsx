@@ -28,14 +28,12 @@ const AppBar = () => {
   async function logout() {
     try {
       await api.post("/v1/user/logout");
-      console.log("logged out");
       
       navigate("/signin");
     } catch (err) {
       console.log(err);
     }
   }
-console.log("profilePicture:", profilePicture);
 
   return (
     <div className="flex justify-between items-center py-4">

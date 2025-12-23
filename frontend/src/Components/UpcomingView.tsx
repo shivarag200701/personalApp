@@ -166,25 +166,27 @@ const DraggableTask = ({
       };
       const [isEditing, setIsEditing] = useState(false);
 
-      const handlePrioritySelect = async (todo: Todo) => {
-        try {
-          const response = await api.put(`/v1/todo/${todo.id}`, {
-            title: todo.title,
-            description: todo.description,
-            completeAt: todo.completeAt,
-            category: todo.category,
-            priority: todo.priority ?? null,
-            isRecurring: todo.isRecurring,
-            recurrencePattern: todo.recurrencePattern ?? null,
-            recurrenceInterval: todo.recurrenceInterval ?? null,
-            recurrenceEndDate: todo.recurrenceEndDate ?? null,
-          });
-          onTaskUpdated(response.data.todo);
-          setOpenDropdownId(null);
-          setDropdownPosition(null);
-        } catch (error) {
+      const handlePrioritySelect = (todo: Todo) => {
+        // Optimistic update - update UI first
+        onTaskUpdated(todo);
+        setOpenDropdownId(null);
+        setDropdownPosition(null);
+        
+        // Fire-and-forget API call
+        api.put(`/v1/todo/${todo.id}`, {
+          title: todo.title,
+          description: todo.description,
+          completeAt: todo.completeAt,
+          category: todo.category,
+          priority: todo.priority ?? null,
+          isRecurring: todo.isRecurring,
+          recurrencePattern: todo.recurrencePattern ?? null,
+          recurrenceInterval: todo.recurrenceInterval ?? null,
+          recurrenceEndDate: todo.recurrenceEndDate ?? null,
+          isAllDay: todo.isAllDay,
+        }).catch(error => {
           console.error("Error updating priority", error);
-        }
+        });
       }
       const getTimeFromDate12hr = (date: string): string => {
         if(!date) return "";
@@ -207,7 +209,10 @@ const DraggableTask = ({
             todo={todo}
             onCancel={() => setIsEditing(false)}
             onSuccess={() => setIsEditing(false)}
-            onUpdate={onTaskUpdated}
+            onUpdate={(todo) => {
+              onTaskUpdated(todo);
+              setIsEditing(false);
+            }}
             todos={todos}
           />
         ):(

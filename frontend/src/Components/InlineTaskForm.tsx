@@ -147,7 +147,23 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     try {
       let res;
       if (todo?.id) {
+        console.log("updating todo", todo)
         // Update existing todo
+        onUpdate({
+          ...todo,
+          title,
+          description,
+          completeAt: selectedDate,
+          category,
+          completed: todo?.completed || false,
+          completedAt: todo?.completedAt || null,
+          priority: priority ?? null,
+          isRecurring,
+          recurrencePattern: recurrencePattern ?? null,
+          recurrenceInterval: recurrenceInterval ?? null,
+          recurrenceEndDate: recurrenceEndDate ?? null,
+          isAllDay,
+        });
         res = await api.put(`/v1/todo/${todo.id}`, {
           title,
           description,
@@ -160,25 +176,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
         });
-        onUpdate(res.data.todo);
-      } else {
-        res = await api.post("/v1/todo/", {
-          title,
-          description,
-          completeAt: selectedDate,
-          isAllDay,
-          category,
-          priority: priority ?? null,
-          isRecurring,
-          recurrencePattern: recurrencePattern ?? null,
-          recurrenceInterval: recurrenceInterval ?? null,
-          recurrenceEndDate: recurrenceEndDate ?? null,
-          color: 'bg-purple-500',
-        });
-      }
-
-      if (res.data.todo) {
-        onSuccess(res.data.todo);
       } else {
         onSuccess({
           ...todo,
@@ -196,6 +193,20 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           parentRecurringId: todo?.parentRecurringId || null,
           isAllDay,
         });
+        res = await api.post("/v1/todo/", {
+          title,
+          description,
+          completeAt: selectedDate,
+          isAllDay,
+          category,
+          priority: priority ?? null,
+          isRecurring,
+          recurrencePattern: recurrencePattern ?? null,
+          recurrenceInterval: recurrenceInterval ?? null,
+          recurrenceEndDate: recurrenceEndDate ?? null,
+          color: 'bg-purple-500',
+        });
+
       }
 
       // Reset form

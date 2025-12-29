@@ -369,7 +369,6 @@ const DraggableTask = ({
               <div className="flex justify-center items-center">
                 <Repeat className="w-3 h-3" />
               </div>
-              <div>{todo.recurrencePattern}</div>
             </div>
           )}
           {!todo.isAllDay && (
@@ -993,13 +992,13 @@ const UpcomingView = ({
   }
 
   return (
-    <div className="flex flex-col mt-5 flex-1 min-h-0 px-10">
+    <div className="flex flex-col mt-5 flex-1 min-h-0">
       {/* Header */}
-      <div className="flex justify-between items-end mb-4 border-b-2 border-white/10 pb-4">
+      <div className="flex justify-between items-end mb-4 border-b-2 border-white/10 pb-4 px-10">
         {viewType === "board" && (
           <>
           <div className="flex flex-col gap-2">
-          <h1 className="text-white text-2xl md:text-3xl font-bold hidden sm:block">Upcoming</h1>
+          <h1 className="text-white text-2xl md:text-3xl font-bold ">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
               className="flex items-center gap-2 text-white cursor-pointer hover:text-white transition-colors py-1.5 hover:bg-white/10 select-none"
@@ -1090,19 +1089,19 @@ const UpcomingView = ({
           </div>
         </>
         )}
-        <div className="flex items-center  border border-white/10 rounded-md ">
+        <div className="flex items-center  border border-white/10 rounded-sm ">
           {viewType === "board" && (
             <>
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-2  hover:bg-white/5 cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1  hover:bg-white/5 cursor-pointer"
           >
             <ChevronLeft className="w-4  h-4" />
           </button>
           <div className="w-px h-4 bg-white/10"/>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  hover:bg-white/5 text-x font-sm cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-1  hover:bg-white/5 text-x font-sm cursor-pointer"
           >
             Today
           </button>
@@ -1110,7 +1109,7 @@ const UpcomingView = ({
 
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-2  hover:bg-white/5 cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-1  hover:bg-white/5 cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

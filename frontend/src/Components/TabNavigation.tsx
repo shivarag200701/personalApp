@@ -29,9 +29,9 @@ const TabNavigation = ({ activeTab, onTabChange, rightContent }: TabNavigationPr
   ];
 
   return (
-    <div className="flex justify-between items-center mb-5  border-b border-gray-800">
+    <div className="flex justify-between items-center p-5">
       <div className="flex gap-2">
-      {tabs.map((tab) => {
+      {/* {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
         
@@ -53,7 +53,7 @@ const TabNavigation = ({ activeTab, onTabChange, rightContent }: TabNavigationPr
             <span>{tab.label}</span>
           </button>
         );
-      })}
+      })} */}
       </div>
       {rightContent && (
         <div className="flex items-center">

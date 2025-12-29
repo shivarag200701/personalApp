@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import type {DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import api from "../utils/api";
 import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+import CustomDatePicker from "./CustomDatePicker";
 
 
 
@@ -27,8 +28,8 @@ interface UpcomingViewProps {
   onTaskCreated?: (todo: Todo) => void;
   onDuplicateTask: (todo: Todo) => void;
   onTaskUpdated: (todo: Todo) => void;
-  viewType?: "board" | "calendar";
-  onViewTypeChange?: (viewType: "board" | "calendar") => void;
+  viewType?: string;
+  onViewTypeChange?: (viewType: string) => void;
 }
 
 interface DraggableTaskProps {
@@ -221,7 +222,7 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      className={`p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.3)] ${openDropdownId === todo.id ? "z-50": ""}`}
+      className={`p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_0px_12px_rgba(0,0,0,0.3)] ${openDropdownId === todo.id ? "z-50": ""}`}
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
@@ -408,6 +409,28 @@ const DroppableDateColumn = ({
             date
         },
     });
+    function roundToNearest15Minutes(date: Date) {
+
+      const ms = 1000 * 60 * 15
+  
+      const roundedDate = new Date(Math.ceil(date.getTime() / ms) * ms);
+      return roundedDate.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: false
+      })
+  
+    }
+    
+    const [showDatePicker, setShowDatePicker] = useState(false)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const [selectedDate, setSelectedDate] = useState<string>("")
+    const [selectedTime,setSelectedTime] = useState<string>(roundToNearest15Minutes(new Date()))
+    const [isAllDay, setIsAllDay] = useState(true)
+    const divRef = useRef<HTMLDivElement>(null)
+    const [isTopScrolled,setIsTopScrolled] = useState(false)   
+    const [isBottomScrolled,setIsBottomScrolled] = useState(false)
+    console.log("isToday", isToday);
     
 
     const handleAddTaskClick = () => {
@@ -428,43 +451,100 @@ const DroppableDateColumn = ({
         onCloseForm();
     };
 
+    useEffect(() => {    
+        
+      const handleScroll = () => {
+
+        if(divRef.current){
+          if(divRef.current.scrollTop > 0){
+            setIsTopScrolled(true)
+          } else {
+            setIsTopScrolled(false)
+          }
+          if(divRef.current.scrollTop + divRef.current.clientHeight < divRef.current.scrollHeight){
+            setIsBottomScrolled(true)
+          } else {
+            setIsBottomScrolled(false)
+          }
+        }
+      }
+      const currentDiv = divRef.current
+      if(currentDiv){
+        currentDiv.addEventListener('scroll', handleScroll)
+      }
+
+      return () => {
+        if(currentDiv){
+          currentDiv.removeEventListener('scroll', handleScroll)
+        }
+      }
+    },[])
+
     return (
         <div
             ref={setNodeRef}
-            className={`group flex flex-col bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 min-h-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-colors ${
-                isToday ? "ring-2 ring-purple-500/50 border-purple-500/30" : ""
-              } ${isOver ? "ring-2 ring-purple-500/70 border-purple-500/50 bg-[#101018]/90" : ""}`}
+            className={`flex flex-col relative px-2  transition-colors `}
         >
             
             {/* Date Header */}
-            <div className="mb-4 pb-3 border-b border-white/10">
-                <div className="flex items-center justify-between mb-1">
+            <div className="pb-2">
+                <div className={`flex items-center ${isOverdue ? "justify-between" : "gap-4"} mb-1`}>
                     <div className="text-white text-sm font-semibold">
                         {isOverdue ? "Overdue" : formatUpcomingDateHeader(date)}
                     </div>
+                    {!isOverdue && (
                     <div className="text-[#A2A2A9] text-xs">
                         {dayTasks.length}
+                    </div>)}
+                    <div className="flex items-center gap-2">
+                      {isOverdue && (
+                        <>
+                        <button className="text-white/50 cursor-pointer text-xs hover:text-white transition-colors" 
+                        onClick = {() => setShowDatePicker(!showDatePicker)}
+                        ref={buttonRef}
+                        >
+                        Reschedule
+                      </button>
+                      <div className="text-[#A2A2A9] text-xs">
+                        {dayTasks.length}
+                    </div>
+                    </>
+                    )}
+                      
                     </div>
                 </div>
             </div>
+          {isTopScrolled && <div className="h-px rounded-full bg-white/20 w-full"></div>}
 
             {/* Tasks Container - Only tasks should scroll */}
-            <div className="mb-4 space-y-3 max-h-[350px] overflow-y-auto scrollbar-hide-on-hover">
+            <div className={`space-y-3 p-2 max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-hide-on-hover`}
+              ref={divRef}
+              >
                 {children}
+                {isOver && (
+                  <div className="w-full h-[100px] rounded-xl bg-white/10" />
+                )}
             </div>
+
+            {isBottomScrolled && <div className="h-px rounded-full bg-white/20 w-full"></div>}
             
             {/* Add Task Button and Inline Form - Outside scroll container, always visible */}
             {!isOverdue && (
                 <>
-                    {!isFormOpen ? (
+                    {!isFormOpen  ? ( 
+                      !isOver && (
                         <button
                             onClick={handleAddTaskClick}
-                            className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full border border-white/5 hover:border-white/10 hover:bg-white/5"
+                            className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full  hover:border-white/10 "
                         >
-                            <Plus className="w-4 h-4 group-hover:text-purple-400 transition-colors" />
-                            <span>Add task</span>
+                          <div className="flex items-center justify-center p-px rounded-full group-hover:bg-purple-400 transition-colors">
+                            <Plus className="w-4 h-4 group-hover:text-white transition-colors" />
+                          </div>
+                          <span className="text-xs font-medium">Add task</span>
                         </button>
+                        )
                     ) : (
+                      <div className={` ${dayTasks.length > 5 ? "absolute inset-x-0 bottom-0 flex" : ""} `}>
                         <InlineTaskForm
                             columnIndex={columnIndex}
                             todos={todos}
@@ -474,10 +554,25 @@ const DroppableDateColumn = ({
                             onSuccess={handleTaskCreated}
                             onUpdate={handleTaskUpdated}
                         />
+                        </div>
                     )}
                 </>
             )}
-            <div className="flex items-center gap-2"></div>
+            {showDatePicker && (
+              <CustomDatePicker
+              columnIndex={-1}
+              isAllDay={isAllDay}
+              todos={[]}
+              selectedDate={selectedDate}
+              onDateSelect={(date: string) => setSelectedDate(date)}
+              onClose={() => setShowDatePicker(false)}
+              index={0}
+              selectedTime={selectedTime}
+              onTimeSelect={(time: string) => setSelectedTime(time)}
+              setIsAllDay={setIsAllDay}
+              buttonRef={buttonRef}
+            />
+            )}
         </div>
     )
 }
@@ -555,7 +650,7 @@ const UpcomingView = ({
   const dayCount = getDayCount();
 
   const dateRange = useMemo(() => {
-    return getUpcomingDateRange(startDate, dayCount);
+    return getUpcomingDateRange(startDate, 5);
   }, [startDate, dayCount]);
 
 
@@ -898,19 +993,19 @@ const UpcomingView = ({
   }
 
   return (
-    <div className="flex-col space-y-6 ">
+    <div className="flex flex-col mt-5 flex-1 min-h-0 px-10">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-end mb-4 border-b-2 border-white/10 pb-4">
         {viewType === "board" && (
           <>
-        <div className="flex items-center gap-4">
-          <h1 className="text-white text-3xl md:text-4xl font-bold hidden sm:block">Upcoming</h1>
+          <div className="flex flex-col gap-2">
+          <h1 className="text-white text-2xl md:text-3xl font-bold hidden sm:block">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
-              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 select-none"
+              className="flex items-center gap-2 text-white cursor-pointer hover:text-white transition-colors py-1.5 hover:bg-white/10 select-none"
               onClick={handleShowMonthYearPicker}
             >
-              <span className="text-lg">{getCurrentMonthYear()}</span>
+              <span className="text-sm">{getCurrentMonthYear()}</span>
               <ChevronDown
                 className={`w-5 h-5 transition-transform ${showMonthYearPicker ? "rotate-180" : ""}`}
               />
@@ -992,29 +1087,32 @@ const UpcomingView = ({
               </div>
             )}
           </div>
-        </div>
+          </div>
         </>
         )}
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center  border border-white/10 rounded-md ">
           {viewType === "board" && (
             <>
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-2  hover:bg-white/5 cursor-pointer"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4  h-4" />
           </button>
+          <div className="w-px h-4 bg-white/10"/>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2 rounded-lg hover:bg-white/5 text-sm font-medium cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2  hover:bg-white/5 text-x font-sm cursor-pointer"
           >
             Today
           </button>
+          <div className="w-px h-4 bg-white/10"/>
+
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
+            className="text-[#A2A2A9] hover:text-white transition-colors p-2  hover:bg-white/5 cursor-pointer"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
             </>
           )}
@@ -1025,7 +1123,7 @@ const UpcomingView = ({
       {viewType === "board" ? (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {/* Calendar Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">
+      <div className="flex gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap flex-1 pb-4">
         {/* Overdue Section */}
         {(() => {
           const overDueTasks = getOverDueTasks();
@@ -1035,6 +1133,7 @@ const UpcomingView = ({
             const overdueDateKey = "overdue";
             const isFormOpen = openFormDate === overdueDateKey;
             return (
+              <div className="shrink-0 w-80">
               <DroppableDateColumn
                 columnIndex={-1}
                 key={overdueDateKey}
@@ -1084,6 +1183,7 @@ const UpcomingView = ({
                   />
                 ))}
               </DroppableDateColumn>
+              </div>
             );
           }
           return null;
@@ -1096,6 +1196,7 @@ const UpcomingView = ({
           const dateKey = date.toISOString();
           const isFormOpen = openFormDate === dateKey;
           return (
+            <div className="shrink-0 w-80 ">
             <DroppableDateColumn
               columnIndex={index}
               key={dateKey}
@@ -1144,6 +1245,7 @@ const UpcomingView = ({
                   />
                 ))}
             </DroppableDateColumn>
+            </div>
           );
         })}
       </div>

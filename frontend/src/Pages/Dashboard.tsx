@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import AppBar from "../Components/AppBar";
 import type { Todo } from "@/Components/Modal";
-import TabNavigation, { type TabType } from "../Components/TabNavigation";
+import { type TabType } from "../Components/TabNavigation";
 import TodayView from "../Components/TodayView";
 import UpcomingView from "../Components/UpcomingView";
 import CompletedView from "../Components/CompletedView";
@@ -10,8 +9,10 @@ import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
-import { SquareKanban, CalendarDays } from "lucide-react";
+import { CalendarDays, Plus, PanelLeft, SquareKanban, Calendar1, CircleCheck } from "lucide-react";
 import AddTaskCalendar from "../Components/AddTaskCalender";
+import SideBar, { SideBarItem } from "@/Components/SideBar";
+import { ViewDropDown } from "@/Components/ViewDropDown";
 
 const Dashboard = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -19,11 +20,15 @@ const Dashboard = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("today");
-  const [viewType, setViewType] = useState<"board" | "calendar">("board");
+  const [activeTab, setActiveTab] = useState<TabType>("upcoming");
+  const [viewType, setViewType] = useState<string>("board");
   const [showViewDropdown, setShowViewDropdown] = useState(false);
   const viewDropdownRef = useRef<HTMLDivElement>(null);
+  const viewDropdownButtonRef = useRef<HTMLButtonElement | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [expanded, setExpanded] = useState(true);
+  const [viewTypeActive, setViewTypeActive] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { refreshAuth } = Auth();
 
   // Handle OAuth success redirect
@@ -95,7 +100,6 @@ const Dashboard = () => {
     if (!todoToUpdate) {
       return;
     }
-    console.log("todoToUpdate", todoToUpdate);
     
     const newCompletedStatus = !todoToUpdate?.completed;
     console.log("newCompletedStatus", newCompletedStatus);
@@ -308,7 +312,6 @@ const Dashboard = () => {
       try {
         const res = await api.get("/v1/todo/");
         const todos = res.data.todos;
-        console.log("todos", todos);
         setTodos(todos);
         setLoading(false);
       } catch (error) {
@@ -318,9 +321,23 @@ const Dashboard = () => {
     fetchTodo();
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+
+    window.addEventListener("resize", checkMobile)
+
+    return () => window.removeEventListener("resize", checkMobile)
+
+  },[])
+
+  
+
   return (
     <>
-      <div className="relative min-h-screen bg-[#05050a] w-full px-4 md:px-16 pb-12 overflow-x-hidden">
+      <div className="relative min-h-screen bg-[#05050a] w-full">
         <style>{`
           /* Custom dark scrollbar */
           ::-webkit-scrollbar {
@@ -361,82 +378,70 @@ const Dashboard = () => {
           }}
         />
 
-        <div className="relative z-10">
-        <div className="mb-8">
-          {(activeTab !== "upcoming" || viewType !== "calendar") && (
-            <AppBar />
+        <div className="relative z-10 flex h-screen">
+        <SideBar expanded={expanded} setExpanded={setExpanded}>
+          <button className="flex gap-2 mb-5 hover:bg-white/10 p-2 rounded-sm cursor-pointer w-full"
+          onClick= {() => openModal()}
+          >
+            <div className={`p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 ${expanded ? "" : "w-0 invisible"} overflow-hidden`}>
+            <Plus className="w-5 h-5 text-black"/>
+            </div>
+            <div className={`flex items-center justify-center transition-all duration-300 ease-in-out ${expanded ? "" : "w-0 invisible"} overflow-hidden`}>
+            <span className="text-sm font-medium text-white">Add Task</span>
+            </div>
+          </button>
+          <SideBarItem icon={<Calendar1 size={20}/>} text="Today" 
+          onClick={() => {
+            setActiveTab("today")
+            if(isMobile){
+              setExpanded(false)
+            }
+          }}
+          active = {activeTab === "today"}
+          />
+          <SideBarItem icon={<CalendarDays size={20}/>} text="Upcoming"
+          onClick={() => {
+            setActiveTab("upcoming")
+            if(isMobile){
+              setExpanded(false)
+            }
+          }}
+          active = {activeTab === "upcoming"}
+          />
+          <SideBarItem icon={<CircleCheck size={20}/>} text="Completed"
+          onClick={() => {
+            setActiveTab("completed")
+            if(isMobile){
+              setExpanded(false)
+            }
+          }}
+          active = {activeTab === "completed"}
+          />
+        </SideBar>
+        {/* //backdrop for mobile which closes the sidebar when clicked outside */}
+          {isMobile && expanded && (
+            <div className="fixed inset-0  z-40 bg-[#05050a] backdrop-blur-sm" onClick={() => setExpanded(false)} />
           )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex justify-between items-center p-5">
+        <button 
+          className={`p-2 rounded-md hover:bg-white/10 transition-all duration-300 ease-in-out ${expanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          onClick={() => setExpanded(!expanded)}
+          >
+          <PanelLeft className="w-5 h-5 text-gray-400 cursor-pointer font-light" />
+        </button>
+        <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
+          setViewTypeActive(!viewTypeActive)
+        }}>
+          <div className={`flex items-center gap-2 cursor-pointer hover:bg-white/10 hover:text-white p-2 rounded-sm transition-all duration-300 text-gray-400
+            ${viewTypeActive ? "bg-white/10 text-white" : ""}`}>
+          {viewType === "board" ? <SquareKanban className="w-5 h-5 cursor-pointer font-light" /> : <CalendarDays className="w-5 h-5 cursor-pointer font-light" />}
+          <span className="text-sm font-medium">{viewType === "board" ? "Board" : "Calendar"}</span>
+          </div>
+          
+        </button> 
         </div>
-        <TabNavigation 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab}
-          rightContent={
-            activeTab === "upcoming" ? (
-              <div className="relative" ref={viewDropdownRef}>
-                <button
-                  onClick={() => setShowViewDropdown(!showViewDropdown)}
-                  className={`flex items-center gap-2 transition-colors px-3 py-1.5 rounded-lg cursor-pointer ${
-                    showViewDropdown 
-                      ? "bg-white/10 text-white" 
-                      : "text-[#A2A2A9] hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {viewType === "board" ? (
-                    <>
-                      <SquareKanban className="w-4.5 h-4.5 hidden sm:block" />
-                      <span className="text-sm hidden sm:inline">Board</span>
-                    </>
-                  ) : (
-                    <>
-                      <CalendarDays className="w-4.5 h-4.5 hidden sm:block" />
-                      <span className="text-sm hidden sm:inline">Calendar</span>
-                    </>
-                  )}
-                </button>
-                {/* View Dropdown Menu */}
-                {showViewDropdown && (
-                  <div className="absolute top-full right-0  bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]">
-                    <div className="text-white text-sm font-semibold px-4 pt-2">Layout</div>
-                    <div className="p-2">
-                    <div className="flex gap-2 p-1 rounded-lg bg-white/5 min-w-[200px] max-w-[200px]">
-                    <button
-                      onClick={() => {
-                        setViewType("board");
-                      }}
-                      className={`w-full px-4 py-2.5 text-sm text-center transition-colors flex-col items-center justify-center gap-3 cursor-pointer rounded-lg ${
-                        viewType === "board"
-                          ? "bg-purple-500/20 text-purple-400"
-                          : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center justify-center">
-                      <SquareKanban className="w-4 h-4" />
-                      </div>
-                      <span>Board</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setViewType("calendar");
-                      }}
-                      className={`w-full px-4 py-2.5 text-sm text-center transition-colors flex-col items-center justify-center gap-3 cursor-pointer rounded-lg ${
-                        viewType === "calendar"
-                          ? "bg-purple-500/20 text-purple-400"
-                          : "text-[#A2A2A9] hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center justify-center">
-                      <CalendarDays className="w-4 h-4" />
-                      </div>
-                        <span>Calendar</span>
-                      </button>
-                    </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : null
-          }
-        />
+       
         {activeTab === "today" && (
           <TodayView
             todos={todos}
@@ -476,6 +481,7 @@ const Dashboard = () => {
           />
         )}
         </div>
+        </div>
       </div>
       {isAddTaskCalendarOpen && (
         <AddTaskCalendar
@@ -498,6 +504,9 @@ const Dashboard = () => {
         onDelete={deleteTodo}
         handleDuplicate={duplicateTodo}
       />
+      {showViewDropdown && (
+        <ViewDropDown viewType={viewType} setViewType={setViewType} buttonRef={viewDropdownButtonRef} setShowViewDropdown={setShowViewDropdown} setViewTypeActive={setViewTypeActive} />
+      )}
     </>
   );
 };

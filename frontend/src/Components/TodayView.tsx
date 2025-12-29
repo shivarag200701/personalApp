@@ -70,7 +70,7 @@ const TodayView = ({
   }, [completedDates]);
 
   return (
-    <div className="flex-col space-y-8">
+    <div className="flex-col space-y-8 px-10">
       <NewSection onClick={onAddTask} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatsCard

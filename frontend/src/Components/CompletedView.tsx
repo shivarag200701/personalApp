@@ -30,7 +30,7 @@ const CompletedView = ({
   }, [todos]);
 
   return (
-    <div className="flex-col space-y-8">
+    <div className="flex-col space-y-8 px-10">
       <Day
         icon={CheckCircle2}
         heading="Completed"

@@ -323,7 +323,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
 
   const handleCancel = () => {
     setIsWarningModalOpen(false);
-  }
+  } 
   const handleDiscard = () => {
     onCancel();
     setIsWarningModalOpen(false);
@@ -331,7 +331,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   
   return (
     <>
-    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} backdrop-blur-sm border border-white/10 rounded-xl ${width} min-w-0 shadow-[0_4px_12px_rgba(0,0,0,0.3)]`}>
+    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} backdrop-blur-sm border border-white/10 rounded-xl bg-transparent ${width} min-w-0 overflow-hidden `}>
       {/* Category Tag */}
       {category && (
         <div className="mb-2">
@@ -349,6 +349,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       )}
 
       {/* Task Name Input */}
+      <div className="flex flex-col gap-2">
       <input
         ref={titleInputRef}
         type="text"
@@ -375,6 +376,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
         style={{ minHeight: '20px', maxHeight: '200px' }}
       />
+      </div>
 
       {/* Action Buttons Row */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">

@@ -46,7 +46,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [selectedColor, setSelectedColor] = useState<string>(todo?.color ?? "bg-red-600");
-
+  const [isMobile, setIsMobile] = useState(false);
 
   function roundToNearest15Minutes(date: Date) {
 
@@ -294,12 +294,22 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     }, 300);
     return () => clearTimeout(timeoutId);
   },[title])
+  console.log("width", width);
 
+  useEffect(() => {
+    const checkMobile = ()  => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  })
+  
   
   return createPortal(
     <>
     <div className="fixed inset-0 z-40" onClick={onCancel}></div>
-    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
+    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
     style={{
       top: '50px',
       left: '50%',

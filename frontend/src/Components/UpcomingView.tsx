@@ -97,7 +97,7 @@ const DraggableTask = ({
     const style = {
         opacity: isDragging ? 0 : 1,
         userSelect: 'none' as const,
-        touchAction: 'pan-y' as const,
+        touchAction: 'pan-y pan-x' as const,
         WebkitUserSelect: 'none' as const,
     }
 
@@ -517,7 +517,7 @@ const DroppableDateColumn = ({
           {isTopScrolled && <div className="h-px rounded-full bg-white/20 w-full"></div>}
 
             {/* Tasks Container - Only tasks should scroll */}
-            <div className={`space-y-3 p-2 max-h-[calc(100vh-300px)] overflow-y-auto scrollbar-hide-on-hover`}
+            <div className={`space-y-3 p-2 max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar`}
               ref={divRef}
               >
                 {children}
@@ -1133,7 +1133,7 @@ const UpcomingView = ({
             const overdueDateKey = "overdue";
             const isFormOpen = openFormDate === overdueDateKey;
             return (
-              <div className="shrink-0 w-80">
+              <div className="shrink-0 w-70">
               <DroppableDateColumn
                 columnIndex={-1}
                 key={overdueDateKey}
@@ -1196,7 +1196,7 @@ const UpcomingView = ({
           const dateKey = date.toISOString();
           const isFormOpen = openFormDate === dateKey;
           return (
-            <div className="shrink-0 w-80 ">
+            <div className="shrink-0 w-70 ">
             <DroppableDateColumn
               columnIndex={index}
               key={dateKey}

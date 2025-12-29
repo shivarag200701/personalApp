@@ -377,7 +377,7 @@ const Dashboard = () => {
           }}
         />
 
-        <div className="relative z-10 flex h-screen">
+        <div className="relative z-10 flex h-screen ">
         <SideBar expanded={expanded} setExpanded={setExpanded}>
           <button className="flex gap-2 mb-5 hover:bg-white/10 p-2 rounded-sm cursor-pointer w-full"
           onClick= {() => openModal()}

@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { Todo } from "@/Components/Modal";
-import { type TabType } from "../Components/TabNavigation";
 import TodayView from "../Components/TodayView";
 import UpcomingView from "../Components/UpcomingView";
 import CompletedView from "../Components/CompletedView";
@@ -20,7 +19,7 @@ const Dashboard = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("upcoming");
+  const [activeTab, setActiveTab] = useState<string>("upcoming");
   const [viewType, setViewType] = useState<string>("board");
   const [showViewDropdown, setShowViewDropdown] = useState(false);
   const viewDropdownRef = useRef<HTMLDivElement>(null);

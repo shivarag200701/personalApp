@@ -109,4 +109,19 @@ export declare function formatUpcomingDateHeader(date: Date): string;
  * Uses local date components for both dates to ensure timezone consistency
  */
 export declare function isTaskOnDate(taskDateString: string | null | undefined, targetDate: Date): boolean;
+export declare const changePasswordSchema: z.ZodObject<{
+    currentPassword: z.ZodString;
+    newPassword: z.ZodString;
+    confirmNewPassword: z.ZodString;
+}, z.core.$strip>;
+export declare const addPasswordSchema: z.ZodObject<{
+    newPassword: z.ZodString;
+    confirmNewPassword: z.ZodString;
+}, z.core.$strip>;
+export declare const changeEmailSchema: z.ZodObject<{
+    email: z.ZodEmail;
+}, z.core.$strip>;
+export declare const ChangeUsernameSchema: z.ZodObject<{
+    email: z.ZodString;
+}, z.core.$strip>;
 //# sourceMappingURL=index.d.ts.map

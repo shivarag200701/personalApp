@@ -3,10 +3,11 @@ import { z } from "zod";
 const userRouter = express();
 import prisma from "../db/index.js";
 import dotenv from "dotenv";
-import { signUpSchema, signInSchema } from "@shiva200701/todotypes";
+import { signUpSchema, signInSchema, changePasswordSchema} from "@shiva200701/todotypes";
 import crypto from "crypto";
 import { hashPassword, verifyPassword } from "../utils/passwordHasher.js";
 import { requireLogin } from "../middleware.js";
+
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ userRouter.post("/signup", async (req, res) => {
         username,
         hashedPassword,
         email,
+        isPasswordSet: true,
       },
     });
     //create session for user
@@ -160,6 +162,87 @@ userRouter.post("/logout", async (req, res) => {
   }
 });
 
+userRouter.put("/password", async (req,res) => {
+    const userId = req.session.userId
+
+    if(!userId){
+      return res.status(401).json({
+        msg:"Unauthorized"
+      })
+    }
+    const {data,success,error} = changePasswordSchema.safeParse(req.body)
+      if (!success) {
+        return res.status(400).json({
+          msg: "send valid data",
+          error,
+        });
+      }
+    const {currentPassword,newPassword,confirmNewPassword} = data
+
+    if (confirmNewPassword != newPassword){
+      return res.status(404).json({
+        msg:"New passwords don't match"
+      })
+    }
+
+    try{
+      const user = await prisma.user.findUnique({
+        where:{id:userId},
+        select:{
+          id: true,
+          hashedPassword: true,
+          isPasswordSet: true
+        }
+      })
+
+      if(!user){
+        return res.status(404).json({
+          msg:"User not found"
+        })
+      }
+
+      if(!user.isPasswordSet || !user.hashedPassword){
+        return res.status(404).json({
+          msg:"Password is not set"
+        })
+      }
+
+      const isPasswordValid = await verifyPassword(currentPassword,user.hashedPassword)
+
+      if(!isPasswordValid){
+        return res.status(404).json({
+          msg:"current password is not incorrect"
+        })
+      }
+
+      const {hashedPassword:newHashedPassword} = await hashPassword(newPassword)
+
+      const updatedUser = await prisma.user.update({
+        where:{
+          id:userId
+        },
+        data:{
+          hashedPassword:newHashedPassword
+        }
+      })
+
+      return res.status(200).json({
+        msg:"Password updated sucessfully"
+      })
+
+    }catch(error){
+      console.error("error updating password", error);
+      return res.status(400).json({
+      msg: error,
+    });
+    }
+
+    })
+
+    
+
+
+
 userRouter.get("/profile", requireLogin, async (req, res) => {
   const userId = req.session.userId;
   if (!userId) {
@@ -175,10 +258,12 @@ userRouter.get("/profile", requireLogin, async (req, res) => {
         id: true,
         username: true,
         email: true,
+        isPasswordSet: true,
         oauthAccounts: {
           where: { provider: "google" },
           select: {
             pictureUrl: true,
+            provider: true,
           },
           take: 1,
         },
@@ -196,7 +281,11 @@ userRouter.get("/profile", requireLogin, async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        pictureUrl: user.oauthAccounts[0]?.pictureUrl || null,
+        isPasswordSet: user.isPasswordSet,
+        pictureUrl: user.oauthAccounts?.[0]?.pictureUrl || null,
+        provider: user.oauthAccounts?.[0]?.provider || null,
+        isOAuthLinked: user.oauthAccounts?.length > 0,
+
       },
     });
   } catch (error) {

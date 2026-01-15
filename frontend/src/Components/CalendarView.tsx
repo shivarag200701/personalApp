@@ -237,7 +237,7 @@ const CalendarView = ({
       };
 
   return (
-    <div className="flex-col space-y-6 relative"
+    <div className="flex-col space-y-6 relative overflow-auto"
     ref={calendarRef}
     >
       {/* Header */}
@@ -245,7 +245,7 @@ const CalendarView = ({
         <div className="flex items-center gap-4">
           <div className="absolute left-0" ref={pickerRef}>
             <div
-              className="flex items-center gap-2 text-[#A2A2A9] cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 font-bold"
+              className="flex items-center gap-2 text-muted-foreground cursor-pointer hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted font-bold"
               onClick={() => setShowMonthYearPicker(!showMonthYearPicker)}
             >
               <span className="text-lg">{getCurrentMonthYear()}</span>
@@ -256,7 +256,7 @@ const CalendarView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px]">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[280px] max-w-[90vw] sm:min-w-[320px]">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>
@@ -280,7 +280,7 @@ const CalendarView = ({
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
                                 : isDisabled
                                 ? "text-[#4A4A4A] cursor-not-allowed opacity-40"
-                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:scale-105 active:scale-95"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground hover:scale-105 active:scale-95"
                             }`}
                           >
                             {month.label.slice(0, 3)}
@@ -311,7 +311,7 @@ const CalendarView = ({
                             className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer ${
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
-                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:translate-x-1"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-1"
                             }`}
                           >
                             {year}
@@ -321,7 +321,7 @@ const CalendarView = ({
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="mt-4 pt-4 border-t border-border">
                   <div className="text-[#9EA0BB] text-xs text-center">
                     Only future dates are available
                   </div>
@@ -333,19 +333,19 @@ const CalendarView = ({
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1 sm:p-2 rounded-lg hover:bg-muted cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-2 rounded-lg hover:bg-white/5 text-sm font-medium cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors px-2 sm:px-4 py-2 rounded-lg hover:bg-muted text-sm font-medium cursor-pointer"
           >
             Today
           </button>
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1 sm:p-2 rounded-lg hover:bg-white/5 cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1 sm:p-2 rounded-lg hover:bg-muted cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -354,7 +354,7 @@ const CalendarView = ({
 
       {/* Calendar Grid */}
       <div 
-      className="relative bg-[#101018]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)] ">
+      className="relative bg-card/80 backdrop-blur-xl border border-border rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.4)] ">
         {/* Backdrop - appears when form is open, covers the calendar */}
         {openFormDate && (
           <div
@@ -363,12 +363,12 @@ const CalendarView = ({
           />
         )}
         {/* Week Day Headers */}
-        <div className="grid grid-cols-7">
+        <div className="flex w-full">
           {weekDays.map((day, dayIndex) => (
             <div
               key={day}
-              className={`text-[#A2A2A9] text-xs font-semibold text-center py-2 ${
-                dayIndex < 6 ? "border-r border-white/10" : ""
+              className={`text-muted-foreground text-xs font-semibold text-center py-2 flex-1 ${
+                dayIndex < 6 ? "border-r border-border" : ""
               }`}
             >
               {day}
@@ -391,8 +391,8 @@ const CalendarView = ({
             return (
               <div  
                 key={index}
-                className={`max-h-[170px] min-h-[170px] transition-all relative z-10 ${colIndex < 6 ? "border-r border-white/10" : ""} ${
-                  !isLastRow ? "border-b border-white/10" : ""
+                className={`max-h-[170px] min-h-[170px] transition-all relative z-10 ${colIndex < 6 ? "border-r border-border" : ""} ${
+                  !isLastRow ? "border-b border-border" : ""
                 }`}
                 onClick={(e) => {
                     e.stopPropagation();
@@ -413,7 +413,7 @@ const CalendarView = ({
                       ? "bg-purple-500 text-white"
                       : isCurrentMonthDate
                       ? "text-white"
-                      : "text-[#A2A2A9]"
+                      : "text-muted-foreground"
                   }`}
                   >
                     {date.getDate()}
@@ -438,7 +438,7 @@ const CalendarView = ({
                   {dayTasks.length > 3 && (
                     <button
                       type="button"
-                      className="text-xs text-[#A2A2A9] my-0.5 px-1.5 rounded-md hover:bg-white/10 transition-colors cursor-pointer p-1 w-full text-left "
+                      className="text-xs text-muted-foreground my-0.5 px-1.5 rounded-md hover:bg-muted transition-colors cursor-pointer p-1 w-full text-left "
                       onClick={(e) => {
                         e.stopPropagation();
                         const anchor = dayRefs.current.get(dateKey);
@@ -465,7 +465,7 @@ const CalendarView = ({
                   <div>
                     {isFormOpen && (
                       <div 
-                        className='z-50 bg-[#101018] '
+                        className='z-50 bg-card '
                         style={{
                                   top: '0px',
                                   left: '50%',
@@ -476,7 +476,7 @@ const CalendarView = ({
                         <div className={`transition-all duration-3000 z-50 ${isFormOpen ? " translate-x-0" : "translate-x-full"}`}>
                         <AddTaskCalender
                           width="w-[500px]"
-                          backgroundColor="bg-[#1e1f20]"
+                          backgroundColor="bg-secondary"
                           index={dayTasks.length}
                           preselectedDate={date}
                           onCancel={() => setOpenFormDate(null)}
@@ -523,11 +523,11 @@ const CalendarView = ({
             className="fixed z-50 w-full max-w-xs"
             style={viewMoreModalStyle}
           >
-            <div className="relative w-full rounded-[32px] bg-[#101018] shadow-[0_20px_60px_rgba(0,0,0,0.7)] border border-white/10 p-4 ">
+            <div className="relative w-full rounded-[32px] bg-card shadow-[0_20px_60px_rgba(0,0,0,0.7)] border border-border p-4 ">
               {/* Close button */}
               <button
                 type="button"
-                className="absolute right-5 top-5 text-[#A2A2A9] hover:text-white cursor-pointer"
+                className="absolute right-5 top-5 text-muted-foreground hover:text-foreground cursor-pointer"
                 onClick={() => {
                   setIsViewingMoreTasks(false);
                   setViewMoreTasks([]);
@@ -539,7 +539,7 @@ const CalendarView = ({
               </button>
 
               {/* Day label */}
-              <div className="text-center text-xs font-semibold tracking-[0.2em] text-[#A2A2A9] mb-2 uppercase">
+              <div className="text-center text-xs font-semibold tracking-[0.2em] text-muted-foreground mb-2 uppercase">
                 {viewMoreDate.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </div>
 

@@ -58,7 +58,7 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, setIsAllDa
     />
     <div
     ref={pickerRef}
-    className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-70 w-[300px]"
+    className="fixed bg-card border border-border rounded-md shadow-2xl z-70 w-[300px]"
     style={{
         left: `${position.left}px`,
         top: `${position.top}px`,
@@ -69,33 +69,33 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, setIsAllDa
     >
         <div className="flex flex-col gap-2 p-3">
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-[#D3D3D3] text-sm font-light">Time</div>
-            <button ref={timeOptionButtonRef} className="w-full p-1 border-[0.5px] border-gray-600 flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            <div className="text-foreground text-sm font-light">Time</div>
+            <button ref={timeOptionButtonRef} className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
             hover:border-[0.5px]
             hover:border-white/40 transition-colors duration-300" onClick={() => setIsTimeOptionOpen(!isTimeOptionOpen)}>
-                <div className="text-[#D3D3D3] text-sm font-light text-left">{selectedTime.label}</div>
+                <div className="text-foreground text-sm font-light text-left">{selectedTime.label}</div>
             </button>
             </div>
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-[#D3D3D3] text-sm font-light">Duration</div>
-            <button className="w-full p-1 border-[0.5px] border-gray-600 flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            <div className="text-foreground text-sm font-light">Duration</div>
+            <button className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
             hover:border-[0.5px]
             hover:border-white/40 transition-colors duration-300" >
-                <div className="text-[#D3D3D3] text-sm font-light text-left">No duration</div>
+                <div className="text-foreground text-sm font-light text-left">No duration</div>
             </button>
             </div>
         </div>
         <div className="h-px w-full bg-gray-700"/>
         <div className="flex flex-col gap-2 p-3">
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-[#D3D3D3] text-sm font-light">Time zone</div>
+            <div className="text-foreground text-sm font-light">Time zone</div>
             </div>
         </div>
         <div className="h-px w-full bg-gray-700"/>
         <div className="flex justify-end">
         <div className=" flex justify-between p-3.5 gap-2">
-            <button className="w-full py-1.5 px-4  bg-white/5 hover:bg-white/10 flex items-center  text-center gap-2 rounded-sm cursor-pointer transition-colors duration-300" onClick={() => {onClose(); setIsAllDay(true);}}>
-                <div className="text-[#D3D3D3] text-xs font-light text-left">Cancel</div>
+            <button className="w-full py-1.5 px-4  bg-muted hover:bg-muted flex items-center  text-center gap-2 rounded-sm cursor-pointer transition-colors duration-300" onClick={() => {onClose(); setIsAllDay(true);}}>
+                <div className="text-foreground text-xs font-light text-left">Cancel</div>
             </button>
             <button className="w-full py-1.5 px-4 bg-red-600 hover:bg-red-500 flex items-center  text-center gap-2 rounded-sm cursor-pointer
             transition-colors duration-300" onClick={() => {onClose(); setIsAllDay(false);}}>
@@ -167,7 +167,7 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
         <div className="fixed inset-0 z-80"
         onClick={onClose}
         />
-        <div className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto"
+        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto"
         style={{
             left: `${position.left}px`,
             top: `${position.top}px`,
@@ -176,7 +176,7 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
         }}
         onClick={(e) => e.stopPropagation()}
         >
-            {timeOptions.map((time) => <button key={time.value} className="w-full p-2.5  flex text-left gap-2 rounded-sm cursor-pointer hover:border-gray-300 transition-colors duration-300 text-[#D3D3D3] text-sm font-light hover:bg-[#27272B]" onClick={(e) => {
+            {timeOptions.map((time) => <button key={time.value} className="w-full p-2.5  flex text-left gap-2 rounded-sm cursor-pointer hover:border-border transition-colors duration-300 text-foreground text-sm font-light hover:bg-muted" onClick={(e) => {
               onTimeSelect(time.value);
               e.stopPropagation();
             }}>{time.label}</button>)}

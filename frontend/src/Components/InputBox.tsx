@@ -24,7 +24,7 @@ const InputBox = ({
         {...register}
         placeholder={placeholder}
         type={Type}
-        className="pl-10 p-2 border border-white/10 bg-white/5 backdrop-blur-sm text-white placeholder:text-[#9EA0BB] rounded-xl h-10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+        className="pl-10 p-2 border border-border bg-muted backdrop-blur-sm text-white placeholder:text-[#9EA0BB] rounded-xl h-10 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
       />
     </div>
   );

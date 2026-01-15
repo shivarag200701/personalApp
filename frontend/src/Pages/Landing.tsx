@@ -135,11 +135,6 @@ const Landing = () => {
         ::-webkit-scrollbar-thumb:hover {
           background: #2a2a3e;
         }
-        /* Firefox scrollbar */
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #1a1a2e #0a0a0f;
-        }
       `}</style>
 
       {/* Grid backdrop */}

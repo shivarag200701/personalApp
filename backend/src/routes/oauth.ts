@@ -102,7 +102,7 @@ oauthRouter.get("/google/callback", async (req,res) => {
 
             if(stateData.type === 'login'){
 
-            //user not logged in
+            //user already exists
             let user = await prisma.user.findUnique({
                 where: {
                     email: userInfo.email,

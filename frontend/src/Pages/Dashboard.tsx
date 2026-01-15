@@ -8,7 +8,7 @@ import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
-import { CalendarDays, Plus, PanelLeft, SquareKanban, Calendar1, CircleCheck } from "lucide-react";
+import { CalendarDays, Plus,SquareKanban, Calendar1, CircleCheck } from "lucide-react";
 import AddTaskCalendar from "../Components/AddTaskCalender";
 import SideBar, { SideBarItem } from "@/Components/SideBar";
 import { ViewDropDown } from "@/Components/ViewDropDown";
@@ -336,31 +336,10 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="relative min-h-screen bg-[#05050a] w-full">
-        <style>{`
-          /* Custom dark scrollbar */
-          ::-webkit-scrollbar {
-            width: 8px;
-          }
-          ::-webkit-scrollbar-track {
-            background: #0a0a0f;
-          }
-          ::-webkit-scrollbar-thumb {
-            background: #1a1a2e;
-            border-radius: 4px;
-          }
-          ::-webkit-scrollbar-thumb:hover {
-            background: #2a2a3e;
-          }
-          /* Firefox scrollbar */
-          * {
-            scrollbar-width: thin;
-            scrollbar-color: #1a1a2e #0a0a0f;
-          }
-        `}</style>
-
+      <div className="relative min-h-screen bg-background w-full">
+        
         {/* Grid backdrop */}
-        <div
+        {/* <div
           className="pointer-events-none absolute inset-0 opacity-30"
           style={{
             backgroundImage:
@@ -375,20 +354,22 @@ const Dashboard = () => {
             background:
               "radial-gradient(circle at 60% 40%, rgba(168,85,247,0.15), transparent 55%)",
           }}
-        />
+        /> */}
 
         <div className="relative z-10 flex h-screen ">
         <SideBar expanded={expanded} setExpanded={setExpanded}>
-          <button className="flex gap-2 mb-5 hover:bg-white/10 p-2 rounded-sm cursor-pointer w-full"
+          {expanded && (
+          <button className="flex gap-2 mb-5 hover:bg-hover p-2 rounded-sm cursor-pointer w-full"
           onClick= {() => openModal()}
           >
-            <div className={`p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 ${expanded ? "" : "w-0 invisible"} overflow-hidden`}>
-            <Plus className="w-5 h-5 text-black"/>
+            <div className="p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 overflow-hidden">
+            <Plus className="w-5 h-5 text-background"/>
             </div>
-            <div className={`flex items-center justify-center transition-all duration-300 ease-in-out ${expanded ? "" : "w-0 invisible"} overflow-hidden`}>
-            <span className="text-sm font-medium text-white">Add Task</span>
+            <div className="flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden">
+            <span className="text-sm font-medium text-accent">Add Task</span>
             </div>
           </button>
+          )}
           <SideBarItem icon={<Calendar1 size={20}/>} text="Today" 
           onClick={() => {
             setActiveTab("today")
@@ -419,25 +400,21 @@ const Dashboard = () => {
         </SideBar>
         {/* //backdrop for mobile which closes the sidebar when clicked outside */}
           {isMobile && expanded && (
-            <div className="fixed inset-0  z-40 bg-[#05050a] backdrop-blur-sm" onClick={() => setExpanded(false)} />
+            <div className="fixed inset-0  z-40 bg-background/95 backdrop-blur-sm" onClick={() => setExpanded(false)} />
           )}
         <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex justify-between items-center p-5">
-        <button 
-          className={`p-2 rounded-md hover:bg-white/10 transition-all duration-300 ease-in-out ${expanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          onClick={() => setExpanded(!expanded)}
-          >
-          <PanelLeft className="w-5 h-5 text-gray-400 cursor-pointer font-light" />
-        </button>
+        <div className="flex justify-end items-center p-5">
         <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
           setViewTypeActive(!viewTypeActive)
         }}>
-          <div className={`flex items-center gap-2 cursor-pointer hover:bg-white/10 hover:text-white p-2 rounded-sm transition-all duration-300 text-gray-400
-            ${viewTypeActive ? "bg-white/10 text-white" : ""}`}>
+          {
+            activeTab === "upcoming" && !isMobile && (
+          <div className={`flex items-center gap-2 cursor-pointer hover:bg-muted hover:text-foreground p-2 rounded-sm transition-all duration-300 text-muted-foreground
+            ${viewTypeActive ? "bg-muted text-foreground" : ""}`}>
           {viewType === "board" ? <SquareKanban className="w-5 h-5 cursor-pointer font-light" /> : <CalendarDays className="w-5 h-5 cursor-pointer font-light" />}
           <span className="text-sm font-medium">{viewType === "board" ? "Board" : "Calendar"}</span>
           </div>
-          
+          )}
         </button> 
         </div>
        

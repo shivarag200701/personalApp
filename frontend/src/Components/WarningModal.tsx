@@ -19,8 +19,8 @@ type WarningModalProps = {
         className={`fixed inset-0 bg-black/30 transition-opacity duration-100 ${isOpen ? "opacity-100 " : "pointer-events-none opacity-0"} transition-opacity duration-100`}
         onClick={onClose}
       />
-        <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative  max-h-[90vh] flex flex-col  animate-in fade-in-0 zoom-in-95 duration-300 border border-gray-800 z-10 ">
-        <div className="text-white text-center md:text-left text-2xl mb-1 font-bold">
+        <div className="bg-card p-6 rounded-lg shadow-lg bg-opacity-30 relative  max-h-[90vh] flex flex-col  animate-in fade-in-0 zoom-in-95 duration-300 border border-border z-10 ">
+        <div className="text-foreground text-center md:text-left text-2xl mb-1 font-bold">
           {title}
         </div>
         <div className="text-white text-md font-extralight mb-6">

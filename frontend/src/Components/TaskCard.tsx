@@ -74,7 +74,7 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
         return (
           <div
             key={todo.id || `temp=${index}`}
-            className={`p-5 border border-gray-800 relative bg-[#1B1B1E] my-4 rounded-2xl transition transform hover:-translate-y-0.5 hover:border-purple-400/40 cursor-pointer ${
+            className={`p-5 border border-border relative bg-card my-4 rounded-2xl transition transform hover:-translate-y-0.5 hover:border-purple-400/40 cursor-pointer ${
               todo.completed ? "brightness-80" : ""
             }`}
             onClick={() => onViewDetails?.(todo)}
@@ -129,7 +129,7 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
                 >
                   {todo.title}
                 </div>
-                <div className="mt-1 text-[#A2A2A9] text-sm">
+                <div className="mt-1 text-muted-foreground text-sm">
                   {todo.description}
                 </div>
                 <div className="flex mt-3 gap-2">
@@ -139,21 +139,21 @@ const TaskCard = ({ todos, onToggleComplete, onDelete, onEdit, onViewDetails }: 
                   >
                     {todo.priority}
                   </div>)}
-                  <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
+                  <div className="py-1 px-2 text-white bg-muted rounded-md text-xs flex gap-1">
                     <div className="flex justify-center items-center">
                       <Tag className="w-3 h-3" />
                     </div>
                     <div>{todo.category}</div>
                   </div>
                   {todo.isRecurring && (
-                    <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
+                    <div className="py-1 px-2 text-white bg-muted rounded-md text-xs flex gap-1">
                       <div className="flex justify-center items-center">
                         <Repeat className="w-3 h-3" />
                       </div>
                       <div>{todo.recurrencePattern}</div>
                     </div>
                   )}
-                  <div className="py-1 px-2 text-white bg-[#27272B] rounded-md text-xs flex gap-1">
+                  <div className="py-1 px-2 text-white bg-muted rounded-md text-xs flex gap-1">
                     <div className="flex justify-center items-center">
                       <Calendar className="w-3 h-3" />
                     </div>

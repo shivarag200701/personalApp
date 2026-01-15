@@ -44,17 +44,17 @@ const AppBar = () => {
           <img
             src={profilePicture}
             alt="Profile"
-            className="w-10 h-10 rounded-full border-2 border-white/10 object-cover"
+            className="w-10 h-10 rounded-full border-2 border-border object-cover"
           />
         )}
         {!isLoading && !profilePicture && (
-          <div className="w-10 h-10 rounded-full border-2 border-white/10 bg-[#1B1B1E] flex items-center justify-center">
-            <User className="w-5 h-5 text-gray-400" />
+          <div className="w-10 h-10 rounded-full border-2 border-border bg-card flex items-center justify-center">
+            <User className="w-5 h-5 text-muted-foreground" />
           </div>
         )}
         <button 
           onClick={logout}
-          className="text-white text-sm flex items-center justify-center bg-[#1B1B1E] border border-gray-700 hover:border-red-500/50 rounded-xl px-4 py-2 h-full cursor-pointer transition-all hover:bg-red-500/10"
+          className="text-foreground text-sm flex items-center justify-center bg-card border border-border hover:border-red-500/50 rounded-xl px-4 py-2 h-full cursor-pointer transition-all hover:bg-red-500/10"
         >
           Logout
         </button>

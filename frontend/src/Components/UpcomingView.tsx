@@ -222,7 +222,7 @@ const DraggableTask = ({
       style={style}
       {...listeners}
       {...attributes}
-      className={`p-3 bg-[#101018]/80 backdrop-blur-sm border border-white/10 rounded-xl relative cursor-pointer active:cursor-grabbing hover:border-white/20 transition-all duration-300 shadow-[0_0px_12px_rgba(0,0,0,0.3)] ${openDropdownId === todo.id ? "z-50": ""}`}
+      className={`p-3 bg-task backdrop-blur-sm border border-border rounded-xl relative cursor-pointer active:cursor-grabbing hover:shadow-[0_0px_6px_rgba(0,0,0,0.3)] hover:border-border-hover transition-all duration-300  ${openDropdownId === todo.id ? "z-50": ""}`}
       onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
       onMouseLeave={() => setHoveredTodoId(null)}
       onClick={() => onViewDetails(todo)}
@@ -248,7 +248,7 @@ const DraggableTask = ({
         >
           <button
             ref={buttonRef}
-            className="text-[#A2A2A9] hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               toggleDropdown(todo.id!, e);
@@ -264,7 +264,7 @@ const DraggableTask = ({
       {/* Dropdown Menu - Rendered via Portal */}
       {openDropdownId === todo.id && dropdownPosition && createPortal(
           <div 
-            className="fixed z-9999 w-45 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+            className="fixed z-9999 w-45 bg-card/95 backdrop-blur-xl border border-border rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
             data-dropdown-menu="true"
             style={{
               top: `${dropdownPosition.top}px`,
@@ -272,7 +272,7 @@ const DraggableTask = ({
             }}
           >
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer border-b border-white/10"
+                className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center gap-3 cursor-pointer border-b border-border"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -300,7 +300,7 @@ const DraggableTask = ({
                   ))}
                 </div>
                 <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center gap-3 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDuplicateTask(todo as Todo);
@@ -312,7 +312,7 @@ const DraggableTask = ({
                 <span>Duplicate</span>
               </button>
               <button
-                className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-white/5 hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer"
+                className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted hover:text-red-400 transition-colors flex items-center gap-3 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteClick(todo);
@@ -338,11 +338,11 @@ const DraggableTask = ({
           />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-white text-sm font-medium mb-1 line-clamp-2">
+          <div className="text-foreground text-sm font-medium mb-1 line-clamp-2">
             {todo.title}
           </div>
           {todo.description && (
-            <div className="text-[#A2A2A9] text-xs mt-1 line-clamp-2">
+            <div className="text-muted-foreground text-xs mt-1 line-clamp-2">
               {todo.description}
             </div>
           )}
@@ -372,7 +372,7 @@ const DraggableTask = ({
             </div>
           )}
           {!todo.isAllDay && (
-            <div className="mt-2 w-fit  rounded-md text-xs flex gap-1 text-gray-400 hover:text-white transition-colors cursor-pointer">
+            <div className="mt-2 w-fit  rounded-md text-xs flex gap-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 <div className="flex justify-center items-center">
                   <AlarmClock className="w-3 h-3" />
                 </div>
@@ -488,23 +488,23 @@ const DroppableDateColumn = ({
             {/* Date Header */}
             <div className="pb-2">
                 <div className={`flex items-center ${isOverdue ? "justify-between" : "gap-4"} mb-1`}>
-                    <div className="text-white text-sm font-semibold">
+                    <div className="text-foreground text-sm font-semibold">
                         {isOverdue ? "Overdue" : formatUpcomingDateHeader(date)}
                     </div>
                     {!isOverdue && (
-                    <div className="text-[#A2A2A9] text-xs">
+                    <div className="text-foreground text-xs">
                         {dayTasks.length}
                     </div>)}
                     <div className="flex items-center gap-2">
                       {isOverdue && (
                         <>
-                        <button className="text-white/50 cursor-pointer text-xs hover:text-white transition-colors" 
+                        <button className="text-foreground cursor-pointer text-xs hover:text-foreground transition-colors" 
                         onClick = {() => setShowDatePicker(!showDatePicker)}
                         ref={buttonRef}
                         >
                         Reschedule
                       </button>
-                      <div className="text-[#A2A2A9] text-xs">
+                      <div className="text-muted-foreground text-xs">
                         {dayTasks.length}
                     </div>
                     </>
@@ -513,7 +513,7 @@ const DroppableDateColumn = ({
                     </div>
                 </div>
             </div>
-          {isTopScrolled && <div className="h-px rounded-full bg-white/20 w-full"></div>}
+          {isTopScrolled && <div className="h-px rounded-full bg-muted w-full"></div>}
 
             {/* Tasks Container - Only tasks should scroll */}
             <div className={`space-y-3 p-2 max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar`}
@@ -521,11 +521,11 @@ const DroppableDateColumn = ({
               >
                 {children}
                 {isOver && (
-                  <div className="w-full h-[100px] rounded-xl bg-white/10" />
+                  <div className="w-full h-[100px] rounded-xl bg-muted" />
                 )}
             </div>
 
-            {isBottomScrolled && <div className="h-px rounded-full bg-white/20 w-full"></div>}
+            {isBottomScrolled && <div className="h-px rounded-full bg-muted w-full"></div>}
             
             {/* Add Task Button and Inline Form - Outside scroll container, always visible */}
             {!isOverdue && (
@@ -534,10 +534,10 @@ const DroppableDateColumn = ({
                       !isOver && (
                         <button
                             onClick={handleAddTaskClick}
-                            className="group flex items-center gap-2 text-[#A2A2A9] hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full  hover:border-white/10 "
+                            className="group flex items-center gap-2 text-muted-foreground hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full  hover:border-border "
                         >
                           <div className="flex items-center justify-center p-px rounded-full group-hover:bg-purple-400 transition-colors">
-                            <Plus className="w-4 h-4 group-hover:text-white transition-colors" />
+                            <Plus className="w-4 h-4 group-hover:text-foreground transition-colors" />
                           </div>
                           <span className="text-xs font-medium">Add task</span>
                         </button>
@@ -921,7 +921,7 @@ const UpcomingView = ({
       <div className="flex items-center justify-between gap-10 w-full">
         <span className="pl-2">Date updated to <span className="underline cursor-pointer">{formatDateForToast(newDate)}</span></span>
         <div className="flex items-center">
-          <div className="hover:bg-white/10 px-3 py-1 rounded-md cursor-pointer" onClick={async () => {
+          <div className="hover:bg-muted px-3 py-1 rounded-md cursor-pointer" onClick={async () => {
             onUpdateTodo({
               ...todo,
               completeAt: oldDate?.toISOString() ?? null,
@@ -994,14 +994,14 @@ const UpcomingView = ({
   return (
     <div className="flex flex-col mt-5 flex-1 min-h-0">
       {/* Header */}
-      <div className="flex justify-between items-end mb-4 border-b-2 border-white/10 pb-4 px-10">
+      <div className="flex justify-between items-end mb-4 border-b-[0.5px]  border-white/20 pb-4 px-10">
         {viewType === "board" && (
           <>
           <div className="flex flex-col gap-2">
-          <h1 className="text-white text-2xl md:text-3xl font-bold ">Upcoming</h1>
+          <h1 className="text-foreground text-2xl md:text-3xl font-bold ">Upcoming</h1>
           <div className="relative" ref={pickerRef}>
             <div
-              className="flex items-center gap-2 text-white cursor-pointer hover:text-white transition-colors py-1.5 hover:bg-white/10 select-none"
+              className="flex items-center gap-2 text-foreground cursor-pointer hover:bg-hover rounded-r-md transition-colors py-1.5 select-none"
               onClick={handleShowMonthYearPicker}
             >
               <span className="text-sm">{getCurrentMonthYear()}</span>
@@ -1012,7 +1012,7 @@ const UpcomingView = ({
 
             {/* Month/Year Picker Dropdown */}
             {showMonthYearPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-[#101018]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-9999 min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
+              <div className="absolute top-full left-0 mt-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-9999 min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
                 <div className="grid grid-cols-2 gap-6">
                   {/* Month Selector */}
                   <div>
@@ -1036,7 +1036,7 @@ const UpcomingView = ({
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
                                 : isDisabled
                                 ? "text-[#4A4A4A] cursor-not-allowed opacity-40"
-                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:scale-105 active:scale-95"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground hover:scale-105 active:scale-95"
                             }`}
                           >
                             {month.label.slice(0, 3)}
@@ -1068,7 +1068,7 @@ const UpcomingView = ({
                             className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer select-none ${
                               isSelected
                                 ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
-                                : "text-[#A2A2A9] hover:bg-white/5 hover:text-white hover:translate-x-1"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-1"
                             }`}
                           >
                             {year}
@@ -1078,7 +1078,7 @@ const UpcomingView = ({
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="mt-4 pt-4 border-t border-border">
                   <div className="text-[#9EA0BB] text-xs text-center">
                     Only future dates are available
                   </div>
@@ -1089,27 +1089,27 @@ const UpcomingView = ({
           </div>
         </>
         )}
-        <div className="flex items-center  border border-white/10 rounded-sm ">
+        <div className="flex items-center  border border-border rounded-sm ">
           {viewType === "board" && (
             <>
           <button
             onClick={navigatePrevious}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1  hover:bg-white/5 cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
           >
             <ChevronLeft className="w-4  h-4" />
           </button>
-          <div className="w-px h-4 bg-white/10"/>
+          <div className="w-px h-4 bg-muted"/>
           <button
             onClick={navigateToToday}
-            className="text-[#A2A2A9] hover:text-white transition-colors px-2 sm:px-4 py-1  hover:bg-white/5 text-x font-sm cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors px-2 sm:px-4 py-1  hover:bg-muted text-x font-sm cursor-pointer"
           >
             Today
           </button>
-          <div className="w-px h-4 bg-white/10"/>
+          <div className="w-px h-4 bg-muted"/>
 
           <button
             onClick={navigateNext}
-            className="text-[#A2A2A9] hover:text-white transition-colors p-1  hover:bg-white/5 cursor-pointer"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -1252,7 +1252,7 @@ const UpcomingView = ({
       {/* Drag Overlay for better UX */}
       <DragOverlay>
         {activeTodo ? (
-          <div className="p-3 bg-[#101018]/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] opacity-90 cursor-grabbing"
+          <div className="p-3 bg-card/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] opacity-90 cursor-grabbing"
           style={{
             transform: 'rotate(3deg)'
           }}>
@@ -1262,7 +1262,7 @@ const UpcomingView = ({
                   {activeTodo.title}
                 </div>
                 {activeTodo.description && (
-                  <div className="text-[#A2A2A9] text-xs mt-1 line-clamp-2">
+                  <div className="text-muted-foreground text-xs mt-1 line-clamp-2">
                     {activeTodo.description}
                   </div>
                 )}

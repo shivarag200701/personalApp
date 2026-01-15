@@ -209,7 +209,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         className="fixed inset-0 bg-transparent bg-opacity-30 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="bg-[#131315] p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3 lg:w-1/3 2xl:w-1/4 max-h-[90vh] flex flex-col  animate-in fade-in-0 zoom-in-95 duration-300 overflow-y-auto ">
+      <div className="bg-card p-6 rounded-lg shadow-lg bg-opacity-30 relative w-11/12 md:w-1/3 lg:w-1/3 2xl:w-1/4 max-h-[90vh] flex flex-col  animate-in fade-in-0 zoom-in-95 duration-300 overflow-y-auto ">
         <button
           onClick={handleClick}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700  cursor-pointer z-10 text-2xl"
@@ -229,7 +229,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What needs to be done?"
-              className="bg-[#141415] rounded-sm p-2 pl-4 placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full text-white"
+              className="bg-input rounded-sm p-2 pl-4 placeholder:text-muted-foreground placeholder:font-extralight border-[0.1px] border-border w-full text-white"
             />
           </div>
           <div className="text-white text-md font-extralight mb-3">
@@ -239,7 +239,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="text-white border-[0.1px] rounded-sm border-gray-600 w-full font-extralight p-3 "
+              className="text-white border-[0.1px] rounded-sm border-border w-full font-extralight p-3 "
               rows={3}
               placeholder="Add more details..."
             ></textarea>
@@ -252,7 +252,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-[#141415] rounded-sm p-2 pl-10 text-white border-[0.1px] border-gray-600 w-full cursor-pointer"
+              className="bg-input rounded-sm p-2 pl-10 text-white border-[0.1px] border-border w-full cursor-pointer"
               min={new Date().toISOString().split("T")[0]}
             />
             <div className="text-[#A2A2A9] text-xs mt-1">
@@ -286,7 +286,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
               onChange={(e) => setCategory(e.target.value)}
               type="text"
               placeholder="e.g., Work, Personal, Health"
-              className="bg-[#141415] rounded-sm p-2 pl-10 text-white placeholder:text-[#A2A2A9] placeholder:font-extralight border-[0.1px] border-gray-600 w-full"
+              className="bg-input rounded-sm p-2 pl-10 text-white placeholder:text-muted-foreground placeholder:font-extralight border-[0.1px] border-border w-full"
             />
           </div>
           <div className="text-white text-md font-extralight mb-3">
@@ -312,12 +312,12 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         min="1" 
         value={recurrenceInterval}
         onChange={(e) => setRecurrenceInterval(parseInt(e.target.value))}
-        className="bg-[#141415] rounded-sm p-2 w-24 text-white border-[0.1px] border-gray-600 text-center"
+        className="bg-input rounded-sm p-2 w-24 text-white border-[0.1px] border-border text-center"
       />
       <select
         value={recurrencePattern}
         onChange={(e) => setRecurrencePattern(e.target.value as any)}
-        className="bg-[#141415] rounded-sm p-2 flex-1 text-white border-[0.1px] border-gray-600"
+        className="bg-input rounded-sm p-2 flex-1 text-white border-[0.1px] border-border"
       >
         <option value="daily">Day(s)</option>
         <option value="weekly">Week(s)</option>
@@ -336,7 +336,7 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         type="date"
         value={recurrenceEndDate}
         onChange={(e) => setRecurrenceEndDate(e.target.value)}
-        className="bg-[#141415] rounded-sm p-2 w-full text-white border-[0.1px] border-gray-600"
+        className="bg-input rounded-sm p-2 w-full text-white border-[0.1px] border-border"
       />
       {recurrenceEndDate && (
         <div className="text-[#A2A2A9] text-xs mt-1">

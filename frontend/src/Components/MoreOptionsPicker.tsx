@@ -89,7 +89,7 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
       {/* More Options Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[150px] md:w-[200px]"
+        className="fixed bg-card border border-border rounded-md shadow-2xl z-50 w-[150px] md:w-[200px]"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -101,7 +101,7 @@ const MoreOptionsPicker = ({ onClose, buttonRef, onCategoryClick }: MoreOptionsP
           <button 
             onClick={handleCategoryClick}
             onMouseDown={(e) => e.stopPropagation()}
-            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[#27272B] transition-colors cursor-pointer text-[#A2A2A9] text-sm"
+            className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer text-muted-foreground text-sm"
           >
             <Tag className="w-4 h-4" />
             <span>Category</span>
@@ -224,11 +224,11 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
       <div>
   
   {/* Category Picker / Dropdown Menu */}
-  <div className='bg-[#1B1B1E] fixed z-10' style={{ top: `${position.top}px`, left: `${position.left}px`, width: `${position.width}px` }}> {/* This acts as the page background */}
+  <div className='bg-card fixed z-10' style={{ top: `${position.top}px`, left: `${position.left}px`, width: `${position.width}px` }}> {/* This acts as the page background */}
       
       {/* The dropdown arrow now matches the menu's background color */}
       <div 
-        className="dropdown-arrow absolute w-3 h-3 bg-[#27272B] border border-gray-800 z-40" 
+        className="dropdown-arrow absolute w-3 h-3 bg-secondary border border-border z-40" 
         style={{ 
           left: `50%`, 
           top: `-5px`,
@@ -239,11 +239,11 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
       {/* Category Picker (Now with lighter gray background and padding) */}
       <div
         ref={pickerRef}
-        className="relative bg-[#27272B] border border-gray-800 rounded-xs shadow-2xl z-50 p-1.5" /* Added p-2 padding and lighter background */
+        className="relative bg-secondary border border-border rounded-xs shadow-2xl z-50 p-1.5" /* Added p-2 padding and lighter background */
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="space-y-1 bg-[#1B1B1E] rounded-xs">
+        <div className="space-y-1 bg-card rounded-xs">
           {presetCategories.map((category, index) => {
             const isSelected = selectedCategory === category;
             return (
@@ -254,12 +254,12 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
                   handlePresetCategorySelect(category);
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`w-full flex items-center gap-3 p-2 ${index === 0 ? "rounded-t-xs" : ""} hover:bg-[#3A3A3D] transition-colors cursor-pointer ${
-                  isSelected ? "bg-[#3A3A3D]" : "" /* Subtle color change for selected */
+                className={`w-full flex items-center gap-3 p-2 ${index === 0 ? "rounded-t-xs" : ""} hover:bg-muted transition-colors cursor-pointer ${
+                  isSelected ? "bg-muted" : "" /* Subtle color change for selected */
                 }`}
               >
-                <Tag className="w-5 h-5 text-[#A2A2A9] " />
-                <span className={`text-sm ${isSelected ? "text-white" : "text-[#A2A2A9]"}`}>
+                <Tag className="w-5 h-5 text-muted-foreground " />
+                <span className={`text-sm ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
                   {category}
                 </span>
               </button>
@@ -273,7 +273,7 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
                 placeholder="Category name"
-                className="w-full bg-[#1B1B1E] border border-gray-700 rounded-md px-2 py-1.5 text-sm text-white placeholder:text-[#A2A2A9] outline-none focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                className="w-full bg-card border border-border rounded-md px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus:ring-2 focus:ring-accent/20"
                 onBlur={() => {
                   if (!customCategory.trim()) {
                     setShowCustomInput(false);
@@ -293,7 +293,7 @@ const CategoryPicker = ({ onClose, onCategorySelect, selectedCategory, titleInpu
                 handleCreateLabel();
               }}
               onMouseDown={(e) => e.stopPropagation()}
-              className="w-full flex items-center gap-3 p-2 rounded-b-xs hover:bg-[#3A3A3D] transition-colors cursor-pointer text-[#A2A2A9] text-sm"
+              className="w-full flex items-center gap-3 p-2 rounded-b-xs hover:bg-muted transition-colors cursor-pointer text-muted-foreground text-sm"
             >
               <span>Create label</span>
             </button>

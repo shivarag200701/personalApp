@@ -100,7 +100,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
       {/* Priority Picker */}
       <div
         ref={pickerRef}
-        className="absolute bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[200px]"
+        className="absolute bg-card border border-border rounded-md shadow-2xl z-50 w-[200px]"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -117,8 +117,8 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
                   onPrioritySelect(priority.value);
                   onClose();
                 }}
-                className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[#27272B] transition-colors cursor-pointer ${
-                  isSelected ? "bg-[#27272B]" : ""
+                className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer ${
+                  isSelected ? "bg-muted" : ""
                 }`}
               >
                 <Flag 
@@ -126,7 +126,7 @@ const PriorityPicker = ({ selectedPriority, onPrioritySelect, onClose, buttonRef
                   style={{ fill: isSelected ? priority.iconColor : 'none' }}
                 />
                 <div className="flex-1 text-left">
-                  <div className={`text-sm ${isSelected ? "text-white" : "text-[#A2A2A9]"}`}>
+                  <div className={`text-sm ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
                     {priority.label}
                   </div>
                 </div>

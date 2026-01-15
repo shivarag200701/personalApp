@@ -108,7 +108,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
     return createPortal(
         <>
         <div className="fixed inset-0 z-40" onClick={onClose} />
-        <div ref={pickerRef} className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[250px]" style={{
+        <div ref={pickerRef} className="fixed bg-card border border-border rounded-md shadow-2xl z-50 w-[250px]" style={{
             left: `${position.left}px`,
             top: `${position.top}px`,
             transform: 'translateY(-100%)',
@@ -117,7 +117,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
                 <div className='flex flex-col gap-1'>
                     {options.map((option) => (
                         <button key={option.id} onClick={handleClick(option)} >
-                            <div className='text-[#D3D3D3] text-xs text-left font-light cursor-pointer hover:bg-[#27272B] transition-colors duration-300 rounded-sm py-2 pl-8'>{option.primary} <span className='text-[#A2A2A9] text-xs text-left font-light'>{option.secondary}</span></div>
+                            <div className='text-foreground text-xs text-left font-light cursor-pointer hover:bg-muted transition-colors duration-300 rounded-sm py-2 pl-8'>{option.primary} <span className='text-muted-foreground text-xs text-left font-light'>{option.secondary}</span></div>
                         </button>
                     ))}
                 </div>

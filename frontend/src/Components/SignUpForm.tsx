@@ -67,7 +67,7 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-white flex items-center justify-center px-4">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-white flex items-center justify-center px-4">
       <style>{`
         @keyframes floatUp {
           0% { transform: translateY(0) scale(0.9); opacity: 0.2; }
@@ -112,7 +112,7 @@ const SignUpForm = () => {
         <div className="mb-8 flex justify-center">
           <LogoCard />
         </div>
-        <div className="relative rounded-[28px] border border-white/10 bg-[#101018]/80 backdrop-blur-2xl p-8 shadow-[0_35px_120px_rgba(8,7,24,0.8)]">
+        <div className="relative rounded-[28px] border border-border bg-card/80 backdrop-blur-2xl p-8 shadow-[0_35px_120px_rgba(8,7,24,0.8)]">
           {/* Gradient overlay */}
           <div
             className="absolute inset-0 rounded-[28px] pointer-events-none"
@@ -125,7 +125,7 @@ const SignUpForm = () => {
           
           <div className="relative z-10">
             <div className="text-3xl font-semibold text-white mb-2">Get Started</div>
-            <div className="mt-2 text-[#A2A2A9] mb-6">
+            <div className="mt-2 text-muted-foreground mb-6">
               Create your account to start organizing
             </div>
             {/* Google Sign-In Button */}
@@ -135,9 +135,9 @@ const SignUpForm = () => {
 
             {/* Divider */}
             <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-white/10"></div>
+              <div className="flex-1 border-t border-border"></div>
               <span className="px-4 text-[#9EA0BB] text-sm">OR</span>
-              <div className="flex-1 border-t border-white/10"></div>
+              <div className="flex-1 border-t border-border"></div>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <InputBox
@@ -186,7 +186,7 @@ const SignUpForm = () => {
             <div className="text-center text-red-400 mt-2 min-h-[20px] mb-4">
               {error ? error : ""}
             </div>
-            <div className="text-center text-[#A2A2A9] mt-8 font-light">
+            <div className="text-center text-muted-foreground mt-8 font-light">
               Already have an account?{" "}
               <a href="/signin" className="text-purple-400 hover:text-purple-300 transition-colors underline">
                 Sign in

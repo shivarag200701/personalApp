@@ -100,7 +100,7 @@ const ColorPicker = ({ selectedColor, onColorSelect, onClose, buttonRef }: Color
       {/* Priority Picker */}
       <div
         ref={pickerRef}
-        className="absolute bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[50px]"
+        className="absolute bg-card border border-border rounded-md shadow-2xl z-50 w-[50px]"
         style={{
           left: `${position.left}px`,
           top: `${position.top}px`,
@@ -117,7 +117,7 @@ const ColorPicker = ({ selectedColor, onColorSelect, onClose, buttonRef }: Color
                   onColorSelect(color.color);
                   onClose();
                 }}
-                className={`w-full flex items-center justify-center p-0.5 rounded-lg transition-colors cursor-pointer hover:bg-[#27272B]`}
+                className={`w-full flex items-center justify-center p-0.5 rounded-lg transition-colors cursor-pointer hover:bg-muted`}
               >
                 <div className={`w-4 h-4 rounded-full flex items-center justify-center ${color.color}`}>
                     {isSelected && (

@@ -477,14 +477,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       {/* Date Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-[#1B1B1E] border border-gray-800 rounded-md shadow-2xl z-50 w-[250px] transition-opacity duration-150"
+        className="fixed bg-card border border-border rounded-md shadow-2xl z-50 w-[250px] transition-opacity duration-150"
         style={{
           ...position,
           transform: `${columnIndex && columnIndex >= 3 ? "translateX(-100%)" : ""}`,
         }}
       >
       {/* NLP Input Section */}
-      <div className="p-3 border-b border-gray-800">
+      <div className="p-3 border-b border-border">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-4 h-4 text-gray-500" />
           <span className="text-gray-500 text-xs font-medium">Type a date</span>
@@ -500,15 +500,15 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             }
           }}
           placeholder="e.g., tomorrow, every Monday, in 5 days"
-          className="w-full bg-[#141415] border border-gray-700 rounded-md px-2 py-1.5 text-base sm:text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-gray-600"
+          className="w-full bg-input border border-border rounded-md px-2 py-1.5 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
         />
         {parsedResult && (
           <div className="mt-3 text-xs flex items-center gap-3">
             {parsedResult.confidence === "high" && (
               <div>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={handleApplyDate}>
-              {parsedResult.isRecurring && <RefreshCw className="w-4 h-4 text-gray-400" />}
-              {!parsedResult.isRecurring && <Calendar className="w-4 h-4 text-gray-400" />}
+              {parsedResult.isRecurring && <RefreshCw className="w-4 h-4 text-muted-foreground" />}
+              {!parsedResult.isRecurring && <Calendar className="w-4 h-4 text-muted-foreground" />}
               <div className="text-white flex items-center gap-1">
                 {parsedResult.displayText}
                 {parsedResult.isRecurring && (
@@ -516,7 +516,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                 )}
               </div>
               </div>
-            <div className="text-gray-400 mt-3 text-xs">
+            <div className="text-muted-foreground mt-3 text-xs">
             You can also type in recurring dates like <span className="text-gray-300">every day, every 2 weeks, and every month.</span> 
             </div>
             </div>
@@ -527,7 +527,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
 
       {/* Quick Options */}
-      <div className="p-2 border-b border-gray-800 space-y-1">
+      <div className="p-2 border-b border-border space-y-1">
         {quickOptions.map((option) => {
           const Icon = option.icon;
           const isSelected = option.date && isSelectedDate(option.date);
@@ -551,13 +551,13 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                 setNlpInput("");
                 setParsedResult(null);
               }}
-              className={`w-full flex items-center gap-3 p-1 rounded-lg hover:bg-[#27272B] transition-colors cursor-pointer ${
-                (isSelected || isNoDate) ? "bg-[#27272B]" : ""
+              className={`w-full flex items-center gap-3 p-1 rounded-lg hover:bg-muted transition-colors cursor-pointer ${
+                (isSelected || isNoDate) ? "bg-muted" : ""
               }`}
             >
-              <Icon className={`w-4 h-4 ${isSelected || isNoDate ? "text-white" : "text-[#A2A2A9]"}`} />
+              <Icon className={`w-4 h-4 ${isSelected || isNoDate ? "text-white" : "text-muted-foreground"}`} />
               <div className="flex-1 text-left">
-                <div className={`text-sm ${isSelected || isNoDate ? "text-white" : "text-[#A2A2A9]"}`}>
+                <div className={`text-sm ${isSelected || isNoDate ? "text-white" : "text-muted-foreground"}`}>
                   {option.label}
                 </div>
               </div>
@@ -575,7 +575,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-1 hover:bg-[#27272B] rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
@@ -583,14 +583,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             <span className="text-white font-semibold">{monthLabel}</span>
             <button
               onClick={goToToday}
-              className="w-6 h-6 rounded-full hover:bg-[#27272B] transition-colors flex items-center justify-center"
+              className="w-6 h-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center"
             >
               <div className="w-2 h-2 rounded-full bg-white"></div>
             </button>
           </div>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-1 hover:bg-[#27272B] rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
             <ChevronRight className="w-4 h-4 text-white" />
           </button>
@@ -644,12 +644,12 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                     : isParsedDate
                     ? "bg-blue-500/50 text-white"
                     : isTodayDate
-                    ? "bg-[#27272B] text-white"
+                    ? "bg-muted text-foreground"
                     : isPast
                     ? "text-[#4A4A4A] cursor-not-allowed"
                     : isRecurringDate
                     ? "border border-dashed border-white/50 text-white "
-                    : "text-[#A2A2A9] hover:bg-[#27272B] hover:text-white"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }
                     `}
               >
@@ -687,7 +687,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                       ? "bg-blue-500/50 text-white"
                       : isPast
                       ? "text-[#4A4A4A] cursor-not-allowed"
-                      : "text-[#A2A2A9] hover:bg-[#27272B] hover:text-white"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   {date.getDate()}
@@ -698,15 +698,15 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         </div>
       </div>
       <div className="flex-col items-center justify-between">
-      <div className="border-t border-gray-800 p-2.5 text-xs text-[#A2A2A9] flex items-center justify-center text-center gap-2">
-        <button ref={timeButtonRef} className="w-full p-1.5 border border-gray-600 flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-[#27272B] transition-colors duration-300" onClick={() => {setShowTimePicker(true)}}>
-            <Clock className="w-3.5 h-3.5 text-[#A2A2A9]" />
+      <div className="border-t border-border p-2.5 text-xs text-muted-foreground flex items-center justify-center text-center gap-2">
+        <button ref={timeButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-muted transition-colors duration-300" onClick={() => {setShowTimePicker(true)}}>
+            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
             {!isAllDay ? (<div className="text-white">{convert24hrTo12hr(selectedTime)}</div>) : (<div className="text-white">Time</div>)}
             </button>
         </div>
-        <div className="w-full p-2.5 text-[#A2A2A9] text-xs flex items-center justify-center text-center gap-2">
-          <button ref={reccurenceButtonRef} className="w-full p-1.5 border border-gray-600 flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-[#27272B] transition-colors duration-300" onClick={() => {setShowReccurencePicker(true)}}>
-            <Repeat className="w-3.5 h-3.5 text-[#A2A2A9]" />
+        <div className="w-full p-2.5 text-muted-foreground text-xs flex items-center justify-center text-center gap-2">
+          <button ref={reccurenceButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-muted transition-colors duration-300" onClick={() => {setShowReccurencePicker(true)}}>
+            <Repeat className="w-3.5 h-3.5 text-muted-foreground" />
             <div>Repeat</div>
             </button>
         </div>

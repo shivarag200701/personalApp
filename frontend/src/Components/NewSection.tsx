@@ -7,7 +7,7 @@ interface NewSectionProps {
 const NewSection = ({ onClick }: NewSectionProps) => {
   return (
       <div 
-        className="text-white mb-8 bg-[#1B1B1E] border border-gray-800 hover:border-purple-500/50 p-6 rounded-2xl cursor-pointer transition-all hover:bg-[#1f1f22]" 
+        className="text-white mb-8 bg-card border border-border hover:border-accent/50 p-6 rounded-2xl cursor-pointer transition-all hover:bg-muted" 
         onClick={onClick}
       >
         <div className="flex justify-between items-center">
@@ -16,7 +16,7 @@ const NewSection = ({ onClick }: NewSectionProps) => {
               <Plus className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-              <div className="text-[#A2A2A9] font-medium items-center justify-center text-base sm:text-lg">
+              <div className="text-muted-foreground font-medium items-center justify-center text-base sm:text-lg">
                 <span className="hidden sm:inline">What needs to be done?</span>
                 <span className="sm:hidden">Add new task</span>
               </div>

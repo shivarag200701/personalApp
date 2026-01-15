@@ -28,7 +28,7 @@ interface TaskDetailDrawerProps {
 
 }
 
-const labelClass = "text-xs uppercase tracking-wide text-gray-400";
+const labelClass = "text-xs uppercase tracking-wide text-muted-foreground";
 
 const formatDateTime = (value?: string | null) => {
   if (!value) {
@@ -199,7 +199,7 @@ const TaskDetailDrawer = ({
         }}
       >
         <div 
-          className="w-full h-full sm:h-auto sm:max-w-2xl flex flex-col overflow-hidden bg-[#131316] sm:rounded-md border-0 sm:border border-white/10 shadow-2xl"
+          className="w-full h-full sm:h-auto sm:max-w-2xl flex flex-col overflow-hidden bg-card sm:rounded-md border-0 sm:border border-border shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-end p-2 gap-2 relative">
@@ -209,15 +209,15 @@ const TaskDetailDrawer = ({
                   e.stopPropagation();
                   setIsDropdownOpen(!isDropdownOpen);
                 }}
-                className="text-gray-400 p-2 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer flex items-center justify-center"
+                className="text-muted-foreground p-2 rounded-md hover:bg-muted transition-colors cursor-pointer flex items-center justify-center"
                 title="More options"
               >
                 <MoreHorizontal className="h-5 w-5" />
               </button>
               {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1 w-32 bg-[#1B1B1E] border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-1 w-32 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
                   <button
-                    className="w-full px-3 py-2 text-left text-sm text-[#A2A2A9] hover:bg-[#131315] hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
+                    className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-secondary hover:text-red-400 transition-colors flex items-center gap-2 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(todo.id as string | number);
@@ -232,7 +232,7 @@ const TaskDetailDrawer = ({
             </div>
             {editAllowed && (
               <button
-                className="text-gray-400 p-2 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
+                className="text-muted-foreground p-2 rounded-md hover:bg-muted transition-colors cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   onClose();
@@ -253,12 +253,12 @@ const TaskDetailDrawer = ({
                 onUpdate={onEdit}
                 isEditMode={true}
                 width="w-[500px]"
-                backgroundColor="bg-[#1e1f20]"
+                backgroundColor="bg-secondary"
                 
               />
             )}
             <button
-              className="text-gray-400 p-2 rounded-md hover:bg-[#1B1B1E] transition-colors cursor-pointer"
+              className="text-muted-foreground p-2 rounded-md hover:bg-muted transition-colors cursor-pointer"
               onClick={onClose}
               title="Close details"
             >
@@ -270,7 +270,7 @@ const TaskDetailDrawer = ({
             <div className="flex-1">
               <div className="flex items-start justify-start gap-3">
               <div
-              className={`group flex items-center justify-center bg-transparent rounded-full p-2 border border-white/10 h-5 w-5 mt-3 font-bold ${
+              className={`group flex items-center justify-center bg-transparent rounded-full p-2 border border-border h-5 w-5 mt-3 font-bold ${
                 isEditing
                   ? "border-purple-400 cursor-not-allowed"
                   : "border-white/50 hover:cursor-pointer"
@@ -288,7 +288,7 @@ const TaskDetailDrawer = ({
             <div className="flex-1 cursor-text">
               {isEditing ? (
                 <>
-                <div className="space-y-3 border-2 border-white/10 rounded-md p-2">
+                <div className="space-y-3 border-2 border-border rounded-md p-2">
                   <input
                     ref={titleInputRef}
                     type="text"
@@ -312,7 +312,7 @@ const TaskDetailDrawer = ({
                         handleCancelEdit();
                       }
                     }}
-                    className="w-full text-sm text-gray-400 bg-transparent focus:outline-none focus:border-purple-400 resize-none min-h-[60px] pb-2"
+                    className="w-full text-sm text-muted-foreground bg-transparent focus:outline-none focus:border-purple-400 resize-none min-h-[60px] pb-2"
                     disabled={isSaving}
                     placeholder="Description"
                   />
@@ -322,7 +322,7 @@ const TaskDetailDrawer = ({
                   variant="outline"
                   onClick={handleCancelEdit}
                   disabled={isSaving}
-                  className="border border-white/10 bg-[#1B1B1E] text-gray-200 hover:bg-[#222227] disabled:opacity-50 text-xs min-w-[60px] py-1 px-5! rounded-sm!"
+                  className="border border-border bg-card text-foreground hover:bg-muted disabled:opacity-50 text-xs min-w-[60px] py-1 px-5! rounded-sm!"
                 >
                   Cancel
                 </Button>
@@ -341,7 +341,7 @@ const TaskDetailDrawer = ({
                   <h2 className="mt-1 text-2xl font-semibold text-white transition-colors">
                     {todo.title}
                   </h2>
-                  <h3 className="text-sm text-gray-400 transition-colors mt-2">
+                  <h3 className="text-sm text-muted-foreground transition-colors mt-2">
                     {todo.description || "No description"}
                   </h3>
                 </div>
@@ -352,7 +352,7 @@ const TaskDetailDrawer = ({
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <section className="rounded-2xl bg-[#1B1B1E] p-5">
+            <section className="rounded-2xl bg-card p-5">
               <p className={labelClass}>Progress & reminders</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
@@ -365,7 +365,7 @@ const TaskDetailDrawer = ({
                     className={`rounded-full px-3 py-1 text-xs ${
                       chip.active
                         ? "bg-purple-500/20 text-purple-200"
-                        : "bg-[#111114] text-gray-500"
+                        : "bg-secondary text-muted-foreground"
                     }`}
                   >
                     {chip.label}
@@ -382,7 +382,7 @@ const TaskDetailDrawer = ({
                       Due {formatCompleteAt(todo.completeAt)}
                     </p>
                     {todo.completedAt && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         Completed {formatDateTime(todo.completedAt)}
                       </p>
                     )}
@@ -392,18 +392,18 @@ const TaskDetailDrawer = ({
             </section>
           </div>
 
-          <div className="border-t border-white/10 p-6">
+          <div className="border-t border-border p-6">
         
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="outline"
-                  className="border border-white/10 bg-transparent text-gray-200 hover:bg-white/5"
+                  className="border border-border bg-transparent text-foreground hover:bg-muted"
                 >
                   <Bell className="mr-2 h-4 w-4" /> Add Reminder
                 </Button>
                 <Button
                   variant="ghost"
-                  className="bg-[#1B1B1E] text-white hover:bg-[#222227] cursor-pointer"
+                  className="bg-card text-white hover:bg-muted cursor-pointer"
                   onClick={(e)=>{
                     e.stopPropagation();
                     handleDuplicate(todo);

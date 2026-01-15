@@ -21,7 +21,7 @@ interface AddTaskCalenderProps {
   isEditMode?: boolean;
 }
 
-const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate, isEditMode=false , index, backgroundColor, width="w-full"}: AddTaskCalenderProps) => {
+const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate, isEditMode=false , index, width="w-full"}: AddTaskCalenderProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -309,7 +309,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   return createPortal(
     <>
     <div className="fixed inset-0 z-40" onClick={onCancel}></div>
-    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 ${backgroundColor} fixed z-50 backdrop-blur-sm border border-white/10 rounded-sm ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
+    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 bg-task fixed z-50 backdrop-blur-sm border border-border rounded-sm ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
     style={{
       top: '50px',
       left: '50%',
@@ -319,12 +319,12 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
       {/* Category Tag */}
       {category && (
         <div className="mb-2">
-          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/10 border border-white/10 text-white text-xs font-medium">
+          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted border border-border text-white text-xs font-medium">
             <span>@{category}</span>
             <button
               type="button"
               onClick={() => setCategory("")}
-              className="ml-1 hover:bg-white/10 rounded-full p-0.5 transition-colors"
+              className="ml-1 hover:bg-muted rounded-full p-0.5 transition-colors"
             >
               <X className="w-3 h-3" />
             </button>
@@ -339,7 +339,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] placeholder:font-bold font-bold text-xl! outline-none focus:outline-none min-w-0 mb-1"
+        className="w-full bg-transparent text-foreground placeholder:text-[#A2A2A9] placeholder:font-bold font-bold text-xl! outline-none focus:outline-none min-w-0 mb-1"
         autoFocus
       />
 
@@ -350,7 +350,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
         rows={1}
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-md! mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
+        className="w-full bg-transparent text-foreground placeholder:text-[#A2A2A9] text-md! mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
         style={{ minHeight: '20px', maxHeight: '200px' }}
       />
 
@@ -365,7 +365,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
               e.preventDefault();
               setShowDatePicker(!showDatePicker);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-xs font-medium hover:bg-white/5 hover:border-white/20 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 border border-border text-xs font-medium hover:bg-muted hover:border-white/20 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0 ${dateLabel ? "text-green-500" : "text-white"} ${
               isTodaySelected ? "rounded-full" : "rounded-md"
             }`}
           >
@@ -374,7 +374,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
             {isRecurring && <RefreshCw className="w-2.5 h-2.5 shrink-0 text-gray-300" />}
             {selectedDate && (
               <X
-                className="w-3 h-3 ml-1 text-white hover:text-gray-300 shrink-0"
+                className="w-3 h-3 ml-1 text-foreground hover:bg-hover   shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleNoDate();
@@ -427,7 +427,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
               e.preventDefault();
               setShowPriorityPicker(!showPriorityPicker);
             }}
-            className={`p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
+            className={`p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
           >
             <div className="flex items-center gap-1">
             <Flag 
@@ -438,7 +438,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
                       priority === "low" ? "#28A745" : "none" 
               }}
             />
-            <span className="text-white text-xs font-extralight">{priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : "Priority"}</span>
+            <span className="text-foreground text-xs font-extralight">{priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : "Priority"}</span>
             </div>
           </button>
           
@@ -459,11 +459,11 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         {/* Reminder Button (placeholder) */}
         <button
           type="button"
-          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
+          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-foreground">
           <AlarmClock className="w-4 h-4" />
-          <span className="text-white text-xs font-extralight">Reminders</span>
+          <span className="text-xs font-extralight">Reminders</span>
           </div>
         </button>
 
@@ -471,7 +471,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         <button
           ref={moreOptionsButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-fore ground shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           onClick={(e) => {
             e.preventDefault();
             setShowMoreOptionsPicker(!showMoreOptionsPicker);
@@ -482,7 +482,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         <button
           ref={colorButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           onClick={(e) => {
             e.preventDefault();
             setShowColorPicker(!showColorPicker);
@@ -525,7 +525,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
       </div>
 
       {/* Bottom Row: Project and Submit */}
-      <div className="flex items-center justify-end pt-1.5 border-t border-white/10 gap-2 min-w-0">
+      <div className="flex items-center justify-end pt-1.5 border-t border-border gap-2 min-w-0">
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 shrink-0 py-1.5">
@@ -534,7 +534,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
             onClick={() =>{
               onCancel();
             }}
-            className="p-1.5 rounded-md text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-white/10"
+            className="p-1.5 rounded-md text-white bg-muted hover:bg-muted transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
           >
             Cancel
           </button>

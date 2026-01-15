@@ -1,6 +1,6 @@
 const LoadingSkeleton = () => {
   return (
-    <div className="p-5 border border-gray-800  bg-[#1B1B1E] my-4  rounded-2xl">
+    <div className="p-5 border border-border  bg-card my-4  rounded-2xl">
       <div
         role="status"
         className="space-y-8 animate-pulse md:space-y-0 md:space-x-8 rtl:space-x-reverse md:flex md:items-center"

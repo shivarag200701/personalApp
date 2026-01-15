@@ -324,4 +324,19 @@ export function isTaskOnDate(taskDateString, targetDate) {
         taskDate.getMonth() === target.getMonth() &&
         taskDate.getDate() === target.getDate());
 }
+export const changePasswordSchema = z.object({
+    currentPassword: z.string(),
+    newPassword: z.string().min(8, "Password must be 8 characters long"),
+    confirmNewPassword: z.string().min(8, "Password must be 8 characters long")
+});
+export const addPasswordSchema = z.object({
+    newPassword: z.string().min(8, "Password must be 8 characters long"),
+    confirmNewPassword: z.string().min(8, "Password must be 8 characters long")
+});
+export const changeEmailSchema = z.object({
+    email: z.email("Invalid email")
+});
+export const ChangeUsernameSchema = z.object({
+    email: z.string().min(3, "Atleast 3 characters")
+});
 //# sourceMappingURL=index.js.map

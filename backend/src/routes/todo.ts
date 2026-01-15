@@ -292,8 +292,8 @@ todoRouter.delete("/:id", requireLogin, async (req, res) => {
       msg: "Not authorized",
     });
   }
-  const todoId = req.params.id;
-  if (!todoId) {
+  const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  if (!idParam) {
     return res.status(400).json({
       msg: "No todo id found in path",
     });
@@ -301,7 +301,7 @@ todoRouter.delete("/:id", requireLogin, async (req, res) => {
   try {
     await prisma.todo.delete({
       where: {
-        id: parseInt(todoId),
+        id: parseInt(idParam),
       },
     });
     return res.status(200).json({
@@ -323,8 +323,8 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
     });
   }
 
-  const todoId = req.params.id;
-  if(!todoId) {
+  const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  if(!idParam) {
     return res.status(400).json({
       msg: "No todo id found in path",
     });
@@ -343,7 +343,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
   try {
     const existingTodo = await prisma.todo.findFirst({
       where :{
-        id: parseInt(todoId),
+        id: parseInt(idParam),
         userId,
       },
     });
@@ -358,7 +358,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
     }
     const updatedTodo = await prisma.todo.update({
-      where: {id: parseInt(todoId)},
+      where: {id: parseInt(idParam)},
       data: {
         title,
         description,

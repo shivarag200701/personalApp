@@ -275,8 +275,8 @@ oauthRouter.delete("/accounts/:id",requireLogin, async(req,res)=>{
     }
 
     const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-    
-    const accountId = parseInt(req.params.id);
+
+    const accountId = parseInt(idParam);
     if(isNaN(accountId)){
         return res.status(400).json({msg: 'Account id is required'});
     }

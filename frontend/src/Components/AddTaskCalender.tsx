@@ -183,6 +183,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
           color: selectedColor ?? null,
+          createdAt: null
         });
       }
 
@@ -390,6 +391,10 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
               selectedDate={selectedDate}
               todo={todo}
               selectedTime={selectedTime}
+              isRecurring={isRecurring}
+              setIsRecurring={setIsRecurring}
+              recurrencePattern={recurrencePattern}
+              setRecurrencePattern={setRecurrencePattern}
               onTimeSelect={(time: string) => {
                 setSelectedTime(time);
               }}

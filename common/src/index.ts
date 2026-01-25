@@ -24,6 +24,7 @@ export const todoSchema = z.object({
   recurrenceEndDate: z.string().nullish(),
   nextOccurrence: z.string().nullish(),
   color: z.string().nullish(),
+  order: z.number().int().optional(),
 });
 
 export type SignUp = z.infer<typeof signUpSchema>;
@@ -429,5 +430,5 @@ export const changeEmailSchema = z.object({
 })
 
 export const ChangeUsernameSchema = z.object({
-  email: z.string().min(3,"Atleast 3 characters")
+  username: z.string().min(3,"Atleast 3 characters")
 })

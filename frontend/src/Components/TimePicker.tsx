@@ -6,7 +6,9 @@ interface TimePickerProps {
     buttonRef?: React.RefObject<HTMLButtonElement | null>;
     selectedTime: TimeOption;
     onTimeSelect: (time: string) => void;
-    setIsAllDay: (isAllDay: boolean) => void;
+    // setIsAllDay: (isAllDay: boolean) => void;
+    isTimeSelected?: boolean
+    onSave?:() => void
 }
 interface TimeOption {
     value: string;
@@ -18,8 +20,7 @@ interface TimeOptionProps {
     onClose: () => void;
     buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
-const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, setIsAllDay }: TimePickerProps) => {
-
+const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSelected,onSave }: TimePickerProps) => {
     const pickerRef = useRef<HTMLDivElement>(null);
     const timeOptionButtonRef = useRef<HTMLButtonElement>(null);
     const [isTimeOptionOpen, setIsTimeOptionOpen] = useState(false);
@@ -45,7 +46,8 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, setIsAllDa
             });
         }
     }, [buttonRef]);
-
+    console.log("selected time in timepicker",selectedTime);
+    
 
 
   
@@ -94,13 +96,26 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, setIsAllDa
         <div className="h-px w-full bg-gray-700"/>
         <div className="flex justify-end">
         <div className=" flex justify-between p-3.5 gap-2">
-            <button className="w-full py-1.5 px-4  bg-muted hover:bg-muted flex items-center  text-center gap-2 rounded-sm cursor-pointer transition-colors duration-300" onClick={() => {onClose(); setIsAllDay(true);}}>
+            <button className="w-full py-1.5 px-4  bg-muted hover:bg-muted flex items-center  text-center gap-2 rounded-sm cursor-pointer transition-colors duration-300" onClick={() => {onClose(); }}>
                 <div className="text-foreground text-xs font-light text-left">Cancel</div>
             </button>
-            <button className="w-full py-1.5 px-4 bg-red-600 hover:bg-red-500 flex items-center  text-center gap-2 rounded-sm cursor-pointer
-            transition-colors duration-300" onClick={() => {onClose(); setIsAllDay(false);}}>
-                <div className="text-white text-xs font-light text-left">Save</div>
-            </button>
+            {!isTimeSelected ?
+                (<button className="w-full py-1.5 px-4 bg-red-600 hover:bg-red-500 flex items-center  text-center gap-2 rounded-sm cursor-pointer
+                transition-colors duration-300" onClick={() => {onClose();
+                    if(onSave){
+                        onSave()
+                    }
+                }}>
+                    <div className="text-white text-xs font-light text-left">Save</div>
+                </button>):(
+                    <button className="w-full py-1.5 px-4 bg-red-600 hover:bg-red-500 flex items-center  text-center gap-2 rounded-sm cursor-pointer
+                    transition-colors duration-300" onClick={() => {onClose(); 
+                    if(onSave){
+                        onSave()
+                    }}}>
+                        <div className="text-white text-xs font-light text-left">Update</div>
+                    </button>)  
+            }
         </div>
         </div>
     </div>

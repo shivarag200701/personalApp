@@ -75,6 +75,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
         color: todo.color ?? null,
         isAllDay: todo.isAllDay,
+        order: todo.order ?? null,
       },
     })
   } catch (error) {
@@ -165,6 +166,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
         createdAt: todo.createdAt.toISOString(),
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
         color: todo.color ?? null,
+        order: todo.order ?? null,
       })),
     });
   } catch (error) {
@@ -337,7 +339,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
       error,
     });
   }
-  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay} = data;
+  const {title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay,order} = data;
 
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
@@ -373,6 +375,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         recurrenceEndDate: isRecurring ? (recurrenceEndDate ? new Date(recurrenceEndDate) : null) : null,
         nextOccurrence: isRecurring ? nextOccurrence : null,
         color: color ?? null,
+        order: order ?? null,
       },
     })
     return res.status(200).json({
@@ -387,6 +390,7 @@ todoRouter.put("/:id", requireLogin, async (req, res) => {
         createdAt: updatedTodo.createdAt.toISOString(),
         updatedAt: updatedTodo.updatedAt ? updatedTodo.updatedAt.toISOString() : null,
         color: updatedTodo.color ?? null,
+        order: updatedTodo.order ?? null,
       },
     });
   }catch(error){

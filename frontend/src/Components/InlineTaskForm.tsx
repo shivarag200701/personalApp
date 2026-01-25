@@ -28,6 +28,24 @@ interface InlineTaskFormProps {
     hour12: false
   })
 }
+export function getDateFromDate(date: string){
+  if(!date) return "";
+  return date.split("T")[0];
+}
+export function roundToNearest15Minutes(date: Date) {
+
+  const ms = 1000 * 60 * 15
+
+  const roundedDate = new Date(Math.ceil(date.getTime() / ms) * ms);
+  return roundedDate.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: false
+  })
+
+}
+
+
 const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate , index, backgroundColor, width="w-full", todos, columnIndex}: InlineTaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -64,11 +82,9 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   }
   if(!isAllDay){
     selectedDate = combineDateAndTime(selectedDate,selectedTime);
+
   }
-
-
-  
-
+console.log("date",selectedDate);
   
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -78,31 +94,18 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     return `${year}-${month}-${day}`;
   };
 
-  function roundToNearest15Minutes(date: Date) {
-
-    const ms = 1000 * 60 * 15
-
-    const roundedDate = new Date(Math.ceil(date.getTime() / ms) * ms);
-    return roundedDate.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: false
-    })
-
-  }
-
+  
   // Helper function to convert ISO date string to YYYY-MM-DD format (using local timezone)
  
 
   
-  const getDateFromDate = (date: string) => {
-    if(!date) return "";
-    return date.split("T")[0];
-  }
+  
 
 
   // Initialize form fields from todo prop when editing
   useEffect(() => {
+    console.log("called the todo");
+    
     if (todo) {
       setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
       if(!todo.isAllDay){
@@ -191,6 +194,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
           isAllDay,
+          createdAt:null
         });
           await api.post("/v1/todo/", {
           title,
@@ -233,6 +237,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       dateStr = dateStr.split("T")[0];
     }
 
+    console.log("selected time",selectedTime);
+    
     // Parse YYYY-MM-DD string as local date (not UTC)
     const [year, month, day] = dateStr.split('-').map(Number);
     const selectedDate = new Date(year, month - 1, day);
@@ -268,6 +274,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   };
 
   const dateLabel = getDateLabel(selectedDate,selectedTime);
+  console.log("dateLabel",dateLabel);
+  console.log("isAllDay",isAllDay);
+  
+  
+  
   
   // Check if selected date is today
   const isTodaySelected = (() => {
@@ -319,7 +330,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     return () => clearTimeout(timeoutId);
   },[title])
 
-
+  
 
   const handleCancel = () => {
     setIsWarningModalOpen(false);
@@ -419,6 +430,10 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               selectedDate={selectedDate}
               setIsAllDay={setIsAllDay}
               selectedTime={selectedTime}
+              isRecurring={isRecurring}
+              setIsRecurring={setIsRecurring}
+              recurrencePattern={recurrencePattern}
+              setRecurrencePattern={setRecurrencePattern}
               onTimeSelect={(time: string) => {
                 setSelectedTime(time);
                 hasChangesRef.current = true;
@@ -443,6 +458,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               }}
               index={index}
               onClose={() => setShowDatePicker(false)}
+              onSave={()=> setIsAllDay(false)}
               buttonRef={dateButtonRef}
             />
           )}
@@ -503,7 +519,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             setShowMoreOptionsPicker(!showMoreOptionsPicker);
           }}
         >
-          <MoreHorizontal className="w-4 h-4" />
+          <MoreHorizontal className="w-6 h-6" />
         </button>
         {showMoreOptionsPicker && (
           <MoreOptionsPicker

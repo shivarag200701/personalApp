@@ -12,12 +12,22 @@ import { CalendarDays, Plus,SquareKanban, Calendar1, CircleCheck } from "lucide-
 import AddTaskCalendar from "../Components/AddTaskCalender";
 import SideBar, { SideBarItem } from "@/Components/SideBar";
 import { ViewDropDown } from "@/Components/ViewDropDown";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Dashboard = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const queryClient = useQueryClient();
+  
+  // Use useQuery for todos - data is already cached from RequireAuth
+  const { data: todos = [], isLoading: loading } = useQuery<Todo[]>({
+    queryKey: ["todos"],
+    queryFn: async () => {
+      const res = await api.get("/v1/todo/");
+      return res.data.todos;
+    },
+  });
+
   const [isAddTaskCalendarOpen, setIsAddTaskCalendarOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [activeTab, setActiveTab] = useState<string>("upcoming");
   const [viewType, setViewType] = useState<string>("board");
@@ -59,29 +69,33 @@ const Dashboard = () => {
     };
   }, [showViewDropdown]);
 
-  const openModal = (date?: string) => {
+  const openModal = () => {
     setIsAddTaskCalendarOpen(true);
-    console.log("date", date);
     
   }
   const closeModal = () => {
     setIsAddTaskCalendarOpen(false);
   }
   const closeDetailDrawer = () => {
-    setIsDetailOpen(false);
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("task")
+    setSearchParams(params,{ replace: true})
   };
 
   function addTodo(newTask: Todo) {
-    setTodos((prev) => [...prev, newTask]);
+    queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => [...prev, newTask]);
   }
   function updateTodo(updatedTask: Todo) {
-    setTodos((prev) => prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo));
+    queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+      prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo)
+    );
     setSelectedTodo((prev) => {
       if (prev?.id === updatedTask.id) {
         return updatedTask;
       }
       return prev;
     });
+    
   }
   const handleEdit = (todo: Todo) => {
     setSelectedTodo(todo);
@@ -90,8 +104,11 @@ const Dashboard = () => {
   };
 
   const handleViewDetails = (todo: Todo) => {
-    setSelectedTodo(todo);
-    setIsDetailOpen(true);
+    const params = new URLSearchParams(searchParams.toString())
+    if(todo.id){
+      params.set("task",String(todo.id))
+      setSearchParams(params, { replace: false })
+    }
   };
 
   const toggleTodoCompletion = async (todoId: string | number) => {
@@ -106,14 +123,9 @@ const Dashboard = () => {
     if(newCompletedStatus === true){}
     //If the task is not recurring, update the task as completed in the UI
     if(!todoToUpdate.isRecurring){
-      setTodos((prev) => {
-          return prev.map((todo) => {
-            if(todo.id === todoId){
-              return {...todo, completed: newCompletedStatus}
-            }
-            return todo;
-          })
-      })
+      queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+        prev.map((todo) => todo.id === todoId ? {...todo, completed: newCompletedStatus} : todo)
+      );
       setSelectedTodo((prev) => {
         if (prev?.id === todoId) {
           return { ...prev, completed: newCompletedStatus };
@@ -127,14 +139,9 @@ const Dashboard = () => {
         });
       }catch(error){
         console.error("Error cant mark as completed", error);
-        setTodos((prev) => {
-          return prev.map((todo) => {
-            if(todo.id === todoId){
-              return {...todo, completed: !newCompletedStatus}
-            }
-            return todo;
-          })
-        })
+        queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+          prev.map((todo) => todo.id === todoId ? {...todo, completed: !newCompletedStatus} : todo)
+        );
         setSelectedTodo((prev) => {
           if(prev?.id === todoId){
             return {...prev, completed: !newCompletedStatus}
@@ -152,14 +159,9 @@ const Dashboard = () => {
         const nextOccurrenceDate = calculateNextOccurence(todoToUpdate.recurrencePattern as RecurrencePattern, todoToUpdate.recurrenceInterval, baseDate);
         //optimistic update to UI
         if(todoToUpdate.recurrenceEndDate && nextOccurrenceDate > new Date(todoToUpdate.recurrenceEndDate)){
-          setTodos((prev) => {
-            return prev.map((todo) => {
-              if(todo.id === todoId){
-                return {...todo, completed: true, nextOccurrence: null}
-              }
-              return todo;
-            })
-          })
+          queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+            prev.map((todo) => todo.id === todoId ? {...todo, completed: true, nextOccurrence: null} : todo)
+          );
           setSelectedTodo((prev) => {
             if (prev?.id === todoId) {
               return { ...prev, completed: true, nextOccurrence: null };
@@ -169,21 +171,15 @@ const Dashboard = () => {
         }
         else{
           console.log("next occurrence date", nextOccurrenceDate);
-          
-            setTodos((prev) => {
-              return prev.map((todo) => {
-                if(todo.id === todoId){
-                  return {...todo, completeAt: nextOccurrenceDate.toISOString()}
-                }
-                return todo;
-              })
-            })
-            setSelectedTodo((prev) => {
-              if (prev?.id === todoId) {
-                return { ...prev, completeAt: nextOccurrenceDate.toISOString() };
-              }
-              return prev;
-            });
+          queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+            prev.map((todo) => todo.id === todoId ? {...todo, completeAt: nextOccurrenceDate.toISOString()} : todo)
+          );
+          setSelectedTodo((prev) => {
+            if (prev?.id === todoId) {
+              return { ...prev, completeAt: nextOccurrenceDate.toISOString() };
+            }
+            return prev;
+          });
         }
       //send data to backend
       try{
@@ -192,14 +188,9 @@ const Dashboard = () => {
         });
       }catch(error){
         console.error("Error cant mark recurring task as completed", error);
-        setTodos((prev) => {
-          return prev.map((todo) => {
-            if(todo.id === todoId){
-              return {...todo, completeAt: baseDate.toISOString()}
-            }
-            return todo;
-          })
-        })
+        queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+          prev.map((todo) => todo.id === todoId ? {...todo, completeAt: baseDate.toISOString()} : todo)
+        );
         setSelectedTodo((prev) => {
           if(prev?.id === todoId){
             return {...prev, completeAt: baseDate.toISOString()}
@@ -210,14 +201,9 @@ const Dashboard = () => {
     }
     else{
       //to handle the case where the task is recurring and the completed status is changed to not completed
-      setTodos((prev) => {
-        return prev.map((todo) => {
-          if(todo.id === todoId){
-            return {...todo, completed: newCompletedStatus}
-          }
-          return todo;
-        })
-      })
+      queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+        prev.map((todo) => todo.id === todoId ? {...todo, completed: newCompletedStatus} : todo)
+      );
       setSelectedTodo((prev) => {
         if(prev?.id === todoId){
           return {...prev, completed: newCompletedStatus}
@@ -231,14 +217,9 @@ const Dashboard = () => {
         });
       }catch(error){
         console.error("Error cant mark as not completed", error);
-        setTodos((prev) => {
-          return prev.map((todo) => {
-            if(todo.id === todoId){
-              return {...todo, completed: !newCompletedStatus}
-            }
-            return todo;
-          })
-        })
+        queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
+          prev.map((todo) => todo.id === todoId ? {...todo, completed: !newCompletedStatus} : todo)
+        );
         setSelectedTodo((prev) => {
           if(prev?.id === todoId){
             return {...prev, completed: !newCompletedStatus}
@@ -274,7 +255,7 @@ const Dashboard = () => {
     if (!todoId) {
       return;
     }
-    setTodos((prev) => prev.filter((todo) => todo.id !== todoId));
+    queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => prev.filter((todo) => todo.id !== todoId));
     if (selectedTodo?.id === todoId) {
       setSelectedTodo(null);
       setIsDetailOpen(false);
@@ -283,10 +264,11 @@ const Dashboard = () => {
       await api.delete(`/v1/todo/${todoId}`);
     } catch (error) {
       console.error("Error deleting todo", error);
+      // Revert on error - refetch todos
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     }
   }
   const duplicateTodo = async (todo: Todo) => {
-
     try {
       const res = await api.post("v1/todo/",{
         title: todo.title,
@@ -303,22 +285,11 @@ const Dashboard = () => {
       addTodo(createdTodo);
     } catch (error) {
       console.error("Error duplicating todo", error);
+      // On error, refetch todos to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     }
   }
 
-  useEffect(() => {
-    async function fetchTodo() {
-      try {
-        const res = await api.get("/v1/todo/");
-        const todos = res.data.todos;
-        setTodos(todos);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching todos", error);
-      }
-    }
-    fetchTodo();
-  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -331,6 +302,26 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", checkMobile)
 
   },[])
+
+  useEffect(() => {
+    const taskIdParam = searchParams.get("task")
+    if(taskIdParam){
+      const matched = todos.find((t) => String(t.id) === taskIdParam)
+      
+      if(matched){
+        setSelectedTodo(matched)
+        setIsDetailOpen(true)
+      }
+      else{
+        setSelectedTodo(null)
+        setIsDetailOpen(false)
+      }
+    } 
+    else {
+      setSelectedTodo(null)
+      setIsDetailOpen(false)
+    }
+  },[searchParams,todos])
 
   
 
@@ -436,7 +427,7 @@ const Dashboard = () => {
             onDelete={deleteTodo}
             onEdit={handleEdit}
             onUpdateTodo={updateTodo}
-            onAddTask={(date) => openModal(date)}
+            onAddTask={() => openModal()}
             onViewDetails={handleViewDetails}
             onTaskCreated={addTodo}
             onTaskUpdated={updateTodo}
@@ -470,7 +461,7 @@ const Dashboard = () => {
           width="w-[500px]"
         />
       )}
-      <TaskDetailDrawer
+      { isDetailOpen && selectedTodo && (<TaskDetailDrawer
         todo={selectedTodo}
         isOpen={isDetailOpen}
         onClose={closeDetailDrawer}
@@ -479,7 +470,9 @@ const Dashboard = () => {
         onToggleComplete={toggleTodoCompletion}
         onDelete={deleteTodo}
         handleDuplicate={duplicateTodo}
+        key={selectedTodo.id}
       />
+    )}
       {showViewDropdown && (
         <ViewDropDown viewType={viewType} setViewType={setViewType} buttonRef={viewDropdownButtonRef} setShowViewDropdown={setShowViewDropdown} setViewTypeActive={setViewTypeActive} />
       )}

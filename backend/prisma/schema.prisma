@@ -42,6 +42,7 @@ model Todo {
   completedAt   DateTime?
   color         String?
   isAllDay      Boolean     @default(false)
+  order         Int?
 
   //Recurring tasks fields
   isRecurring         Boolean     @default(false)

@@ -26,6 +26,7 @@ export declare const todoSchema: z.ZodObject<{
     recurrenceEndDate: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     nextOccurrence: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     color: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    order: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strip>;
 export type SignUp = z.infer<typeof signUpSchema>;
 export type SignIn = z.infer<typeof signInSchema>;
@@ -122,6 +123,6 @@ export declare const changeEmailSchema: z.ZodObject<{
     email: z.ZodEmail;
 }, z.core.$strip>;
 export declare const ChangeUsernameSchema: z.ZodObject<{
-    email: z.ZodString;
+    username: z.ZodString;
 }, z.core.$strip>;
 //# sourceMappingURL=index.d.ts.map

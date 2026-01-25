@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import { type RecurrencePattern } from '@shiva200701/todotypes';
-import { formatDate } from '../utils/nlpDateParser';
 interface ReccurencePickerProps {
     buttonRef?: React.RefObject<HTMLButtonElement | null>;
     onClose: () => void
@@ -12,6 +11,7 @@ interface ReccurencePickerProps {
         recurrenceEndDate?: string | null;
       }) => void;
     onDateSelect: (date: string) => void;
+    selectedDate: string
 }
 
 interface RecurrenceOption {
@@ -23,7 +23,7 @@ interface RecurrenceOption {
     recurrenceEndDate: string | null;
 }
 
-const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}: ReccurencePickerProps) => {
+const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect,selectedDate}: ReccurencePickerProps) => {
     const pickerRef = useRef<HTMLDivElement>(null)
     const getInitialPosition = () => {
         if (buttonRef?.current) {
@@ -45,17 +45,16 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
             });
         }
     }, [buttonRef]);
-
     const getOrdinal = (n: number) => {
         const s = ["th", "st", "nd", "rd"];
         const v = n % 100;
         return n + (s[(v - 20) % 10] || s[v] || s[0]);
       };
 
-    const today = new Date();
-    const todayDay = today.toLocaleDateString('en-US', { weekday: 'long' });
-    const todayDayOrdinal = getOrdinal(today.getDate());
-    const todayMonth = today.toLocaleDateString('en-US', { month: 'long' });
+    const date = new Date(selectedDate)
+    const Day = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const DayOrdinal = getOrdinal(date.getDate());
+    const Month = date.toLocaleDateString('en-US', { month: 'long' });
 
     const options: RecurrenceOption[] = [
         {
@@ -69,7 +68,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
         {
             id:"weekly",
             primary: 'Every Week',
-            secondary: `on ${todayDay}`,
+            secondary: `on ${Day}`,
             recurrencePattern: "weekly",
             recurrenceInterval: 1,
             recurrenceEndDate: null,
@@ -77,7 +76,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
         {
             id:"monthly",
             primary: 'Every Month',
-            secondary: `on the ${todayDayOrdinal}`,
+            secondary: `on the ${DayOrdinal}`,
             recurrencePattern: "monthly",
             recurrenceInterval: 1,
             recurrenceEndDate: null,
@@ -85,7 +84,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
         {
             id:"yearly",
             primary: 'Every Year',
-            secondary: `on ${todayMonth} ${todayDayOrdinal}`,
+            secondary: `on ${Month} ${DayOrdinal}`,
             recurrencePattern: "yearly",
             recurrenceInterval: 1,
             recurrenceEndDate: null,
@@ -95,7 +94,7 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
 
     const handleClick = (option: RecurrenceOption) => () => {
         if (onRecurringSelect) {            
-            onDateSelect(formatDate(today));
+            // onDateSelect(formatDate(today));
             onRecurringSelect({
                 isRecurring: true,
                 recurrencePattern: option.recurrencePattern,
@@ -107,8 +106,8 @@ const ReccurencePicker = ({buttonRef, onClose, onRecurringSelect, onDateSelect}:
     }
     return createPortal(
         <>
-        <div className="fixed inset-0 z-40" onClick={onClose} />
-        <div ref={pickerRef} className="fixed bg-card border border-border rounded-md shadow-2xl z-50 w-[250px]" style={{
+        <div className="fixed inset-0 z-80" onClick={onClose} />
+        <div ref={pickerRef} className="fixed bg-card border border-border rounded-md shadow-2xl z-90 w-[250px]" style={{
             left: `${position.left}px`,
             top: `${position.top}px`,
             transform: 'translateY(-100%)',

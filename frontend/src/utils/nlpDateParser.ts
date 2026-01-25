@@ -522,7 +522,7 @@ export interface ParsedDateResult {
       const dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'short' });
       const dateStr = parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
-        result.displayText = `${dayName}, ${dateStr}`;
+        result.displayText = `${dayName} ${dateStr}`;
     }
     
     if (!parsedDate && !recurringInfo.isRecurring) {

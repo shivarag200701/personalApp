@@ -6,6 +6,7 @@ import DropDown from './DropDown'
 import { SettingsModal } from './SettingsModal/SettingsModal'
 import { useQuery } from '@tanstack/react-query';
 import {useNavigate} from 'react-router-dom'
+import { Spinner } from './ui/spinner';
 
 const SideBarContext = createContext<{expanded: boolean}>({expanded: false});
 const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode, expanded: boolean, setExpanded: (expanded: boolean) => void }) => {
@@ -13,6 +14,7 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
     const [showDropDown, setShowDropDown] = useState(false);
     const [moreOptionsActive, setMoreOptionsActive] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [isLoggingOut,setIsLoggingOut] = useState(false)
     const navigate = useNavigate()
     const {data:user} = useQuery({
       queryKey: ["users"],
@@ -25,7 +27,28 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
           pictureUrl: '/user.png'
         }
     })
-    console.log(user);
+
+    const handleLogout = async () =>{
+      try{
+        setIsLoggingOut(true)
+        await api.post("/v1/user/logout");
+        navigate("/")
+
+      }
+      catch(error){
+        console.error("error logging out",error)
+        setIsLoggingOut(false);
+      }
+    }
+
+    if(isLoggingOut){
+      return (
+        <div className="fixed inset-0 z-9999 bg-background flex flex-col items-center justify-center gap-4">
+          <img src="/favicon.png" alt="Logo" width={100} height={100} />
+          <Spinner />
+        </div>
+      )
+    }
     
   return (
     <aside className={`h-screen transition-all duration-300 ease-in-out ${expanded ? "w-64" : "w-0"} 
@@ -41,14 +64,14 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
           <button ref={buttonRef} onClick={() => {
             setShowDropDown(!showDropDown)
             setMoreOptionsActive(!moreOptionsActive)
-          }}  className={`flex items-center gap-2 hover:bg-hover rounded-sm p-1 cursor-pointer transition-all duration-300 ease-in-out w-full ${moreOptionsActive ? "bg-hover text-foreground" : ""}`}>
+          }}  className={`flex items-center gap-2 hover:bg-options-hover rounded-sm p-1 cursor-pointer transition-all duration-300 ease-in-out w-auto ${moreOptionsActive ? "bg-options-hover text-foreground" : ""}`}>
           <img
             src={user?.pictureUrl}
             alt="Profile"
             className="rounded-full border-2 border-border object-cover transition-all duration-300 ease-in-out w-7 h-7"
           />    
-          <span className="text-xs font-medium text-foreground transition-all    duration-300 ease-in-out w-32">
-            {user?.username}
+          <span className="text-xs font-medium text-foreground transition-all text-left   duration-300 ease-in-out w-auto">
+            {user?.username.split(" ")[0]}
             </span>
           <ChevronDown className='w-4 h-4 text-muted-foreground' />
           </button>
@@ -75,7 +98,7 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
         {showDropDown && <DropDown buttonRef={buttonRef} setShowDropDown={setShowDropDown} setOptionsActive={setMoreOptionsActive} 
         width='w-64' >
               <div className='flex flex-col'>
-                <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px]   p-1.5 m-1.5 cursor-pointer '
+                <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px]   p-1.5 m-1.5 cursor-pointer hover:bg-options-hover transition-all duration-300 '
                 onClick={() => {
                   setShowSettingsModal(true)
                   setShowDropDown(false)
@@ -85,12 +108,14 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
                 >
                     <Settings className='w-4.5 h-4.5' strokeWidth={1}
                      />
-                    <span className='text-sm font-medium'>Settings</span>
+                    <span className='text-[13px] font-medium'>Settings</span>
                 </button>
                 <div className='h-px bg-border' />
-                  <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px] p-1.5 m-1.5 cursor-pointer '>
+                  <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px] p-1.5 m-1.5 cursor-pointer hover:bg-options-hover transition-all duration-300 '
+                  onClick={handleLogout}
+                  >
                     <LogOut className='w-4.5 h-4.5' strokeWidth={1} />
-                    <span className='text-sm font-medium'>Logout</span>
+                    <span className='text-[13px] font-medium'>Logout</span>
                   </button>
               </div>
           </DropDown>

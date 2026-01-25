@@ -8,19 +8,28 @@ import {AddPassword,ChangePassword} from './Password';
 import {useQuery} from '@tanstack/react-query'
 import api from '@/utils/api';
 import { useState } from 'react';
+import type { Dispatch,SetStateAction } from 'react';
 
 
 
 interface SettingModalProps {
     setShowSettingsModal: (show: boolean) => void
 }
+interface UnsavedModalProps {
+    setModalOpen: Dispatch<SetStateAction<boolean>>;
+    onDiscard: () => void;
+  }
 
 export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
 
     const navigate = useNavigate();
     const location = useLocation();
+
+
     const [hasChanged,setHasChanged] = useState<boolean>(false)
     const [modalOpen,setModalOpen] = useState<boolean>(false)
+    const [pendingTab,setPendingTab] = useState<string | null>("")
+    const [resetToken,setResetToken] = useState(0)
 
     const segments = location.hash?.replace("#settings/","").split("/")
 
@@ -81,24 +90,24 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
     }}
     >
         <div className="grid grid-cols-[230px_auto] items-stretch h-full relative">
-            <div className="h-full py-2 px-3 self-stretch">
+            <div className="h-full py-3 px-3 self-stretch">
                 <span className='text-[16px] font-medium'>
                 Settings
                 </span>
-                <div className='flex flex-col gap-1 mt-10'>
+                <div className='flex flex-col mt-10'>
                     {tabs.map((tab) => (
                         <button
                         key={tab.id}
-                        className={`w-full text-[14px] p-2 rounded-[4px] cursor-pointer
-                            transition-all
+                        className={`w-full text-[14px] p-1.5 rounded-[4px] cursor-pointer
                             ${tab.id ===
-                            currentTab ? "bg-accent/15 border-l-2 border-accent text-accent" : "hover:bg-hover"} `}
+                            currentTab ? "bg-accent/15 border-l-2 border-accent text-accent hover:disabled transition-all duration:300" : "hover:bg-options-hover transition-all duration:300 "} `}
                             onClick={() => {
-                                setModalOpen(hasChanged)
-                                if(!hasChanged){
+                               if(hasChanged){
+                                setPendingTab(tab.id)
+                                setModalOpen(true)
+                               } else{
                                 handleTabChange(tab.id)
-                                    
-                                }
+                               }
                             }}
                         >
                             <div className='flex justify-start items-center gap-2'>
@@ -110,7 +119,12 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
 
                 </div>
             </div>
-            {currentTab === "account" && !currentSubTab && <AccountSettings handleChange={handleSubTabChange} hasChanged={hasChanged} setHasChanged={setHasChanged} />}
+            {currentTab === "account" && !currentSubTab && <AccountSettings 
+            handleChange={handleSubTabChange} 
+            hasChanged={hasChanged} 
+            setHasChanged={setHasChanged}
+            resetToken={resetToken}
+             />}
             {currentTab === "general" && <GeneralSettings />}
             {currentTab === "notifications" && <NotificationsSettings />}
             {currentTab === "account" && currentSubTab === "password" && !user.isPasswordSet && <AddPassword handleBack={handleSubTabChange} />}
@@ -126,6 +140,31 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
         </div>
     </div>  
     {modalOpen && (
+        <UnsavedModal
+        setModalOpen={setModalOpen}
+        onDiscard={() => {
+            setHasChanged(false);
+            //trigger reset
+            setResetToken((t) => t+1);
+            if(pendingTab){
+                handleTabChange(pendingTab);
+                setPendingTab(null);
+            }
+        }}
+        />
+    )}    
+    </>
+  )
+}
+
+export const UnsavedModal = ({setModalOpen, onDiscard}:UnsavedModalProps) =>{
+    const handleDiscard = () => {
+        onDiscard();
+        setModalOpen(false);
+    };
+
+    return(
+        <>
         <div>
         <div className='z-50 inset-0 fixed bg-black/30' onClick={()=>setModalOpen(false)}/>
         <div className='z-60 w-[375px] sm:w-[450px] h-content rounded-md p-4 fixed left-1/2 top-1/4  bg-task'
@@ -142,14 +181,15 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
                     >
                         Cancel
                     </button>
-                    <button className=' text-[13px] px-3 py-1.5 bg-red-500 font-medium rounded-sm text-white cursor-pointer hover:bg-red-400'>
+                    <button className=' text-[13px] px-3 py-1.5 bg-red-500 font-medium rounded-sm text-white cursor-pointer hover:bg-red-400'
+                    onClick={handleDiscard}
+                    >
                         Discard
                     </button>
                 </div>
             </div> 
         </div>
         </div>
-    )}    
-    </>
-  )
+        </>
+    )
 }

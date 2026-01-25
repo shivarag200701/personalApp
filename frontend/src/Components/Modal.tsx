@@ -21,6 +21,8 @@ export interface Todo {
   parentRecurringId?: number | null;
   nextOccurrence?: string | null;
   color?: string | null;
+  order?: number | null;
+  createdAt: string | null
 }
 
 interface ModalProps {
@@ -141,7 +143,8 @@ const Modal = ({ isOpen, onClose, addTodo, editTodo, todoToEdit, preselectedDate
         recurrenceInterval,
         recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
         parentRecurringId: null,
-        isAllDay: false
+        isAllDay: false,
+        createdAt: null
       });
     }
       onClose();

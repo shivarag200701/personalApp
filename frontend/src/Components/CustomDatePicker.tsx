@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX, Sparkles, Clock, Repeat} from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Sun, Sofa, ArrowRight, CircleX,Clock, Repeat, X} from "lucide-react";
 import { parseNaturalLanguageDate , type ParsedDateResult} from "../utils/nlpDateParser";
 import { RefreshCw} from 'lucide-react';
 import { createPortal } from "react-dom";
@@ -9,10 +9,10 @@ import type { RecurrencePattern } from "@shiva200701/todotypes";
 import ReccurencePicker from "./ReccurencePicker";
 interface CustomDatePickerProps {
   selectedDate: string; // YYYY-MM-DD format
-  onDateSelect: (date: string) => void;
+  onDateSelect: (date: string,isQuickAction?:boolean) => void;
   onClose: () => void;
-  buttonRef?: React.RefObject<HTMLButtonElement | null>;
-  index: number;
+  buttonRef?: React.RefObject<HTMLButtonElement | HTMLDivElement | null>;
+  index?: number;
   onRecurringSelect?: (config: {
     isRecurring: boolean;
     recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
@@ -21,24 +21,46 @@ interface CustomDatePickerProps {
   }) => void;
   selectedTime: string;
   onTimeSelect: (time: string) => void;
-  setIsAllDay: (isAllDay: boolean) => void;
+  noTimeSelect?: () => void
   todos: Todo[];
   todo?: Todo;
   isAllDay: boolean;
+  isRecurring: boolean;
+  recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly" | null;
   columnIndex?: number;
+  onSave?: ()=>void;
+  setIsAllDay: (isAllDay:boolean) => void
+  setIsRecurring: (isRecurring:boolean) => void
+  setRecurrencePattern?: (pattern: "daily" | "weekly" | "monthly" | "yearly" | null) => void
 }
 
 interface TimeOption {
   value: string;
   label: string;
 }
-const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, index, onRecurringSelect, selectedTime, onTimeSelect, setIsAllDay, todos, todo, isAllDay, columnIndex }: CustomDatePickerProps) => {
+const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, index, onRecurringSelect, selectedTime, onTimeSelect, todos, todo, isAllDay, columnIndex, onSave, setIsAllDay, noTimeSelect, isRecurring, recurrencePattern, setIsRecurring, setRecurrencePattern }: CustomDatePickerProps) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
   const [showReccurencePicker, setShowReccurencePicker] = useState(false);
   const timeButtonRef = useRef<HTMLButtonElement | null>(null);
   const reccurenceButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [prevDisabled,setPrevDisabled] = useState(false);
+
+  const getOrdinal = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+  const today = new Date()
+  const date = new Date(selectedDate)
+  const Day = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const DayOrdinal = getOrdinal(date.getDate());
+  const Month = date.toLocaleDateString('en-US', { month: 'short' });
   
+  const recurrencePatternMap = {"daily":"Every Day",
+                                "weekly":`every ${Day}`,
+                                "monthly":`Every ${DayOrdinal}`,
+                                "yearly":`Every ${DayOrdinal} ${Month}`}
   
   const [currentMonth, setCurrentMonth] = useState(() => {
     if (selectedDate) {
@@ -48,7 +70,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return new Date();
   });
   const getInitialPosition = () => {
-    if (buttonRef?.current) {
+    if (buttonRef?.current && index!=null) {
       const rect = buttonRef.current.getBoundingClientRect();
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
@@ -83,6 +105,12 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           }
         }
       }
+    }else if (buttonRef?.current){
+      const rect = buttonRef.current.getBoundingClientRect();
+      return {
+        left:rect.left,
+        top:rect.bottom
+      }
     }
     return { left: 0, top: 0 };
   }
@@ -96,7 +124,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
   useEffect(() => {
     const updatePosition = () => {
-    if (buttonRef?.current) {
+    if (buttonRef?.current && index != null) {
       const rect = buttonRef.current.getBoundingClientRect();
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
@@ -126,13 +154,19 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                 });
           } else {
             setPosition({
-              left: rect.right,
+              left: rect.left,
               top: 50,
             });
           }
         }
       }
+  }else if (buttonRef?.current){
+    const rect = buttonRef.current.getBoundingClientRect();
+    return {
+      left:rect.left,
+      top:rect.bottom
     }
+  }
     };
     updatePosition();
   }, [buttonRef, index, pickerRef,selectedDate]);
@@ -167,7 +201,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         
         // If recurring, notify parent
         if (parsedResult.isRecurring && onRecurringSelect) {
-          onRecurringSelect({
+          handleRecurringSelect({
             isRecurring: true,
             recurrencePattern: parsedResult.recurrencePattern,
             recurrenceInterval: parsedResult.recurrenceInterval,
@@ -175,13 +209,29 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
           });
         } else if (onRecurringSelect) {
           // Clear recurring if not recurring
-          onRecurringSelect({
+          handleRecurringSelect({
             isRecurring: false
           });
         }
       }
       onClose();
   }
+
+  function handleRecurringSelect (config: {
+    isRecurring: boolean;
+    recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
+    recurrenceInterval?: number;
+    recurrenceEndDate?: string | null}){
+
+      setIsRecurring(config.isRecurring)
+      if (setRecurrencePattern) {
+        setRecurrencePattern(config.recurrencePattern ?? null)
+      }
+      if(onRecurringSelect){
+        onRecurringSelect(config)
+      }
+
+    }
 
 
 
@@ -193,7 +243,6 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     }
   }, [parsedResult]);
 
-  const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const tomorrow = new Date(today);
@@ -278,26 +327,39 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
     return {value: timeString, label: label};
   }
+  const calculateHalfDone = ():boolean =>{
+    return currentMonth.getMonth() == getTodayMonth() && todayDate() >= 18
+  }
 
-  const getDaysInMonth = (date: Date) => {
+  const getDaysInMonth = (date: Date,nextMonth: boolean) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
+    const eighteenthDay = new Date(year,month,18)
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
+    const halfDone = calculateHalfDone()
 
     const days = [];
     // Add empty cells for days before the first day of the month
+    if(!halfDone || nextMonth){
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
+  }else{
+    for (let i = 0; i < eighteenthDay.getDay(); i++) {
+      days.push(null);
+    }
+  }
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
     return days;
   };
+
+  
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth((prev) => {
@@ -374,6 +436,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     return date.getTime() === today.getTime();
   };
 
+  const todayDate = (): number =>{
+    return today.getDate()
+  }
+
+  const getTodayMonth = (): number =>{
+    return today.getMonth()
+  }
+
   const isPastDate = (date: Date | null): boolean => {
     if (!date) return false;
     return date < today;
@@ -381,18 +451,13 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
   const handleDateClick = (date: Date) => {
     if (!isPastDate(date)) {
-      onDateSelect(dateToInput(date));
-      // Clear recurring when manually selecting date
-      if (onRecurringSelect) {
-        onRecurringSelect({
-          isRecurring: false
-        });
-      }
+      onDateSelect(dateToInput(date),false);
       // Clear NLP input
       setNlpInput("");
       setParsedResult(null);
     }
   };
+
 
   const quickOptions = [
     {
@@ -427,13 +492,13 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     },
   ];
 
-  const days = getDaysInMonth(currentMonth);
+  const days = getDaysInMonth(currentMonth,false);
   const monthLabel = currentMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
   // Get next month for display
   const nextMonth = new Date(currentMonth);
   nextMonth.setMonth(nextMonth.getMonth() + 1);
-  const nextMonthDays = getDaysInMonth(nextMonth);
+  const nextMonthDays = getDaysInMonth(nextMonth,true);
   const nextMonthLabel = nextMonth.toLocaleDateString('en-US', { month: 'short' });
 
   const getTaskCountForDate = useMemo(() => {
@@ -452,24 +517,31 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       return dateCountMap.get(date) || 0;
     }
   },[todos])
+  useEffect(()=>{
+    const today = new Date()
+    if (currentMonth < today){
+      setPrevDisabled(true)
+    }else{
+      setPrevDisabled(false)
+    }
+  },[currentMonth])
 
   
   
-  const convert24hrTo12hr = (time: string): string => {
+  const convert24hrTo12hr = (time: string|null): string => {
+    if(!time) return ""
     const [hours, minutes] = time.split(":");
     const hour24 = parseInt(hours);
     const ampm = hour24 >= 12 ? "PM" : "AM";
     const hour12 = hour24 % 12 || 12;
     return `${hour12.toString()}:${minutes.toString()} ${ampm}`;
   }
- 
-  
   
   return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40"
+        className="fixed inset-0 z-60"
         onClick={()=>{
           onClose();
         }}
@@ -477,18 +549,15 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       {/* Date Picker */}
       <div
         ref={pickerRef}
-        className="fixed bg-card border border-border rounded-md shadow-2xl z-50 w-[250px] transition-opacity duration-150"
+        className="fixed bg-task border border-border rounded-md shadow-2xl z-70 w-[250px] transition-opacity duration-150 max-h-[600px] overflow-hidden"
         style={{
           ...position,
           transform: `${columnIndex && columnIndex >= 3 ? "translateX(-100%)" : ""}`,
         }}
       >
       {/* NLP Input Section */}
-      <div className="p-3 border-b border-border">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-500 text-xs font-medium">Type a date</span>
-        </div>
+      <div className="border-b border-border">
+        <div className={`${parsedResult?.confidence === "high" ? "border-b border-border" : ""}`}>
         <input
           ref={inputRef}
           type="text"
@@ -499,28 +568,27 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
               handleApplyDate();
             }
           }}
-          placeholder="e.g., tomorrow, every Monday, in 5 days"
-          className="w-full bg-input border border-border rounded-md px-2 py-1.5 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+          placeholder="Type a date"
+          className="w-full text-base sm:text-lg text-foreground placeholder:text-secondary focus:outline-none focus:border-ring bg-transparent h-10 px-3 "
         />
-        {parsedResult && (
-          <div className="mt-3 text-xs flex items-center gap-3">
-            {parsedResult.confidence === "high" && (
+        </div>
+        {parsedResult?.confidence === "high" && (
+          <div className="mt-3 text-xs flex items-center gap-3 px-3">
               <div>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={handleApplyDate}>
               {parsedResult.isRecurring && <RefreshCw className="w-4 h-4 text-muted-foreground" />}
               {!parsedResult.isRecurring && <Calendar className="w-4 h-4 text-muted-foreground" />}
-              <div className="text-white flex items-center gap-1">
+              <div className="text-white text-[13px] flex items-center gap-1">
                 {parsedResult.displayText}
                 {parsedResult.isRecurring && (
                   <span className="flex items-center gap-1"><ArrowRight className="w-4 h-4 text-white" /> Forever</span>
                 )}
               </div>
               </div>
-            <div className="text-muted-foreground mt-3 text-xs">
+            <div className="text-muted-foreground mt-3 text-[10px] pb-2">
             You can also type in recurring dates like <span className="text-gray-300">every day, every 2 weeks, and every month.</span> 
             </div>
             </div>
-            )}
           </div>
         )}
       </div>
@@ -538,18 +606,17 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
               key={option.label}
               onClick={() => {
                 if (option.date) {
-                  onDateSelect(dateToInput(option.date));
+                  if(!isAllDay){
+                  }
+                  onDateSelect(dateToInput(option.date),true);
+                  
                 } else {
                   onDateSelect("");
                 }
-                // Clear recurring when selecting quick option
-                if (onRecurringSelect) {
-                  onRecurringSelect({
-                    isRecurring: false
-                  });
-                }
+
                 setNlpInput("");
                 setParsedResult(null);
+                onClose()
               }}
               className={`w-full flex items-center gap-3 p-1 rounded-lg hover:bg-muted transition-colors cursor-pointer ${
                 (isSelected || isNoDate) ? "bg-muted" : ""
@@ -570,30 +637,33 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       </div>
 
       {/* Calendar */}
-      <div className="p-4">
+      <div className={`p-4 overflow-y-auto  ${parsedResult?.confidence === "high" ? "max-h-[160px]" : "max-h-[250px]" }`}>
         {/* Month Header */}
         <div className="flex items-center justify-between mb-4">
+        <span className="text-white font-semibold">{monthLabel}</span>
+        <div className="flex">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-1 hover:bg-muted rounded transition-colors"
+            className={`p-1 hover:bg-secondary  rounded transition-colors cursor-pointer ${prevDisabled && "opacity-5"}`}
+            disabled={prevDisabled}
           >
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
           <div className="flex items-center gap-2">
-            <span className="text-white font-semibold">{monthLabel}</span>
             <button
               onClick={goToToday}
-              className="w-6 h-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center"
+              className="w-6 h-6 rounded hover:bg-secondary  transition-colors flex items-center justify-center cursor-pointer"
             >
-              <div className="w-2 h-2 rounded-full bg-white"></div>
+              <div className="w-2 h-2 rounded bg-transparent border border-white"></div>
             </button>
           </div>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-1 hover:bg-muted rounded transition-colors"
+            className="p-1 hover:bg-secondary rounded transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4 text-white" />
           </button>
+        </div>
         </div>
 
         {/* Days of Week */}
@@ -630,7 +700,10 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             const isPast = isPastDate(date);
             const isParsedDate = parsedResult?.date === dateToInput(date);
             const isRecurringDate = isRecurringOccurence(date);
+            const today = todayDate()
             
+            if(today >= 18 && date.getDate() >= 18 || currentMonth.getMonth() != getTodayMonth() )
+            {
             return (
               <button
                 onMouseEnter={() => {setHoverDate(date);}}
@@ -659,14 +732,16 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                 </div>
               </button>
             );
-          })}
+          }
+          }
+          )}
         </div>
 
         {/* Next Month Preview */}
         <div className="mt-6">
           <div className="text-xs text-[#6B6B75] mb-2">{nextMonthLabel}</div>
           <div className="grid grid-cols-7 gap-1">
-            {nextMonthDays.slice(0, 7).map((date, idx) => {
+            {nextMonthDays.slice(0, 14).map((date, idx) => {
               if (!date) {
                 return <div key={`empty-next-${idx}`} className="aspect-square"></div>;
               }
@@ -699,15 +774,42 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       </div>
       <div className="flex-col items-center justify-between">
       <div className="border-t border-border p-2.5 text-xs text-muted-foreground flex items-center justify-center text-center gap-2">
-        <button ref={timeButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-muted transition-colors duration-300" onClick={() => {setShowTimePicker(true)}}>
+        <button ref={timeButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer group [&:not(:has(.clear-icon:hover))]:hover:bg-secondary transition-colors duration-300 relative" onClick={() => {setShowTimePicker(true)}}>
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-            {!isAllDay ? (<div className="text-white">{convert24hrTo12hr(selectedTime)}</div>) : (<div className="text-white">Time</div>)}
+            {!isAllDay ? (<div className="text-foreground font-medium">{convert24hrTo12hr(selectedTime)}</div>) : (<div className="text-white">Time</div>)}
+            {!isAllDay && (
+              <button 
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent opening the time picker
+                setIsAllDay(true); // Remove the time by setting isAllDay to true
+                if(noTimeSelect){
+                noTimeSelect()
+                }
+              }}
+              >
+              <X className="absolute clear-icon cursor-pointer right-0.5 top-1/2 -translate-y-1/2 hover:bg-secondary p-1 h-5.5 w-5.5 rounded-sm " size={13}/>
+              </button>
+            )}
             </button>
         </div>
         <div className="w-full p-2.5 text-muted-foreground text-xs flex items-center justify-center text-center gap-2">
-          <button ref={reccurenceButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer hover:bg-muted transition-colors duration-300" onClick={() => {setShowReccurencePicker(true)}}>
-            <Repeat className="w-3.5 h-3.5 text-muted-foreground" />
-            <div>Repeat</div>
+          <button ref={reccurenceButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer group [&:not(:has(.recurring-clear-icon:hover))]:hover:bg-secondary  transition-colors duration-300 relative" onClick={() => {setShowReccurencePicker(true)}}>
+            <div className="flex items-center justify-center gap-2">
+            <Repeat className="w-3.5 h-3.5 text-muted-foreground " />
+            {isRecurring && recurrencePattern && (<span className="font-bold text-foreground">{recurrencePatternMap[recurrencePattern]}</span>)}
+            </div>
+            {!isRecurring && (<div>Repeat</div>)}
+            {isRecurring && (
+              <button onClick={(e)=>{
+                e.stopPropagation()
+                setIsRecurring(false)
+                if (setRecurrencePattern) {
+                  setRecurrencePattern(null)
+                }
+              }}>
+                <X className="recurring-clear-icon absolute cursor-pointer right-0.5 top-1/2 -translate-y-1/2 hover:bg-secondary p-1 h-5.5 w-5.5 rounded-sm " size={13}/>
+              </button>
+            )}
             </button>
         </div>
         </div>
@@ -720,7 +822,8 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         onTimeSelect={(time: string) => {
           onTimeSelect(time);
         }}
-        setIsAllDay={setIsAllDay}
+        isTimeSelected={!isAllDay}
+        onSave={onSave}
       />
     )}
     {showReccurencePicker && (
@@ -728,8 +831,8 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         onClose={() => setShowReccurencePicker(false)}
         buttonRef={reccurenceButtonRef}
         onDateSelect={onDateSelect}
-        onRecurringSelect={onRecurringSelect}
-
+        onRecurringSelect={handleRecurringSelect}
+        selectedDate={selectedDate}
       />
     )}
     </>,

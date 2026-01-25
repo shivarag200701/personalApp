@@ -3,6 +3,11 @@
 /* --- Custom Variants & Theme Configuration --- */
 @custom-variant dark (&:is([data-theme="dark"] *));
 
+/*--- Custom Break points ---*/
+@theme {
+  --breakpoint-md: 750px;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -27,6 +32,10 @@
   --color-ring: var(--ring);
   --color-task: var(--task);
   --color-border-hover: var(--border-hover);
+  --color-options-hover: var(--options-hover);
+  --color-drag-task: var(--drag-task);
+
+
 
 
   
@@ -74,10 +83,10 @@ body, html {
   --card-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.310 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.280 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: oklch(0.250 0 0);
+  --muted-foreground: oklch(0.900 0 0);
   --accent: oklch(0.45 0.15 264);
   --accent-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
@@ -89,10 +98,12 @@ body, html {
   --sidebar-border: oklch(1 0 0 / 10%);
   --button-subtle: oklch(1 0 0 / 10%);
   --button-subtle-hover: oklch(1 0 0 / 20%);
+  --options-hover: oklch(1 0 0 / 10%);
   --scrollbar-track: transparent;
   --scrollbar-thumb: oklch(0.35 0 0);
   --scrollbar-thumb-hover: oklch(0.45 0 0);
-  --task: oklch(0.233 0 0)
+  --task: oklch(0.233 0 0);
+  --drag-task: oklch(0.22 0 0);
 }
 
 /* --- Light Theme Variables --- */
@@ -118,10 +129,14 @@ body, html {
   --sidebar-border: oklch(0.9 0 0);
   --button-subtle: oklch(0 0 0 / 10%);
   --button-subtle-hover: oklch(0 0 0 / 20%);
+  --options-hover: oklch(0 0 0 / 20%);
+
   --scrollbar-track: transparent;
   --scrollbar-thumb: oklch(0.7 0 0);
   --scrollbar-thumb-hover: oklch(0.55 0 0);
-  --task: oklch(0.99 0 0)
+  --task: oklch(0.99 0 0);
+  --drag-task: oklch(0.99 0 0);
+
 
 }
 

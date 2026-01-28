@@ -894,8 +894,20 @@
     const getTasksForDate = (date: Date): Todo[] => {
       let todosForDate:Todo[] = []
       const formatted = date.toLocaleDateString('en-CA')
+      console.log("todos",todosFromCache);
+      
        todosForDate = todosFromCache.filter(
-        (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt).toLocaleDateString('en-CA') === formatted
+        (todo) => {
+          if(todo.completed || !todo.completeAt) return false
+
+          //untimed todos
+          if(todo.isAllDay){
+            return todo.completeAt.split("T")[0] === formatted
+          }
+
+          //timed todos
+          return new Date(todo.completeAt).toLocaleDateString('en-CA') === formatted
+        }
       );
       return todosForDate
     };

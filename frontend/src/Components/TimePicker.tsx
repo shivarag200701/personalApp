@@ -20,10 +20,18 @@ interface TimeOptionProps {
     onClose: () => void;
     buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
+
+interface TimeZonePickerProps {
+    onClose: () => void;
+    buttonRef: React.RefObject<HTMLButtonElement | null>;
+}
+
 const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSelected,onSave }: TimePickerProps) => {
     const pickerRef = useRef<HTMLDivElement>(null);
     const timeOptionButtonRef = useRef<HTMLButtonElement>(null);
+    const timeZoneButtonRef = useRef<HTMLButtonElement>(null);
     const [isTimeOptionOpen, setIsTimeOptionOpen] = useState(false);
+    const [isTimeZonePickerOpen,setIsTimeZonePickerOpen] = useState(false);
 
     
     const getInitialPosition = () => {
@@ -46,7 +54,6 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
             });
         }
     }, [buttonRef]);
-    console.log("selected time in timepicker",selectedTime);
     
 
 
@@ -91,6 +98,11 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
         <div className="flex flex-col gap-2 p-3">
             <div className="grid grid-cols-[1fr_2fr] gap-2">
             <div className="text-foreground text-sm font-light">Time zone</div>
+            <button ref={timeZoneButtonRef} className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            hover:border-[0.5px]
+            hover:border-white/40 transition-colors duration-300" onClick={() => setIsTimeZonePickerOpen(!isTimeZonePickerOpen)}>
+                <div className="text-foreground text-sm font-light text-left">Hi sad</div>
+            </button>
             </div>
         </div>
         <div className="h-px w-full bg-gray-700"/>
@@ -127,6 +139,12 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
         }} 
         onClose={() => setIsTimeOptionOpen(false)}
          buttonRef={timeOptionButtonRef} />
+    )}
+    {isTimeZonePickerOpen && (
+        <TimeZonePicker
+        buttonRef={timeZoneButtonRef}
+        onClose={() => setIsTimeZonePickerOpen(false)} 
+        />
     )}
     </>
     ,document.body);
@@ -177,12 +195,14 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
         return timeOptions;
       }
       let timeOptions: TimeOption[] = generateTimeOptions();
+      console.log(timeOptions);
+      
       return (
         <>
         <div className="fixed inset-0 z-80"
         onClick={onClose}
         />
-        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto"
+        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto p-1"
         style={{
             left: `${position.left}px`,
             top: `${position.top}px`,
@@ -200,6 +220,59 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
       )
 
 };
+
+const TimeZonePicker = ({onClose,buttonRef}:TimeZonePickerProps) => {
+    const getInitialPosition = () => {
+        if (buttonRef?.current){
+            const rect = buttonRef.current.getBoundingClientRect();
+            return {
+                left: rect.left,
+                top: rect.bottom,
+                width: rect.width,
+            };
+        }
+        return { left: 0, top: 0 };
+    }
+    const [position, setPosition] = useState(getInitialPosition);
+    useLayoutEffect(() => {
+        if (buttonRef?.current){
+            const rect = buttonRef.current.getBoundingClientRect();
+            setPosition({
+                left: rect.left,
+                top: rect.bottom,
+                width: rect.width,
+            });
+        }
+    }, [buttonRef]);
+
+    const timeZoneOptions = [{id:"floating", Primary:"Floating time",Secondary:"Time stays the same across time zones" },{id:"local",Primary:"US/Central",Secondary:"Your current time zone"}]
+
+    return (
+        <>
+        <div className="fixed inset-0 z-80"
+        onClick={onClose}
+        />
+        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto p-1"
+        style={{
+            left: `${position.left}px`,
+            top: `${position.top}px`,
+            marginTop: '4px',
+            width: position.width,
+        }}
+        onClick={(e) => e.stopPropagation()}
+        >
+            {timeZoneOptions.map((option)=>
+                <button className="w-full p-2.5  flex text-left gap-2 rounded-sm cursor-pointer hover:border-border transition-colors duration-300  hover:bg-muted">
+                    <div className="flex flex-col gap-1">
+                        <span className="text-foreground text-sm font-medium">{option.Primary}</span>
+                        <span className="text-[12px] font-extralight">{option.Secondary}</span>
+                    </div>
+                </button>
+            )}
+        </div>
+        </>
+      )
+}
 
 export default TimePicker;
 

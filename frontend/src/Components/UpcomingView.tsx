@@ -466,8 +466,6 @@
       };
 
       const handleTaskCreated = (todo: Todo) => {
-          console.log("task created");
-          
           onTaskCreated(todo);
           onCloseForm();
       };
@@ -668,10 +666,10 @@
 
 
     const getOverDueTasks = (): Todo[] => {
-      //For all day todo
+      //For all day todo      
       const todayLocalStr = new Date().toLocaleDateString('en-CA');
       return todosFromCache.filter(
-        (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt).toLocaleDateString('en-CA') < todayLocalStr
+        (todo) => !todo.completed && todo.completeAt && new Date(todo?.completeAt).toLocaleDateString('en-CA') < todayLocalStr
       );
     };
 
@@ -894,10 +892,12 @@
     };
 
     const getTasksForDate = (date: Date): Todo[] => {
+      let todosForDate:Todo[] = []
       const formatted = date.toLocaleDateString('en-CA')
-      return todosFromCache.filter(
+       todosForDate = todosFromCache.filter(
         (todo) => !todo.completed && todo.completeAt && new Date(todo.completeAt).toLocaleDateString('en-CA') === formatted
       );
+      return todosForDate
     };
 
     
@@ -1087,8 +1087,6 @@
       const newDateTime = time 
         ? combineDateAndTime(targetDate, time)
         : new Date(newDate.setHours(0, 0, 0, 0)).toISOString();
-        console.log("old date",oldDate,"new Date",targetDate);
-        
     
       // Handle reordering for untimed tasks using arrayMove
       if (todo.isAllDay && oldDate === targetDate) {
@@ -1133,8 +1131,6 @@
           
           // Make parallel API calls for all todos whose order changed
           try {
-            console.log("updating backend");
-            
             const updatePromises = Array.from(updatedTodosMap.entries()).map(([todoId, updatedTodo]) => {
               const payload: any = {
                 title: updatedTodo.title,
@@ -1176,8 +1172,6 @@
       if (todo.isAllDay) {
         // Get all untimed tasks for target date (excluding dragged task)
         // Use cache data for immediate updates
-        console.log("here for untimed task");
-        
         const untimedTasksForDate = todosFromCache.filter(t => 
           t.isAllDay && 
           t.completeAt && 
@@ -1444,6 +1438,8 @@
           {/* Overdue Section */}
           {(() => {
             const overDueTasks = getOverDueTasks();
+            console.log("overdue tasks",overDueTasks);
+            
             if (overDueTasks.length > 0) {
               const overdueDate = new Date();
               overdueDate.setDate(overdueDate.getDate() - 1); // Use yesterday's date as placeholder
@@ -1508,10 +1504,7 @@
           
           {/* Regular Date Columns */}
           {dateRange.map((date, index) => {
-            const dayTasks = getTasksForDate(date);
-            // console.log("called after handleDragEnd ----- rerendered");
-            // console.log("taks",dayTasks);
-            
+            const dayTasks = getTasksForDate(date);            
             const sortedDayTasks = sortTasksByDateAndOrder(dayTasks)  
             
             const dateKey = date.toISOString();

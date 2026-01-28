@@ -73,18 +73,24 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const hasChangesRef = useRef(false);
 
   const combineDateAndTime = (date: string, time: string) => {
+    console.log("date",date,"time",time);
+    let dateObj
     if(!date || !time) return "";
-    const dateObj = new Date(date);
+    const [year, month, day] = date.split('-').map(Number);
+    dateObj = new Date(year, month - 1, day);
+    
+    
     const [hours, minutes] = time.split(":").map(Number);
 
     dateObj.setHours(hours, minutes, 0, 0);
+
     return dateObj.toISOString();
   }
   if(!isAllDay){
     selectedDate = combineDateAndTime(selectedDate,selectedTime);
-
   }
-console.log("date",selectedDate);
+  console.log("selected date",selectedDate);
+  
   
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
@@ -104,8 +110,6 @@ console.log("date",selectedDate);
 
   // Initialize form fields from todo prop when editing
   useEffect(() => {
-    console.log("called the todo");
-    
     if (todo) {
       setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
       if(!todo.isAllDay){
@@ -146,10 +150,8 @@ console.log("date",selectedDate);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    
     try {
       if (todo?.id) {
-        console.log("updating todo", todo)
         // Update existing todo
         onUpdate({
           ...todo,
@@ -233,18 +235,25 @@ console.log("date",selectedDate);
 
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
     if (!dateStr || !time) return null;
-    if(!isAllDay){
-      dateStr = dateStr.split("T")[0];
-    }
+    let localDateStr: string;
+  if(!isAllDay){
+    const dateObj = new Date(dateStr);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    localDateStr = `${year}-${month}-${day}`;
+  } else {
+    localDateStr = dateStr;
+  }
 
-    console.log("selected time",selectedTime);
-    
-    // Parse YYYY-MM-DD string as local date (not UTC)
-    const [year, month, day] = dateStr.split('-').map(Number);
+  // Parse YYYY-MM-DD string as local date (not UTC)
+  const [year, month, day] = localDateStr.split('-').map(Number);
     const selectedDate = new Date(year, month - 1, day);
     selectedDate.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    
     
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -274,12 +283,6 @@ console.log("date",selectedDate);
   };
 
   const dateLabel = getDateLabel(selectedDate,selectedTime);
-  console.log("dateLabel",dateLabel);
-  console.log("isAllDay",isAllDay);
-  
-  
-  
-  
   // Check if selected date is today
   const isTodaySelected = (() => {
     if (!selectedDate) return false;

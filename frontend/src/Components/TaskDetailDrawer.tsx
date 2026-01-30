@@ -27,6 +27,12 @@ import { useQuery} from "@tanstack/react-query";
 import CustomDatePicker from "./CustomDatePicker";
 import { roundToNearest15Minutes, getTimeFromDate, getDateFromDate } from "./InlineTaskForm";
 import PriorityPicker from "./PriorityPicker";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./ui/tooltip"
+import { Kbd } from "./ui/kbd";
 
 
 
@@ -191,8 +197,13 @@ const TaskDetailDrawer = ({
     const [hours, minutes] = time.split(":").map(Number);
 
     dateObj.setHours(hours, minutes, 0, 0);
+    console.log(dateObj);
+    
     return dateObj.toISOString();
   }
+
+  console.log(combineDateAndTime(selectedDate,selectedTime));
+  
   
 
   const handleStartEdit = () => {
@@ -295,7 +306,76 @@ const TaskDetailDrawer = ({
     setSearchParams(params,{replace:false})
   
   }
+  const getOrdinal = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+
+  const convertDateTime = (dateStr:string|null,time:string|null): string | null => {
+    if (!dateStr) return null;
+
+    if(!isAllDay && !time) return null
+
+    if(!isAllDay){
+      dateStr = dateStr.split("T")[0];
+    }
+    // Parse YYYY-MM-DD string as local date (not UTC)
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    //timelabel
+    const timeLabel = formatTime(time)
+
+  return timeLabel ? `${selectedDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric', year:'numeric' }).replaceAll(",","")} ${timeLabel}` : `${selectedDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric', year:'numeric' }).replaceAll(",","")} 11:59 PM`
+    }
+
+    
+    const getReccurenceLabel= ():string|null =>{
+      let reccurenceLabel = ""
+      const date = new Date(selectedDate)
+      const day = date.toLocaleDateString('en-US', { weekday: 'long' });
+      const dayOrdinal = getOrdinal(date.getDate())
+      const month = date.toLocaleDateString('en-US', { month: 'long' });
   
+      if(todo.isRecurring){
+        const reccurencePatten = todo.recurrencePattern
+        switch(reccurencePatten){
+          case "daily":
+            reccurenceLabel = isAllDay ? 'every day' : `every day at ${formatTime(selectedTime)}`
+            break;
+          
+          case "weekly":
+            reccurenceLabel = isAllDay ? `every ${day}` : `every ${day} at ${formatTime(selectedTime)}`
+            break;
+          
+          case "monthly":
+            reccurenceLabel = isAllDay ? `every ${dayOrdinal}` : `every ${dayOrdinal} at ${formatTime(selectedTime)}`
+            break;
+          
+          case "yearly":
+            reccurenceLabel = isAllDay ? `every ${dayOrdinal} ${month}` : `every ${dayOrdinal} ${month} at ${formatTime(selectedTime)}`
+            break;
+
+        }
+      }
+      return reccurenceLabel
+    }
+
+  const formatTime = (time:string|null): string | null => {
+      let timeLabel = ""
+      if(!isAllDay && time){
+        const [hours, minutes] = time.split(":")
+        const hour24 = parseInt(hours);
+        const ampm = hour24 >= 12 ? "PM" : "AM";
+        const hour12 = hour24 % 12 || 12;
+        timeLabel = `${hour12}:${minutes} ${ampm}`;
+      }
+      return timeLabel
+  }
+    
 
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
 
@@ -320,15 +400,10 @@ const TaskDetailDrawer = ({
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    let timeLabel = ""
-    if(!isAllDay && time){
-    //covert 24hr to 12hr
-    const [hours, minutes] = time.split(":")
-    const hour24 = parseInt(hours);
-    const ampm = hour24 >= 12 ? "PM" : "AM";
-    const hour12 = hour24 % 12 || 12;
-    timeLabel = `${hour12}:${minutes} ${ampm}`;
-    }
+
+    const timeLabel = formatTime(time)
+    console.log("time label",timeLabel);
+    
     
     
     
@@ -342,6 +417,29 @@ const TaskDetailDrawer = ({
     }
   };
 
+  
+
+  const dayLeft = (dateStr:string | null):string | null =>{
+    if(!dateStr) return null
+
+    const today = new Date()
+    today.setHours(0,0,0,0)
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+    selectedDate.setHours(0, 0, 0, 0);
+
+
+
+    const diffInMs = Math.abs(selectedDate.getTime() - today.getTime())
+    const dayDiff = Math.round(diffInMs / (1000 * 60 * 60 * 24));
+
+    if(dayDiff == 0)return null
+    
+    return dayDiff === 1 ? `${dayDiff} day left` : `${dayDiff} days left` 
+
+  }
+  
+
   const handleDateSelect = async (date:string,isQuickAction?:boolean)=>{
     if(!date) return
     let finalDate = date;
@@ -354,12 +452,8 @@ const TaskDetailDrawer = ({
       ...todo,
       completeAt: finalDate
     }
-    console.log("updatedd Todo",updatedTodo);
-    
     
     onEdit(updatedTodo)
-    console.log("here sdasdasd------");
-    
     if(isQuickAction){
     setShowDatePicker(false);
     }
@@ -605,8 +699,10 @@ const TaskDetailDrawer = ({
       } catch (error) {
         console.error("error updating the time", error);
       }
-
   }
+
+  
+  
 
   const dateLabel = getDateLabel(selectedDate,selectedTime)
   return (
@@ -646,13 +742,32 @@ const TaskDetailDrawer = ({
             onClick={handleBefore}
             disabled={isAtTop}
             >
-            <ChevronUp className="h-5 w-5" strokeWidth={1} style={{ transform: 'scale(1.3)' }}/>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                    <ChevronUp className="h-5 w-5" strokeWidth={1} style={{ transform: 'scale(1.3)' }}/>
+                </TooltipTrigger>
+                <TooltipContent className="pr-1.5">
+                  <div className="flex items-center gap-2 ">
+                    Previous Task<Kbd>K</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            
             </button>
             <button className={`text-muted-foreground p-2 rounded-md hover:bg-muted transition-colors cursor-pointer ${isAtBottom ? "opacity-10 hover:none" : "hover:bg-muted"}`}
             onClick={handleAfter}
             disabled={isAtBottom}
             >
-              <ChevronDown className="w-5 h-5" strokeWidth={1} style={{ transform: 'scale(1.3)'}}/>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ChevronDown className="w-5 h-5" strokeWidth={1} style={{ transform: 'scale(1.3)'}}/>
+                </TooltipTrigger>
+                <TooltipContent className="pr-1.5">
+                  <div className="flex items-center gap-2 ">
+                    Next Task<Kbd>J</Kbd>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             </button>
             <div className="relative" ref={dropdownRef}>
               <button
@@ -663,7 +778,14 @@ const TaskDetailDrawer = ({
                 className={`text-muted-foreground p-2 rounded-md hover:bg-muted transition-colors cursor-pointer flex items-center justify-center ${isDropdownOpen && 'bg-muted'}`}
                 title="More options"
               >
-                <MoreHorizontal className="h-5 w-5 p-0 m-0" style={{ transform: 'scale(1.3)' }} />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <MoreHorizontal className="h-5 w-5 p-0 m-0" style={{ transform: 'scale(1.3)' }} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>More options</p>
+                  </TooltipContent>
+                </Tooltip>
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 top-full mt-1 w-70 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
@@ -719,7 +841,14 @@ const TaskDetailDrawer = ({
               onClick={onClose}
               title="Close details"
             >
-              <X className="h-5 w-5 p-0 m-0" strokeWidth={1} style={{ transform: 'scale(1.3)' }} />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <X className="h-5 w-5 p-0 m-0" strokeWidth={1} style={{ transform: 'scale(1.3)' }} />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Close task</p>
+                </TooltipContent>
+              </Tooltip>
             </button>
             </div>
           </div>
@@ -914,7 +1043,9 @@ const TaskDetailDrawer = ({
                   <span className={`text-[13px] text-muted-foreground font-medium`}>
                   Date
                   </span>
-                  <button
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                    <button
                     type="button"
                     onClick={(e) => {
                       e.preventDefault();
@@ -930,7 +1061,7 @@ const TaskDetailDrawer = ({
                     <div className="flex justify-between">
                       <div className="flex gap-2 items-center justify-center">
                         <Calendar size={15} className={`${true ? "text-green-500" : "text-white"}`}/>
-                        <div className="flex gap-1">
+                        <div className="flex gap-3">
                         {dateLabel && <span className="whitespace-nowrap max-w-[100px] text-muted-foreground text-[12px] font-light">{dateLabel}</span>}
                         <div className="flex items-center justify-center text-muted-foreground">
                         {isRecurring && <RefreshCw size={10} />}
@@ -959,7 +1090,18 @@ const TaskDetailDrawer = ({
                       </div>
                       </div>
                     </div>
-                  </button>
+                    </button>
+                    </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-muted-foreground gap-2">
+                      <p className="text-[12px]">{convertDateTime(selectedDate,selectedTime)}</p>
+                      <p>{dayLeft(selectedDate)}</p>
+                      <p className="text-[11px]">{getReccurenceLabel()}</p>
+                      <div className="h-px bg-ring "/>
+                    </div>
+                  </TooltipContent>
+                  </Tooltip>
+                  
                   </div>
                   <div className="h-[1.5px] bg-secondary"/>
                   <span className="text-[13px] text-muted-foreground font-medium">Priority</span>

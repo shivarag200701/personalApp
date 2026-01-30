@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {createPortal} from "react-dom";
+import { Check } from "lucide-react";
 
 interface TimePickerProps {
     onClose: () => void;
@@ -24,6 +25,9 @@ interface TimeOptionProps {
 interface TimeZonePickerProps {
     onClose: () => void;
     buttonRef: React.RefObject<HTMLButtonElement | null>;
+    onTimeZoneSelect: (timeZone: "floating" | "local") => void
+    selectedTimeZoneMode: "floating" | "local"
+    userDefaultTimeZone: string
 }
 
 const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSelected,onSave }: TimePickerProps) => {
@@ -32,6 +36,15 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
     const timeZoneButtonRef = useRef<HTMLButtonElement>(null);
     const [isTimeOptionOpen, setIsTimeOptionOpen] = useState(false);
     const [isTimeZonePickerOpen,setIsTimeZonePickerOpen] = useState(false);
+    const [userDefaultTimeZone,setUserDefaultTimeZone] = useState("");
+    const [timeZoneMode, setTimeZoneMode] = useState<"local"|"floating">("local")
+
+    useEffect(() => {
+        // Detect on mount
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        setUserDefaultTimeZone(tz);
+      }, []);
+      
 
     
     const getInitialPosition = () => {
@@ -67,7 +80,7 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
     />
     <div
     ref={pickerRef}
-    className="fixed bg-card border border-border rounded-md shadow-2xl z-70 w-[300px]"
+    className="fixed bg-card border border-border rounded-md shadow-2xl z-70 w-[330px]"
     style={{
         left: `${position.left}px`,
         top: `${position.top}px`,
@@ -78,18 +91,16 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
     >
         <div className="flex flex-col gap-2 p-3">
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-foreground text-sm font-light">Time</div>
-            <button ref={timeOptionButtonRef} className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
-            hover:border-[0.5px]
-            hover:border-white/40 transition-colors duration-300" onClick={() => setIsTimeOptionOpen(!isTimeOptionOpen)}>
+            <div className="text-foreground text-sm flex items-center font-medium">Time</div>
+            <button ref={timeOptionButtonRef} className="w-full p-1 border border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            hover:border-border-hover transition-colors duration-300" onClick={() => setIsTimeOptionOpen(!isTimeOptionOpen)}>
                 <div className="text-foreground text-sm font-light text-left">{selectedTime.label}</div>
             </button>
             </div>
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-foreground text-sm font-light">Duration</div>
-            <button className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
-            hover:border-[0.5px]
-            hover:border-white/40 transition-colors duration-300" >
+            <div className="text-foreground flex items-center text-sm font-medium">Duration</div>
+            <button className="w-full p-1 border border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            hover:border-border-hover transition-colors duration-300" >
                 <div className="text-foreground text-sm font-light text-left">No duration</div>
             </button>
             </div>
@@ -97,11 +108,12 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
         <div className="h-px w-full bg-gray-700"/>
         <div className="flex flex-col gap-2 p-3">
             <div className="grid grid-cols-[1fr_2fr] gap-2">
-            <div className="text-foreground text-sm font-light">Time zone</div>
-            <button ref={timeZoneButtonRef} className="w-full p-1 border-[0.5px] border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
-            hover:border-[0.5px]
-            hover:border-white/40 transition-colors duration-300" onClick={() => setIsTimeZonePickerOpen(!isTimeZonePickerOpen)}>
-                <div className="text-foreground text-sm font-light text-left">Hi sad</div>
+            <div className="text-foreground flex items-center text-sm font-medium">Time zone</div>
+            <button ref={timeZoneButtonRef} className="w-full p-1 border border-border flex items-center  text-center gap-2 rounded-sm cursor-pointer 
+            hover:border-border-hover transition-colors duration-300" onClick={() => setIsTimeZonePickerOpen(!isTimeZonePickerOpen)}>
+                <div className="text-foreground text-sm font-light text-left">{
+                    timeZoneMode === "floating" ? "Floating Time" : userDefaultTimeZone
+                    }</div>
             </button>
             </div>
         </div>
@@ -144,6 +156,12 @@ const TimePicker = ({ onClose, buttonRef, selectedTime, onTimeSelect, isTimeSele
         <TimeZonePicker
         buttonRef={timeZoneButtonRef}
         onClose={() => setIsTimeZonePickerOpen(false)} 
+        onTimeZoneSelect={(mode: "floating" | "local")=> {
+            setTimeZoneMode(mode)
+            setIsTimeZonePickerOpen(false)
+        }}
+        selectedTimeZoneMode={timeZoneMode}
+        userDefaultTimeZone={userDefaultTimeZone}
         />
     )}
     </>
@@ -221,7 +239,7 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
 
 };
 
-const TimeZonePicker = ({onClose,buttonRef}:TimeZonePickerProps) => {
+const TimeZonePicker = ({onClose,buttonRef, onTimeZoneSelect, userDefaultTimeZone,selectedTimeZoneMode}:TimeZonePickerProps) => {
     const getInitialPosition = () => {
         if (buttonRef?.current){
             const rect = buttonRef.current.getBoundingClientRect();
@@ -245,14 +263,25 @@ const TimeZonePicker = ({onClose,buttonRef}:TimeZonePickerProps) => {
         }
     }, [buttonRef]);
 
-    const timeZoneOptions = [{id:"floating", Primary:"Floating time",Secondary:"Time stays the same across time zones" },{id:"local",Primary:"US/Central",Secondary:"Your current time zone"}]
+    const timeZoneOptions = [
+        {id:"floating" as const, 
+         Primary:"Floating time",
+         Secondary:"Time stays the same across time zones" ,
+         disabled: true
+
+        },{id:"local" as const,
+           Primary:userDefaultTimeZone || "Your current Time Zone",
+           Secondary:"Your current time zone",
+           disabled: false,
+        }
+        ]
 
     return (
         <>
         <div className="fixed inset-0 z-80"
         onClick={onClose}
         />
-        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-auto p-1"
+        <div className="fixed bg-card border border-border rounded-md shadow-2xl z-90 max-h-[200px] overflow-y-hidden p-1"
         style={{
             left: `${position.left}px`,
             top: `${position.top}px`,
@@ -262,12 +291,35 @@ const TimeZonePicker = ({onClose,buttonRef}:TimeZonePickerProps) => {
         onClick={(e) => e.stopPropagation()}
         >
             {timeZoneOptions.map((option)=>
-                <button className="w-full p-2.5  flex text-left gap-2 rounded-sm cursor-pointer hover:border-border transition-colors duration-300  hover:bg-muted">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-foreground text-sm font-medium">{option.Primary}</span>
-                        <span className="text-[12px] font-extralight">{option.Secondary}</span>
-                    </div>
-                </button>
+                <button
+                key={option.id}
+                className={`w-full py-2.5 pr-2.5 flex text-left gap-2 rounded-sm 
+                  ${selectedTimeZoneMode === option.id ? "bg-muted" : "bg-transparent"}
+                  ${
+                    option.disabled
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer hover:border-border hover:bg-muted"
+                  }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (option.disabled) return;
+                  onTimeZoneSelect(option.id);
+                }}
+              >
+                <div className="grid grid-cols-[40px_1fr]">
+                  <div className="flex items-center justify-center">
+                    {selectedTimeZoneMode === option.id && <Check size={10} />}
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-foreground text-[13px] font-medium">
+                      {option.Primary}
+                    </span>
+                    <span className="text-[12px] font-extralight ">
+                      {option.Secondary}
+                    </span>
+                  </div>
+                </div>
+              </button>
             )}
         </div>
         </>

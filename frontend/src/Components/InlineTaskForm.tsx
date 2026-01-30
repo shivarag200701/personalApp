@@ -73,12 +73,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const hasChangesRef = useRef(false);
 
   const combineDateAndTime = (date: string, time: string) => {
-    console.log("date",date,"time",time);
+
     let dateObj
     if(!date || !time) return "";
     const [year, month, day] = date.split('-').map(Number);
     dateObj = new Date(year, month - 1, day);
-    
     
     const [hours, minutes] = time.split(":").map(Number);
 
@@ -181,7 +180,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceEndDate: recurrenceEndDate ?? null,
         });
       } else {
-        onSuccess({
+         // Create temporary todo for instant UI update
+         const tempTodo = {
           ...todo,
           title,
           description,
@@ -192,13 +192,18 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           completedAt: todo?.completedAt || null,
           isRecurring,
           recurrencePattern: recurrencePattern ?? null,
-          recurrenceInterval: recurrenceInterval ?? null ,
+          recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
           isAllDay,
-          createdAt:null
-        });
-          await api.post("/v1/todo/", {
+          createdAt: null
+        };
+        
+        // Update UI instantly
+        onSuccess(tempTodo);
+        
+        // Then make API call and update with real ID
+        const res = await api.post("/v1/todo/", {
           title,
           description,
           completeAt: selectedDate,
@@ -212,6 +217,11 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           color: 'bg-purple-500',
         });
 
+        // Update the todo with the ID from backend
+        if (res.data.todo) {
+          
+          onUpdate(res.data.todo);
+        }
       }
 
       // Reset form

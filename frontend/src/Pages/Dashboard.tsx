@@ -85,17 +85,40 @@ const Dashboard = () => {
   function addTodo(newTask: Todo) {
     queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => [...prev, newTask]);
   }
+
   function updateTodo(updatedTask: Todo) {
-    queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
-      prev.map((todo) => todo.id === updatedTask.id ? updatedTask : todo)
-    );
+    queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => {
+      // Normal case: match by ID
+      if (updatedTask.id) {
+        const existingIndex = prev.findIndex(todo => todo.id === updatedTask.id);
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = updatedTask;
+          return updated;
+        }
+        
+        // New todo case: replace last item if it doesn't have an ID
+        const lastIndex = prev.length - 1;
+        if (lastIndex >= 0 && !prev[lastIndex].id) {
+          const updated = [...prev];
+          updated[lastIndex] = updatedTask;
+          return updated;
+        }
+      }
+      
+      return prev;
+    });
+    
     setSelectedTodo((prev) => {
       if (prev?.id === updatedTask.id) {
         return updatedTask;
       }
+      // Update selectedTodo if it's the newly created one (no ID)
+      if (updatedTask.id && !prev?.id) {
+        return updatedTask;
+      }
       return prev;
     });
-    
   }
   const handleEdit = (todo: Todo) => {
     setSelectedTodo(todo);

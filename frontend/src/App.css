@@ -31,9 +31,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-task: var(--task);
+  --color-toast: var(--toast);
   --color-border-hover: var(--border-hover);
   --color-options-hover: var(--options-hover);
   --color-drag-task: var(--drag-task);
+  --color-tool-tip: var(--tool-tip);
+
 
 
 
@@ -87,12 +90,13 @@ body, html {
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.250 0 0);
   --muted-foreground: oklch(0.900 0 0);
+  --tool-tip: oklch(0.50 0 0);
   --accent: oklch(0.45 0.15 264);
   --accent-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --border-hover: oklch(1 0 0 / 30%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.35 0 0);
   --sidebar: oklch(0.233 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
@@ -103,6 +107,7 @@ body, html {
   --scrollbar-thumb: oklch(0.35 0 0);
   --scrollbar-thumb-hover: oklch(0.45 0 0);
   --task: oklch(0.233 0 0);
+  --toast: oklch(0.233 0 0);
   --drag-task: oklch(0.22 0 0);
 }
 
@@ -115,15 +120,16 @@ body, html {
   --primary: oklch(0.45 0.15 264);
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.96 0 0);
+  --tool-tip: oklch(0.3 0 0);
   --secondary-foreground: oklch(0.25 0 0);
   --muted: oklch(0.9 0 0);
-  --muted-foreground: oklch(0.5 0 0);
+  --muted-foreground: oklch(0.35 0 0);
   --accent: oklch(0.45 0.15 264);
   --accent-foreground: oklch(0.99 0 0);
   --border: oklch(0.9 0 0);
-  --border-hover: oklch(0.9 0 0 );
+  --border-hover: oklch(0.8 0 0 );
   --input: oklch(0.95 0 0);
-  --ring: oklch(0.45 0.15 264);
+  --ring: oklch(0.45 0 0);
   --sidebar: oklch(0.98 0.005 241.67);
   --sidebar-foreground: oklch(0.2 0 0);
   --sidebar-border: oklch(0.9 0 0);
@@ -135,6 +141,7 @@ body, html {
   --scrollbar-thumb: oklch(0.7 0 0);
   --scrollbar-thumb-hover: oklch(0.55 0 0);
   --task: oklch(0.99 0 0);
+  --toast: oklch(0.20 0 0);
   --drag-task: oklch(0.99 0 0);
 
 
@@ -173,4 +180,9 @@ body, html {
 
 .custom-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-thumb);
+}
+
+/* Sonner toast action button hover */
+[data-sonner-toast] [data-button]:hover {
+  background: oklch(0.45 0.15 264 / 0.3) !important;
 }

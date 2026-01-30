@@ -21,7 +21,7 @@ export const todoSchema = z.object({
     recurrenceEndDate: z.string().nullish(),
     nextOccurrence: z.string().nullish(),
     color: z.string().nullish(),
-    order: z.number().int().optional(),
+    order: z.number().int().nullish(),
 });
 /**
  * Converts "Today"/"Tomorrow"/"This Week" to actual Date object (end of period)

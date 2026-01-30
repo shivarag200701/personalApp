@@ -30,6 +30,7 @@
   import { CSS } from "@dnd-kit/utilities";
   import { useQueryClient } from "@tanstack/react-query";
   import sortTasksByDateAndOrder from "@/utils/sortTask";
+  import { useAppTheme } from "@/hooks/useTheme";
 
 
 
@@ -214,9 +215,6 @@
             hour12: true
           })
         }
-
-
-      
         return (
           <>
           {isEditing ? (
@@ -638,7 +636,10 @@
     const [openDropdownId, setOpenDropdownId] = useState<number | string | null>(null);
     const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
     const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
+    const [originalCompleteAt, setOriginalCompleteAt] = useState<string | null>(null);
     const [openFormDate, setOpenFormDate] = useState<string | null>(null);
+
+    const { theme } = useAppTheme()
 
     // Use external viewType if provided, otherwise default to "board"
     const viewType = externalViewType ?? "board";
@@ -668,8 +669,20 @@
     const getOverDueTasks = (): Todo[] => {
       //For all day todo      
       const todayLocalStr = new Date().toLocaleDateString('en-CA');
+      
       return todosFromCache.filter(
-        (todo) => !todo.completed && todo.completeAt && new Date(todo?.completeAt).toLocaleDateString('en-CA') < todayLocalStr
+        (todo) => {
+
+          if(todo.completed || !todo.completeAt) return false
+
+          //untimed todos
+          if(todo.isAllDay){
+            return todo.completeAt.split("T")[0] < todayLocalStr
+          }
+
+          //timed todos
+          return new Date(todo.completeAt).toLocaleDateString('en-CA') < todayLocalStr
+        }
       );
     };
 
@@ -894,7 +907,6 @@
     const getTasksForDate = (date: Date): Todo[] => {
       let todosForDate:Todo[] = []
       const formatted = date.toLocaleDateString('en-CA')
-      console.log("todos",todosFromCache);
       
        todosForDate = todosFromCache.filter(
         (todo) => {
@@ -926,12 +938,17 @@
       }
     };
     const combineDateAndTime = (date: string, time: string) => {
-      if(!date || !time) return "";
-      const dateObj = new Date(date);
-      const [hours, minutes] = time.split(":").map(Number);
+      let dateObj
+    if(!date || !time) return "";
+    const [year, month, day] = date.split('-').map(Number);
+    dateObj = new Date(year, month - 1, day);
+    
+    
+    const [hours, minutes] = time.split(":").map(Number);
 
-      dateObj.setHours(hours, minutes, 0, 0);
-      return dateObj.toISOString();
+    dateObj.setHours(hours, minutes, 0, 0);
+
+    return dateObj.toISOString();
     }
 
     const handleAddTask = (date: Date) => {
@@ -967,16 +984,22 @@
       const {active} = event;
       const todo = active.data.current?.todo as Todo;
       setActiveTodo(todo);
+      setOriginalCompleteAt(todo?.completeAt ?? null);
     }
 
     const handleDragOver = (event: DragOverEvent) => {
       const { active, over } = event;
       
       if (!over || !active.data.current) return;
+
+      
     
       const isActiveATask = active.data.current?.type === "task";
       const isOverATask = over.data.current?.type === "task";
-      const isOverAColumn = over.data.current?.type === "column";      
+      const isOverAColumn = over.data.current?.type === "column";  
+      
+
+      
       if (over.data.current?.columnIndex === -1) return;
       
     
@@ -984,28 +1007,47 @@
       if (isActiveATask && isOverATask) {
         const activeTodo = active.data.current.todo as Todo;
         const overTodo = over.data.current?.todo as Todo;
-        
         // If tasks are in different columns, update the active task's completeAt
         // to match the over task's column (for visual feedback)
-        if (overTodo.completeAt) {
-          const activeDate = activeTodo.completeAt 
-            ? new Date(activeTodo.completeAt).toLocaleDateString('en-CA')
-            : null;
-          const overDate = new Date(overTodo.completeAt).toLocaleDateString('en-CA');
+        if (overTodo?.completeAt && activeTodo?.completeAt) {
+          let activeDate:string
+          let overDate:string
+
+            if(activeTodo.isAllDay){
+              activeDate = activeTodo.completeAt.split("T")[0]
+            }else{
+              activeDate = new Date(activeTodo?.completeAt).toLocaleDateString('en-CA')
+            }
+            if(overTodo.isAllDay){
+              overDate = overTodo.completeAt.split("T")[0]
+            }else{
+              overDate = new Date(overTodo.completeAt).toLocaleDateString('en-CA')
+            }    
+            // console.log("active",activeDate);
+            // console.log("over",overDate);
+            
+            
           
           if (activeDate !== overDate) {
             // Temporarily update the task's completeAt to show it in the new column
-            const oldDateObj = activeTodo.completeAt ? new Date(activeTodo.completeAt) : null;
-            const time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: false
-            }) : null;
-            
-            const newDate = new Date(overTodo.completeAt);
-            const newDateTime = time 
-              ? combineDateAndTime(overDate, time)
-              : new Date(newDate.setHours(0, 0, 0, 0)).toISOString();
+            let oldDateObj:Date | null
+            let time:string | null
+            let newDateTime: string | null
+
+            //timed todos
+            if(!activeTodo.isAllDay){
+              oldDateObj = activeTodo.completeAt ? new Date(activeTodo.completeAt) : null
+              time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: false
+              }) : null;
+              newDateTime = time && combineDateAndTime(overDate, time)
+            }
+            //untimed todos
+            else{
+              newDateTime = overDate
+            }            
             
             // Update cache for immediate visual feedback
             queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
@@ -1023,27 +1065,40 @@
       if (isActiveATask && isOverAColumn) {
         const activeTodo = active.data.current.todo as Todo;
         const columnDate = over.data.current?.date as Date;
-        const targetDate = columnDate.toLocaleDateString('en-CA');
         
-        // Check if task is already in this column
-        const activeDate = activeTodo.completeAt 
-          ? new Date(activeTodo.completeAt).toLocaleDateString('en-CA')
-          : null;
+        const overDate = columnDate.toLocaleDateString('en-CA');
+
+        if (activeTodo?.completeAt){
+          let activeDate
+
+          if(activeTodo.isAllDay){
+            activeDate = activeTodo.completeAt.split("T")[0]
+          }
+          else{
+            activeDate = new Date(activeTodo?.completeAt).toLocaleTimeString('en-CA')
+          }
         
-        if (activeDate !== targetDate) {
+
+        if (activeDate !== overDate) {
           // Temporarily update the task's completeAt to show it in the new column
-          const oldDateObj = activeTodo.completeAt ? new Date(activeTodo.completeAt) : null;
-          const time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: false
-          }) : null;
-          
-          const newDate = new Date(columnDate);
-          const newDateTime = time 
-            ? combineDateAndTime(targetDate, time)
-            : new Date(newDate.setHours(0, 0, 0, 0)).toISOString();
-          
+            let oldDateObj:Date | null
+            let time:string | null
+            let newDateTime: string | null
+
+          //timed todos
+          if(!activeTodo.isAllDay){
+            oldDateObj = activeTodo.completeAt ? new Date(activeTodo.completeAt) : null
+            time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: false
+            }) : null;
+            newDateTime = time && combineDateAndTime(overDate, time)
+          }
+          //untimed todos
+          else{
+            newDateTime = overDate
+          }       
           // Update cache for immediate visual feedback
           queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
             prev.map((todo) => 
@@ -1055,11 +1110,11 @@
         }
       }
     }
+  }
 
     async function handleDragEnd(event: DragEndEvent) {
       const { active, over } = event;
       setActiveTodo(null);
-    
       if (!over || !active.data.current) return;
 
       if (over.data.current?.columnIndex === -1) return;
@@ -1067,18 +1122,34 @@
       const todo = active.data.current.todo as Todo;
       
       const overData = over.data.current;
-      
-      let targetDate: string;
+      let overDate: string;
+      let activeDate:string
+
+
+      if(todo?.completeAt){
+        if(todo.isAllDay){
+          activeDate = todo.completeAt.split("T")[0]
+        }else{
+          activeDate = new Date(todo?.completeAt).toLocaleDateString('en-CA')
+        }
+      }else{
+        return
+      }
     
       // Over Column
       if (overData?.type === 'column') {
-        targetDate = overData.date.toLocaleDateString('en-CA');
+        overDate = overData.date.toLocaleDateString('en-CA');
+        
       } 
       //over a Todo
       else if(overData?.type === 'task') {
         const overTodo = overData?.todo as Todo;
         if (overTodo?.completeAt) {
-          targetDate = new Date(overTodo.completeAt).toLocaleDateString('en-CA');
+          if(overTodo.isAllDay){
+            overDate = overTodo.completeAt.split("T")[0]
+          }else{
+            overDate = new Date(overTodo.completeAt).toLocaleDateString('en-CA')
+          }    
         } else {
           return;
         }
@@ -1086,29 +1157,44 @@
       else {
         return;
       }
+
+      let oldDateObj:Date | null
+      let time:string | null
+      let newDateTime: string | null
+      let newDate : Date
+      
+      if(!todo.isAllDay){
+        oldDateObj = todo.completeAt ? new Date(todo.completeAt) : null
+            time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: false
+            }) : null;
+            newDateTime = time && combineDateAndTime(overDate, time)
+            const [year, month, day] = overDate.split('-').map(Number);
+            newDate = new Date(year, month - 1, day);
+      }
+      else{
+        newDateTime = overDate
+        const [year, month, day] = overDate.split('-').map(Number);
+        newDate = new Date(year, month - 1, day);
+      } 
     
-      const oldDateObj = todo.completeAt ? new Date(todo.completeAt) : null;
-      const oldDate = oldDateObj ? oldDateObj.toLocaleDateString('en-CA') : null;
-      const time = oldDateObj ? oldDateObj.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: false
-      }) : null;
-    
-      const newDate = new Date(targetDate);
-      const newDateTime = time 
-        ? combineDateAndTime(targetDate, time)
-        : new Date(newDate.setHours(0, 0, 0, 0)).toISOString();
+      
     
       // Handle reordering for untimed tasks using arrayMove
-      if (todo.isAllDay && oldDate === targetDate) {
+      if (todo.isAllDay && activeDate === overDate) {
+        console.log("here");
+        
         // Reordering within the same date - use arrayMove
         // Use cache data for immediate updates
         let untimedTasksForDate = todosFromCache.filter(t => 
           t.isAllDay && 
           t.completeAt && 
-          new Date(t.completeAt).toLocaleDateString('en-CA') === targetDate
+          t.completeAt.split("T")[0] === overDate
         );
+        console.log(untimedTasksForDate);
+        
 
         untimedTasksForDate = sortTasksByDateAndOrder(untimedTasksForDate)
         
@@ -1116,6 +1202,11 @@
         const activeIndex = untimedTasksForDate.findIndex(t => t.id === todo.id);
 
         const overIndex = untimedTasksForDate.findIndex(t => t.id === overData?.todo.id)
+
+        console.log("active Index",activeIndex);
+        console.log("over indezx",overIndex);
+        
+        
         // Use arrayMove to reorder
         const reorderedTasks = arrayMove(untimedTasksForDate, activeIndex, overIndex);
 
@@ -1139,8 +1230,7 @@
               const updated = todo.id ? updatedTodosMap.get(todo.id) : undefined;
               return updated || todo;
             })
-          );
-          
+          );          
           // Make parallel API calls for all todos whose order changed
           try {
             const updatePromises = Array.from(updatedTodosMap.entries()).map(([todoId, updatedTodo]) => {
@@ -1175,7 +1265,7 @@
           }
         }
 
-        return; // Exit early - we've handled reordering
+        // return; // Exit early - we've handled reordering
       }
       
       // Handle date changes or new task placement
@@ -1187,7 +1277,7 @@
         const untimedTasksForDate = todosFromCache.filter(t => 
           t.isAllDay && 
           t.completeAt && 
-          new Date(t.completeAt).toLocaleDateString('en-CA') === targetDate &&
+          new Date(t.completeAt).toLocaleDateString('en-CA') === overDate &&
           t.id !== todo.id
         );
         
@@ -1226,30 +1316,34 @@
       
       onUpdateTodo(updatedTodo);
       toast(
-        <div className="flex items-center justify-between gap-10 w-full">
+        <div className="flex items-center justify-between gap-2 w-full">
           <span className="pl-2">Date updated to <span className="underline cursor-pointer">{formatDateForToast(newDate)}</span></span>
           <div className="flex items-center">
-            <div className="hover:bg-muted px-3 py-1 rounded-md cursor-pointer" onClick={async () => {
+            <div className="flex justify-center items-center hover:bg-accent/30 px-3 py-1 rounded-sm cursor-pointer transition-all duration-300 w-20" onClick={async () => {
               onUpdateTodo({
                 ...todo,
-                completeAt: oldDateObj?.toISOString() ?? null,
+                completeAt: originalCompleteAt,
                 order: todo.order ?? null, // Restore original order
               });
               //call backend
               await api.put(`/v1/todo/${todo.id}`, {
                 ...todo,
-                completeAt: oldDateObj?.toISOString() ?? null,
+                completeAt: originalCompleteAt,
                 order: todo.order ?? null, // Restore original order
               });
+              setOriginalCompleteAt(null); // Clear after undo
             }}>Undo</div>
           </div>
         </div>,{
         position: "bottom-left",
         style: {
-          background: '#2A2A3D',
+          background: 'var(--toast)',
           color: 'white',
-          border: '1px solid #2A2A35',
+          border: '1px solid var(--toast)',
           fontWeight: 'light',
+          ...(theme === 'dark' && {
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          }),
         },
         action:{
           label: "X",
@@ -1258,19 +1352,23 @@
           },
         },
         actionButtonStyle: {
-          background: '#2A2A3D',
+          background: 'transparent',
           color: 'white',
-          fontWeight: 'light',
-          borderRadius: 'full',
-          width: '5px',
-          padding: '0px',
-          margin: '0px',
-          height: '20px',
+          fontWeight: '100',
+          borderRadius: '4px',
+          padding: '4px 12px',
+          fontSize: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          minHeight: '28px',
         },
 
       });
 
-
+      
       //call backend
       if(todo.id){
       try{    
@@ -1446,11 +1544,10 @@
             
           
         {/* Calendar Columns */}
-        <div className="flex gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap flex-1 pb-4">
+        <div className="flex gap-4 overflow-x-auto overflow-y-hidden custom-scrollbar whitespace-nowrap flex-1 pb-4">
           {/* Overdue Section */}
           {(() => {
             const overDueTasks = getOverDueTasks();
-            console.log("overdue tasks",overDueTasks);
             
             if (overDueTasks.length > 0) {
               const overdueDate = new Date();
@@ -1515,8 +1612,8 @@
           })()}
           
           {/* Regular Date Columns */}
-          {dateRange.map((date, index) => {
-            const dayTasks = getTasksForDate(date);            
+          {dateRange.map((date, index) => {            
+            const dayTasks = getTasksForDate(date);  
             const sortedDayTasks = sortTasksByDateAndOrder(dayTasks)  
             
             const dateKey = date.toISOString();

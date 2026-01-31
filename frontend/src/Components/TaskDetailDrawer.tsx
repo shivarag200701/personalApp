@@ -130,8 +130,6 @@ const TaskDetailDrawer = ({
     if (todo) {
       setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
       if(!todo.isAllDay){
-        console.log("hi");
-        
         setIsAllDay(false);
         setSelectedTime(getTimeFromDate(todo?.completeAt ?? ""));
       }
@@ -191,19 +189,19 @@ const TaskDetailDrawer = ({
     window.addEventListener('resize',handleResize)
   },[])
 
-  const combineDateAndTime = (date: string, time: string) => {    
+  const combineDateAndTime = (date: string, time: string) => {
+    let dateObj
     if(!date || !time) return "";
-    const dateObj = new Date(date);
+    const [year, month, day] = date.split('-').map(Number);
+    dateObj = new Date(year, month - 1, day);
+    
     const [hours, minutes] = time.split(":").map(Number);
 
     dateObj.setHours(hours, minutes, 0, 0);
-    console.log(dateObj);
-    
+
     return dateObj.toISOString();
   }
 
-  console.log(combineDateAndTime(selectedDate,selectedTime));
-  
   
 
   const handleStartEdit = () => {
@@ -378,10 +376,6 @@ const TaskDetailDrawer = ({
     
 
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
-
-    // console.log("date",dateStr,"time",time);
-    
-
     if (!dateStr) return null;
 
     if(!isAllDay && !time) return null
@@ -402,10 +396,6 @@ const TaskDetailDrawer = ({
 
 
     const timeLabel = formatTime(time)
-    console.log("time label",timeLabel);
-    
-    
-    
     
     if (selectedDate.getTime() === today.getTime()) {
       return !isAllDay ? `Today ${timeLabel}` : "Today";
@@ -657,9 +647,7 @@ const TaskDetailDrawer = ({
     isRecurring: boolean;
     recurrencePattern?: "daily" | "weekly" | "monthly" | "yearly";
     recurrenceInterval?: number;
-    recurrenceEndDate?: string | null}) => {
-      console.log("in recurring select");
-      
+    recurrenceEndDate?: string | null}) => {      
       if(!config) return
       setIsRecurring(config.isRecurring || false);
       if (config.recurrencePattern) {
@@ -1150,7 +1138,6 @@ const TaskDetailDrawer = ({
               recurrencePattern={recurrencePattern}
               setRecurrencePattern={setRecurrencePattern}
               onTimeSelect={(time: string) => {
-                console.log("selected Date",selectedDate);
                 setSelectedTime(time)
                 hasChangesRef.current = true;
               }}

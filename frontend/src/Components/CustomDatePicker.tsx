@@ -428,7 +428,15 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
     if (!date) return false;
     if (!selectedDate) return false;
     const dateStr = dateToInput(date);
-    return dateStr === selectedDate.split("T")[0];
+    let selectedDateStr: string;
+    if (selectedDate.includes("T")) {
+      const selectedDateObj = new Date(selectedDate);
+      selectedDateStr = dateToInput(selectedDateObj);
+    } else {
+      selectedDateStr = selectedDate;
+    }
+  
+    return dateStr === selectedDateStr;
   };
 
   const isToday = (date: Date | null): boolean => {

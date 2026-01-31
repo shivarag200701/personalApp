@@ -21,7 +21,7 @@ interface InlineTaskFormProps {
 }
  export function getTimeFromDate(date: string): string {
   if(!date) return "";
-  const dateObj = new Date(date);
+  const dateObj = new Date(date);  
   return dateObj.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
@@ -30,6 +30,13 @@ interface InlineTaskFormProps {
 }
 export function getDateFromDate(date: string){
   if(!date) return "";
+  if(date.includes("T")){
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
   return date.split("T")[0];
 }
 export function roundToNearest15Minutes(date: Date) {
@@ -71,9 +78,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const [isAllDay, setIsAllDay] = useState(true);
   // Track whether any field has changed using a ref so it updates synchronously
   const hasChangesRef = useRef(false);
-
   const combineDateAndTime = (date: string, time: string) => {
-
     let dateObj
     if(!date || !time) return "";
     const [year, month, day] = date.split('-').map(Number);
@@ -88,7 +93,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   if(!isAllDay){
     selectedDate = combineDateAndTime(selectedDate,selectedTime);
   }
-  console.log("selected date",selectedDate);
   
   
   // Helper function to convert Date to YYYY-MM-DD format
@@ -246,6 +250,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
     if (!dateStr || !time) return null;
     let localDateStr: string;
+    console.log(dateStr);
+    
   if(!isAllDay){
     const dateObj = new Date(dateStr);
     const year = dateObj.getFullYear();
@@ -255,6 +261,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   } else {
     localDateStr = dateStr;
   }
+  
 
   // Parse YYYY-MM-DD string as local date (not UTC)
   const [year, month, day] = localDateStr.split('-').map(Number);
@@ -291,7 +298,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
     low: "text-green-500",
     undefined: "text-gray-500",
   };
-
+  
   const dateLabel = getDateLabel(selectedDate,selectedTime);
   // Check if selected date is today
   const isTodaySelected = (() => {

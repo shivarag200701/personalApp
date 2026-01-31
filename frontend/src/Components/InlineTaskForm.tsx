@@ -28,17 +28,6 @@ interface InlineTaskFormProps {
     hour12: false
   })
 }
-export function getDateFromDate(date: string){
-  if(!date) return "";
-  if(date.includes("T")){
-    const dateObj = new Date(date);
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-  return date.split("T")[0];
-}
 export function roundToNearest15Minutes(date: Date) {
 
   const ms = 1000 * 60 * 15
@@ -93,8 +82,20 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   if(!isAllDay){
     selectedDate = combineDateAndTime(selectedDate,selectedTime);
   }
+  console.log(isAllDay);
   
-  
+  function getDateFromDate(date: string,isAllDayValue: boolean){
+    if(!date) return "";
+    if(!isAllDayValue){ 
+      const dateObj = new Date(date);
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }else{
+    return date.split("T")[0];
+    }
+  }
   // Helper function to convert Date to YYYY-MM-DD format
   const dateToInput = (date: Date): string => {
     const year = date.getFullYear();
@@ -114,7 +115,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   // Initialize form fields from todo prop when editing
   useEffect(() => {
     if (todo) {
-      setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
+      setIsAllDay(todo.isAllDay)
+      setSelectedDate(getDateFromDate(todo?.completeAt ?? "",todo.isAllDay)); 
       if(!todo.isAllDay){
         setIsAllDay(false);
         setSelectedTime(getTimeFromDate(todo?.completeAt ?? ""));

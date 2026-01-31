@@ -25,7 +25,7 @@ import AddTaskCalender from "./AddTaskCalender";
 import { useSearchParams } from "react-router-dom";
 import { useQuery} from "@tanstack/react-query";
 import CustomDatePicker from "./CustomDatePicker";
-import { roundToNearest15Minutes, getTimeFromDate, getDateFromDate } from "./InlineTaskForm";
+import { roundToNearest15Minutes, getTimeFromDate} from "./InlineTaskForm";
 import PriorityPicker from "./PriorityPicker";
 import {
   Tooltip,
@@ -124,6 +124,21 @@ const TaskDetailDrawer = ({
     low: "text-green-500",
     undefined: "text-gray-500",
   };
+
+  function getDateFromDate(date: string){
+    if(!date) return "";
+    console.log(date,"=====123=====");
+    
+    if(!isAllDay){
+      const dateObj = new Date(date);
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }else{
+    return date.split("T")[0];
+    }
+  }
 
   useEffect(() => {
 

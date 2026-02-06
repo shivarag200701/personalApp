@@ -76,6 +76,11 @@ body, html {
   body {
     @apply bg-background text-foreground;
   }
+
+  input,
+  textarea {
+    caret-color: var(--foreground);
+  }
 }
 
 /* --- Dark Theme Variables --- */
@@ -119,7 +124,7 @@ body, html {
   --card-foreground: oklch(0.15 0 0);
   --primary: oklch(0.45 0.15 264);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0 0);
+  --secondary: oklch(0.90 0 0);
   --tool-tip: oklch(0.3 0 0);
   --secondary-foreground: oklch(0.25 0 0);
   --muted: oklch(0.9 0 0);
@@ -145,6 +150,16 @@ body, html {
   --drag-task: oklch(0.99 0 0);
 
 
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 

@@ -61,11 +61,18 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                                 "weekly":`every ${Day}`,
                                 "monthly":`Every ${DayOrdinal}`,
                                 "yearly":`Every ${DayOrdinal} ${Month}`}
-  
+
   const [currentMonth, setCurrentMonth] = useState(() => {
     if (selectedDate) {
+      if(todo?.isAllDay){
       const [year, month] = selectedDate.split('-').map(Number);
       return new Date(year, month - 1, 1);
+      }else {
+        const date = new Date(selectedDate)
+        const dateStr = date.toLocaleDateString("en-CA")
+        const [year,month] = dateStr.split('-').map(Number)
+        return new Date(year,month-1,1)
+      }
     }
     return new Date();
   });
@@ -516,8 +523,14 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
 
     todos.forEach((todo) =>{
       if(!todo.completed && todo.completeAt){
+        if(todo.isAllDay){
         const date = todo.completeAt.split("T")[0];
         dateCountMap.set(date, (dateCountMap.get(date) || 0) + 1);
+        }else{
+          const date = new Date(todo.completeAt)
+          const dateStr = date.toLocaleDateString("en-CA")
+          dateCountMap.set(dateStr,(dateCountMap.get(dateStr) || 0) + 1)
+        }
       }
     })
 
@@ -645,60 +658,61 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       </div>
 
       {/* Calendar */}
-      <div className={`p-4 overflow-y-auto  ${parsedResult?.confidence === "high" ? "max-h-[160px]" : "max-h-[250px]" }`}>
+      <div className={`overflow-y-auto no-scrollbar  ${parsedResult?.confidence === "high" ? "max-h-[160px]" : "max-h-[250px]" }`}>
         {/* Month Header */}
-        <div className="flex items-center justify-between mb-4">
-        <span className="text-white font-semibold">{monthLabel}</span>
+        <div className="sticky top-0 z-50 bg-task border-b">
+        <div className="flex items-center justify-between pb-1 pl-4 pt-4">
+        <span className="text-foreground font-semibold">{monthLabel}</span>
         <div className="flex">
           <button
             onClick={() => navigateMonth('prev')}
             className={`p-1 hover:bg-secondary  rounded transition-colors cursor-pointer ${prevDisabled && "opacity-5"}`}
             disabled={prevDisabled}
           >
-            <ChevronLeft className="w-4 h-4 text-white" />
+            <ChevronLeft className="w-4 h-4 text-foregound" />
           </button>
           <div className="flex items-center gap-2">
             <button
               onClick={goToToday}
               className="w-6 h-6 rounded hover:bg-secondary  transition-colors flex items-center justify-center cursor-pointer"
             >
-              <div className="w-2 h-2 rounded bg-transparent border border-white"></div>
+              <div className="w-2 h-2 rounded bg-transparent border border-foreground"></div>
             </button>
           </div>
           <button
             onClick={() => navigateMonth('next')}
             className="p-1 hover:bg-secondary rounded transition-colors cursor-pointer"
           >
-            <ChevronRight className="w-4 h-4 text-white" />
+            <ChevronRight className="w-4 h-4 text-foreground" />
           </button>
         </div>
         </div>
 
         {/* Days of Week */}
-        { !hoverDate ? (<div className="grid grid-cols-7 gap-1 mb-2">
+        { !hoverDate ? (<div className="grid grid-cols-7 gap-1 px-2 ">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-            <div key={idx} className="text-center text-xs text-[#6B6B75] py-1">
+            <div key={idx} className="text-center text-[9px] text-muted-foreground py-1">
               {day}
             </div>
           ))}
         </div>):(
-          <div className="flex items-center justify-center gap-1">
-            <div className=" font-light text-center text-[10px] text-[#6B6B75] py-2">
+          <div className="flex items-center justify-center gap-1 py-1">
+            <div className=" font-light text-center text-[10px] text-[#6B6B75]">
               {dateToLocaleDate(hoverDate)}
             </div>
-            <div className="w-[2px] h-[2px] bg-white font-light rounded-full"/>
-            <div className="text-center text-[10px] text-white font-light py-2">
+            <div className="w-[2px] h-[2px] bg-muted-foreground font-light rounded-full"/>
+            <div className="text-center text-[10px] text-muted-foreground font-medium ">
               {getTaskCountForDate(hoverDate?.toLocaleDateString("en-CA").split("T")[0])}
             </div>
-            <div className="text-center text-[10px] text-white font-light py-2">
+            <div className="text-center text-[10px] text-muted-foreground font-medium">
               {getTaskCountForDate(hoverDate?.toISOString().split("T")[0]) == 0 ? "tasks" : getTaskCountForDate(hoverDate?.toISOString().split("T")[0]) > 1 ? "tasks" : "task"}
               </div>
           </div>
-
       )}
+      </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-1 px-2">
           {days.map((date, idx) => {
             if (!date) {
               return <div key={`empty-${idx}`} className="aspect-square p-1"></div>;
@@ -708,10 +722,11 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
             const isPast = isPastDate(date);
             const isParsedDate = parsedResult?.date === dateToInput(date);
             const isRecurringDate = isRecurringOccurence(date);
-            const today = todayDate()
-            
+            const today = todayDate() 
+
+            //if today>=18 only show the last 18 dates fo the current month
             if(today >= 18 && date.getDate() >= 18 || currentMonth.getMonth() != getTodayMonth() )
-            {
+            {    
             return (
               <button
                 onMouseEnter={() => {setHoverDate(date);}}
@@ -719,17 +734,46 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
                 key={date.getTime()}
                 onClick={() => handleDateClick(date)}
                 disabled={isPast}
-                className={`w-full h-full aspect-square rounded-full text-sm transition-colors cursor-pointer ${
+                className={`w-full h-full aspect-square rounded-full text-[13px] transition-colors cursor-pointer ${
                   isSelected
-                    ? "bg-red-500 text-white font-semibold"
+                    ? "bg-accent/80 text-white font-semibold"
                     : isParsedDate
                     ? "bg-blue-500/50 text-white"
                     : isTodayDate
-                    ? "bg-muted text-foreground"
+                    ? "text-red-500"
                     : isPast
-                    ? "text-[#4A4A4A] cursor-not-allowed"
+                    ? "text-[#8A8A8A] cursor-not-allowed"
                     : isRecurringDate
-                    ? "border border-dashed border-white/50 text-white "
+                    ? "border border-dashed border-foreground/40 text-foreground "
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }
+                    `}
+              >
+                <div className="flex flex-col items-center">
+                {date.getDate()}
+                {getTaskCountForDate(dateToInput(date)) > 0 && <div className="h-[3px] w-[3px] bg-foreground rounded-full"/>}
+                </div>
+              </button>
+            );
+          }else if(today < 18){
+            return (
+              <button
+                onMouseEnter={() => {setHoverDate(date);}}
+                onMouseLeave={() => {setHoverDate(null);}}
+                key={date.getTime()}
+                onClick={() => handleDateClick(date)}
+                disabled={isPast}
+                className={`w-full h-full aspect-square rounded-full text-[13px] transition-colors cursor-pointer ${
+                  isSelected
+                    ? "bg-accent/80 text-white font-semibold"
+                    : isParsedDate
+                    ? "bg-blue-500/50 text-white"
+                    : isTodayDate
+                    ? "text-red-500"
+                    : isPast
+                    ? "text-[#8A8A8A] cursor-not-allowed"
+                    : isRecurringDate
+                    ? "border border-dashed border-foreground/40 text-foreground "
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }
                     `}
@@ -746,8 +790,9 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
         </div>
 
         {/* Next Month Preview */}
-        <div className="mt-6">
-          <div className="text-xs text-[#6B6B75] mb-2">{nextMonthLabel}</div>
+        <div className="mt-6 px-2">
+          <div className="text-[13px] text-foreground font-bold mb-2 px-2">{nextMonthLabel}</div>
+          <div className="h-px bg-secondary mb-2"></div>
           <div className="grid grid-cols-7 gap-1">
             {nextMonthDays.slice(0, 14).map((date, idx) => {
               if (!date) {
@@ -755,26 +800,38 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
               }
 
               const isSelected = isSelectedDate(date);
+              const isTodayDate = isToday(date);
               const isPast = isPastDate(date);
               const isParsedDate = parsedResult?.date === dateToInput(date);
+              const isRecurringDate = isRecurringOccurence(date);
 
               return (
                 <button
-                  key={date.getTime()}
-                  onClick={() => handleDateClick(date)}
-                  disabled={isPast}
-                  className={`aspect-square rounded-lg text-sm transition-colors cursor-pointer ${
-                    isSelected
-                      ? "bg-red-500 text-white font-semibold"
-                      : isParsedDate
-                      ? "bg-blue-500/50 text-white"
-                      : isPast
-                      ? "text-[#4A4A4A] cursor-not-allowed"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  {date.getDate()}
-                </button>
+                onMouseEnter={() => {setHoverDate(date);}}
+                onMouseLeave={() => {setHoverDate(null);}}
+                key={date.getTime()}
+                onClick={() => handleDateClick(date)}
+                disabled={isPast}
+                className={`w-full h-full aspect-square rounded-full text-[12px] transition-colors cursor-pointer ${
+                  isSelected
+                    ? "bg-accent/80 text-white font-semibold"
+                    : isParsedDate
+                    ? "bg-blue-500/50 text-white"
+                    : isTodayDate
+                    ? "text-red-500"
+                    : isPast
+                    ? "text-[#8A8A8A] cursor-not-allowed"
+                    : isRecurringDate
+                    ? "border border-dashed border-foreground/40 text-foreground "
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }
+                    `}
+              >
+                <div className="flex flex-col items-center">
+                {date.getDate()}
+                {getTaskCountForDate(dateToInput(date)) > 0 && <div className="h-[3px] w-[3px] bg-white rounded-full"/>}
+                </div>
+              </button>
               );
             })}
           </div>
@@ -784,7 +841,7 @@ const CustomDatePicker = ({ selectedDate, onDateSelect, onClose, buttonRef, inde
       <div className="border-t border-border p-2.5 text-xs text-muted-foreground flex items-center justify-center text-center gap-2">
         <button ref={timeButtonRef} className="w-full p-1.5 border border-border flex items-center justify-center text-center gap-2 rounded-sm cursor-pointer group [&:not(:has(.clear-icon:hover))]:hover:bg-secondary transition-colors duration-300 relative" onClick={() => {setShowTimePicker(true)}}>
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-            {!isAllDay ? (<div className="text-foreground font-medium">{convert24hrTo12hr(selectedTime)}</div>) : (<div className="text-white">Time</div>)}
+            {!isAllDay ? (<div className="text-foreground font-medium">{convert24hrTo12hr(selectedTime)}</div>) : (<div>Time</div>)}
             {!isAllDay && (
               <button 
               onClick={(e) => {

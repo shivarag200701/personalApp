@@ -31,6 +31,9 @@
   import { useQueryClient } from "@tanstack/react-query";
   import sortTasksByDateAndOrder from "@/utils/sortTask";
   import { useAppTheme } from "@/hooks/useTheme";
+import { Tooltip, TooltipTrigger } from "./ui/tooltip";
+import { TooltipContent } from "./ui/tooltip";
+import { Kbd } from "./ui/kbd";
 
 
 
@@ -161,7 +164,7 @@
               // Calculate position when opening
               const rect = buttonRef.current.getBoundingClientRect();
               setDropdownPosition({
-                  top: rect.bottom + 4,
+                  top: rect.bottom,
                   right: window.innerWidth - rect.right,
               });
           } else {
@@ -238,7 +241,7 @@
         {...listeners}
         {...attributes}
         className={`p-3 ${isDragging ? 'bg-muted' : 'bg-task'} 
-          ${isDragging ? 'h-[100px]' : ''} backdrop-blur-sm border border-border rounded-xl relative cursor-pointer active:cursor-grabbing dark:shadow-[0_8px_6px_-1px_rgba(0,0,0,0.3)] hover:shadow-[0_0_6px_-1px_rgba(0,0,0,0.3)] dark:hover:none hover:border-border-hover   ${openDropdownId === todo.id ? "z-50": ""}`}
+          ${isDragging ? 'h-[100px]' : ''} backdrop-blur-sm border border-border rounded-xl relative cursor-pointer active:cursor-grabbing dark:shadow-[0_8px_6px_-1px_rgba(0,0,0,0.3)] hover:shadow-[0_0_6px_-1px_rgba(0,0,0,0.3)] dark:hover:none hover:border-border-hover mb-3 ${openDropdownId === todo.id ? "z-50": ""}`}
         onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
         onMouseLeave={() => setHoveredTodoId(null)}
         onClick={() => {onViewDetails(todo)}}
@@ -246,6 +249,8 @@
         {!isDragging && (
           <>
         {/* Three-dot Menu */}
+        <Tooltip>
+          <TooltipTrigger asChild>
         {todo.id  && (
           <div
             className={`absolute top-2 right-2 z-20 transition-opacity duration-200 pointer-events-auto ${
@@ -265,7 +270,7 @@
           >
             <button
               ref={buttonRef}
-              className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors cursor-pointer"
+              className={`text-muted-foreground ${openDropdownId === todo.id && "bg-secondary"} hover:text-foreground p-1 rounded-sm hover:bg-secondary transition-colors cursor-pointer`}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleDropdown(todo.id!, e);
@@ -277,11 +282,18 @@
             </button>
           </div>
         )}
+        </TooltipTrigger>
+          <TooltipContent className="pr-1.5">
+            <div className="flex items-center gap-2 ">
+              More options<Kbd>.</Kbd>
+            </div>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Dropdown Menu - Rendered via Portal */}
         {openDropdownId === todo.id && dropdownPosition && createPortal(
             <div 
-              className="fixed z-9999 w-45 bg-card/95 backdrop-blur-xl border border-border rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+              className="fixed z-9999 w-45 bg-card/95 backdrop-blur-xl border border-border rounded-lg shadow-[0_8px_16px_rgba(0,0,0,0.2)]"
               data-dropdown-menu="true"
               style={{
                 top: `${dropdownPosition.top}px`,
@@ -301,7 +313,7 @@
                   <PencilLine className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
-                <div className="text-white px-3 py-2 text-xs font-light">Priority</div>
+                <div className="text-foreground px-3 py-2 text-xs font-semibold">Priority</div>
                 <div className="px-3 py-1 flex items-center gap-3">
                     {Array.from({length: 4}).map((_, index) => (
                       <button
@@ -512,7 +524,7 @@
       return (
           <div
               ref={setNodeRef}
-              className={`flex flex-col relative px-2  transition-colors`}
+              className={`flex flex-col relative px-2 transition-colors`}
           >
               
               {/* Date Header */}
@@ -546,7 +558,7 @@
             {isTopScrolled && <div className="h-px rounded-full bg-muted w-full"></div>}
 
               {/* Tasks Container - Only tasks should scroll */}
-              <div className={`space-y-3 p-2 max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar`}
+              <div className={`space-y-3  max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar`}
                 ref={divRef}
                 >
                   <SortableContext
@@ -566,12 +578,12 @@
                         !isOver && (
                           <button
                               onClick={handleAddTaskClick}
-                              className="group flex items-center gap-2 text-muted-foreground hover:text-purple-400 transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3 rounded-md w-full  hover:border-border "
+                              className="group flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors text-xs font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:ring-inset p-3  rounded-md w-full  hover:border-border "
                           >
-                            <div className="flex items-center justify-center p-px rounded-full group-hover:bg-purple-400 transition-colors">
-                              <Plus className="w-4 h-4 group-hover:text-foreground transition-colors" />
+                            <div className="flex items-center justify-center p-px rounded-full group-hover:bg-accent transition-colors">
+                              <Plus className="w-4 h-4 group-hover:text-background transition-colors" />
                             </div>
-                            <span className="text-xs font-medium">Add task</span>
+                            <span className="text-sm font-light">Add task</span>
                           </button>
                           )
                       ) : (
@@ -1406,9 +1418,9 @@
     
 
     return (
-      <div className="flex flex-col mt-5 flex-1 min-h-0">
+      <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex justify-between items-end mb-4 border-b-[0.5px]  border-white/20 pb-4 px-10">
+        <div className="flex justify-between items-end mb-4 border-b-[0.5px]  border-secondary pb-4 px-10">
           {viewType === "board" && (
             <>
             <div className="flex flex-col gap-2">
@@ -1544,7 +1556,7 @@
             
           
         {/* Calendar Columns */}
-        <div className="flex gap-4 overflow-x-auto overflow-y-hidden custom-scrollbar whitespace-nowrap flex-1 pb-4">
+        <div className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar whitespace-nowrap flex-1 pb-4 px-10">
           {/* Overdue Section */}
           {(() => {
             const overDueTasks = getOverDueTasks();
@@ -1739,18 +1751,20 @@
         </DragOverlay>
           </DndContext>
         ) : (
-          <CalendarView
-            todos={todos}
-            onToggleComplete={onToggleComplete}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            onUpdateTodo={onUpdateTodo}
-            onAddTask={onAddTask}
-            onViewDetails={onViewDetails}
-            onTaskCreated={onTaskCreated}
-            onDuplicateTask={onDuplicateTask}
-            onTaskUpdated={onTaskUpdated}
-          />
+          <div className="flex-1 min-h-0 flex flex-col">
+            <CalendarView
+              todos={todos}
+              onToggleComplete={onToggleComplete}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              onUpdateTodo={onUpdateTodo}
+              onAddTask={onAddTask}
+              onViewDetails={onViewDetails}
+              onTaskCreated={onTaskCreated}
+              onDuplicateTask={onDuplicateTask}
+              onTaskUpdated={onTaskUpdated}
+            />
+          </div>
         )}
 
       <WarningModal

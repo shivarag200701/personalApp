@@ -47,6 +47,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [selectedColor, setSelectedColor] = useState<string>(todo?.color ?? "bg-red-600");
   const [isMobile, setIsMobile] = useState(false);
+  const [isVisible,setIsVisible] = useState(false)
 
   function roundToNearest15Minutes(date: Date) {
 
@@ -121,6 +122,10 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
       setRecurrenceEndDate("");
     }
   }, [todo]);
+
+  useEffect(() => {
+      setIsVisible(true)
+  },[])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,12 +310,19 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   })
-  
-  
+
+  const handleClose = () =>{
+    setIsVisible(false)
+
+    setTimeout(() => {
+      onCancel()
+    },300)
+  }
+
   return createPortal(
     <>
-    <div className="fixed inset-0 z-40" onClick={onCancel}></div>
-    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 bg-task fixed z-50 backdrop-blur-sm border border-border rounded-sm ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)]`}
+    <div className="fixed inset-0 z-40" onClick={handleClose}></div>
+    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 bg-task fixed z-50 backdrop-blur-sm border border-border rounded-sm transition-all duration-300 ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
     style={{
       top: '50px',
       left: '50%',
@@ -536,9 +548,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
         <div className="flex items-center gap-2 shrink-0 py-1.5">
           <button
             type="button"
-            onClick={() =>{
-              onCancel();
-            }}
+            onClick={handleClose}
             className="p-1.5 rounded-md text-white bg-muted hover:bg-muted transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
           >
             Cancel

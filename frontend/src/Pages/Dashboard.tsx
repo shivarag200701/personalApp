@@ -69,6 +69,7 @@ const Dashboard = () => {
     };
   }, [showViewDropdown]);
 
+
   const openModal = () => {
     setIsAddTaskCalendarOpen(true);
     
@@ -350,128 +351,109 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="relative min-h-screen bg-background w-full">
-        
-        {/* Grid backdrop */}
-        {/* <div
-          className="pointer-events-none absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-            backgroundSize: "80px 80px",
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-[#0a0a11]/60 to-[#05050a]" />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 60% 40%, rgba(168,85,247,0.15), transparent 55%)",
-          }}
-        /> */}
-
-        <div className="relative z-10 flex h-screen ">
-        <SideBar expanded={expanded} setExpanded={setExpanded}>
-          {expanded && (
-          <button className="flex gap-2 mb-5 hover:bg-hover p-2 rounded-sm cursor-pointer w-full"
-          onClick= {() => openModal()}
-          >
-            <div className="p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 overflow-hidden">
-            <Plus className="w-5 h-5 text-background"/>
-            </div>
-            <div className="flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden">
-            <span className="text-sm font-medium text-accent">Add Task</span>
-            </div>
-          </button>
-          )}
-          <SideBarItem icon={<Calendar1 size={20}/>} text="Today" 
-          onClick={() => {
-            setActiveTab("today")
-            if(isMobile){
-              setExpanded(false)
-            }
-          }}
-          active = {activeTab === "today"}
-          />
-          <SideBarItem icon={<CalendarDays size={20}/>} text="Upcoming"
-          onClick={() => {
-            setActiveTab("upcoming")
-            if(isMobile){
-              setExpanded(false)
-            }
-          }}
-          active = {activeTab === "upcoming"}
-          />
-          <SideBarItem icon={<CircleCheck size={20}/>} text="Completed"
-          onClick={() => {
-            setActiveTab("completed")
-            if(isMobile){
-              setExpanded(false)
-            }
-          }}
-          active = {activeTab === "completed"}
-          />
-        </SideBar>
-        {/* //backdrop for mobile which closes the sidebar when clicked outside */}
+      <div className="relative w-full flex">
+          <SideBar expanded={expanded} setExpanded={setExpanded}>
+            {expanded && (
+            <button className="relative flex gap-2 mb-5 hover:bg-accent/10 p-2 rounded-sm cursor-pointer w-full group"
+            onClick= {() => openModal()}
+            >
+              <div className="p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 overflow-hidden">
+              <Plus className="w-5 h-5 text-background"/>
+              </div>
+              <div className="flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden">
+              <span className="text-sm font-medium text-accent">Add Task</span>
+              </div>
+              <div className='absolute left-full rounded-sm px-2 py-1 bg-tool-tip text-white invisible opacity-20 -translate-x-3 box-shadow-xl font-extralight ml-1   transition-all duration-300 ease-in-out whitespace-nowrap group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-50'>
+              Add task
+              </div>
+            </button>
+            )}
+            <SideBarItem icon={<Calendar1 size={20}/>} text="Today" 
+            onClick={() => {
+              setActiveTab("today")
+              if(isMobile){
+                setExpanded(false)
+              }
+            }}
+            active = {activeTab === "today"}
+            />
+            <SideBarItem icon={<CalendarDays size={20}/>} text="Upcoming"
+            onClick={() => {
+              setActiveTab("upcoming")
+              if(isMobile){
+                setExpanded(false)
+              }
+            }}
+            active = {activeTab === "upcoming"}
+            />
+            <SideBarItem icon={<CircleCheck size={20}/>} text="Completed"
+            onClick={() => {
+              setActiveTab("completed")
+              if(isMobile){
+                setExpanded(false)
+              }
+            }}
+            active = {activeTab === "completed"}
+            />
+          </SideBar>
+          {/* //backdrop for mobile which closes the sidebar when clicked outside */}
           {isMobile && expanded && (
             <div className="fixed inset-0  z-40 bg-background/95 backdrop-blur-sm" onClick={() => setExpanded(false)} />
           )}
-        <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex justify-end items-center p-5">
-        <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
-          setViewTypeActive(!viewTypeActive)
-        }}>
-          {
-            activeTab === "upcoming" && !isMobile && (
-          <div className={`flex items-center gap-2 cursor-pointer hover:bg-muted hover:text-foreground p-2 rounded-sm transition-all duration-300 text-muted-foreground
-            ${viewTypeActive ? "bg-muted text-foreground" : ""}`}>
-          {viewType === "board" ? <SquareKanban className="w-5 h-5 cursor-pointer font-light" /> : <CalendarDays className="w-5 h-5 cursor-pointer font-light" />}
-          <span className="text-sm font-medium">{viewType === "board" ? "Board" : "Calendar"}</span>
-          </div>
-          )}
-        </button> 
-        </div>
-       
-        {activeTab === "today" && (
-          <TodayView
-            todos={todos}
-            loading={loading}
-            onToggleComplete={toggleTodoCompletion}
-            onDelete={deleteTodo}
-            onEdit={handleEdit}
-            onAddTask={() => openModal()}
-            onViewDetails={handleViewDetails}
-          />
-        )}
-        {activeTab === "upcoming" && (
-          <UpcomingView
-            todos={todos}
-            onToggleComplete={toggleTodoCompletion}
-            onDelete={deleteTodo}
-            onEdit={handleEdit}
-            onUpdateTodo={updateTodo}
-            onAddTask={() => openModal()}
-            onViewDetails={handleViewDetails}
-            onTaskCreated={addTodo}
-            onTaskUpdated={updateTodo}
-            onDuplicateTask={duplicateTodo}
-            viewType={viewType}
-            onViewTypeChange={setViewType}
-          />
-        )}
-        {activeTab === "completed" && (
-          <CompletedView
-            todos={todos}
-            loading={loading}
-            onToggleComplete={toggleTodoCompletion}
-            onDelete={deleteTodo}
-            onEdit={handleEdit}
-            onAddTask={() => openModal()}
-            onViewDetails={handleViewDetails}
-          />
-        )}
-        </div>
-        </div>
+          <div className="flex flex-col overflow-hidden h-screen">
+            <div className="flex justify-end items-center p-5 shrink-0">
+              <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
+                setViewTypeActive(!viewTypeActive)
+              }}>
+                {
+                  activeTab === "upcoming" && !isMobile && (
+                <div className={`flex items-center gap-2 cursor-pointer hover:bg-muted hover:text-foreground p-2 rounded-sm transition-all duration-300 text-muted-foreground
+                  ${viewTypeActive ? "bg-muted text-foreground" : ""}`}>
+                {viewType === "board" ? <SquareKanban className="w-5 h-5 cursor-pointer font-light" /> : <CalendarDays className="w-5 h-5 cursor-pointer font-light" />}
+                <span className="text-sm font-medium">{viewType === "board" ? "Board" : "Calendar"}</span>
+                </div>
+                )}
+              </button> 
+            </div>
+              {activeTab === "today" && (
+                <TodayView
+                  todos={todos}
+                  loading={loading}
+                  onToggleComplete={toggleTodoCompletion}
+                  onDelete={deleteTodo}
+                  onEdit={handleEdit}
+                  onAddTask={() => openModal()}
+                  onViewDetails={handleViewDetails}
+                />
+              )}
+              {activeTab === "upcoming" && (
+                <UpcomingView
+                  todos={todos}
+                  onToggleComplete={toggleTodoCompletion}
+                  onDelete={deleteTodo}
+                  onEdit={handleEdit}
+                  onUpdateTodo={updateTodo}
+                  onAddTask={() => openModal()}
+                  onViewDetails={handleViewDetails}
+                  onTaskCreated={addTodo}
+                  onTaskUpdated={updateTodo}
+                  onDuplicateTask={duplicateTodo}
+                  viewType={viewType}
+                  onViewTypeChange={setViewType}
+                />
+              )}
+              {activeTab === "completed" && (
+                <CompletedView
+                  todos={todos}
+                  loading={loading}
+                  onToggleComplete={toggleTodoCompletion}
+                  onDelete={deleteTodo}
+                  onEdit={handleEdit}
+                  onAddTask={() => openModal()}
+                  onViewDetails={handleViewDetails}
+                />
+              )}
+            </div>
       </div>
       {isAddTaskCalendarOpen && (
         <AddTaskCalendar

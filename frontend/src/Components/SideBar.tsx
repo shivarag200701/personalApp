@@ -7,6 +7,9 @@ import { SettingsModal } from './SettingsModal/SettingsModal'
 import { useQuery } from '@tanstack/react-query';
 import {useNavigate} from 'react-router-dom'
 import { Spinner } from './ui/spinner';
+import { Tooltip, TooltipTrigger } from './ui/tooltip';
+import { TooltipContent } from './ui/tooltip';
+import { Kbd } from './ui/kbd';
 
 const SideBarContext = createContext<{expanded: boolean}>({expanded: false});
 const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode, expanded: boolean, setExpanded: (expanded: boolean) => void }) => {
@@ -51,8 +54,8 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
     }
     
   return (
-    <aside className={`h-screen transition-all duration-300 ease-in-out ${expanded ? "w-64" : "w-0"} 
-    z-50`}
+    <aside className={`h-screen transition-all duration-300 ease-in-out ${expanded ? "min-w-70 max-w-70" : "w-0"} 
+    z-50 `}
     aria-expanded={expanded}
     aria-hidden={!expanded}
     >
@@ -76,17 +79,26 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
           <ChevronDown className='w-4 h-4 text-muted-foreground' />
           </button>
           )}
-            <button className={`p-2 rounded-md hover:bg-hover transition-colors 
-            ${expanded ? "relative" : " absolute top-4 left-4 z-50"}
-            ${!expanded ? "pointer-events-auto" : ""}
-            `}
-            onClick={() => setExpanded(!expanded)}
-            aria-label={expanded ? "Close sidebar" : "Open sidebar"}
-            >
-            <PanelLeft className="text-muted-foreground cursor-pointer font-light transition-all duration-300 ease-in-out w-5 h-5" 
-            style={{transform: expanded ? "rotate(0deg)" : "rotate(180deg)"}}
-            />
-            </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className={`p-2 rounded-md hover:bg-hover transition-colors hover:bg-secondary cursor-pointer
+              ${expanded ? "relative" : " absolute top-4 left-4 z-50"}
+              ${!expanded ? "pointer-events-auto" : ""}
+              `}
+              onClick={() => setExpanded(!expanded)}
+              aria-label={expanded ? "Close sidebar" : "Open sidebar"}
+              >
+              <PanelLeft className="text-muted-foreground font-light transition-all duration-300 ease-in-out w-5 h-5" 
+              style={{transform: expanded ? "rotate(0deg)" : "rotate(180deg)"}}
+              />
+              </button>
+              </TooltipTrigger>
+              <TooltipContent className="pr-1.5">
+                <div className="flex items-center gap-2 ">
+                  Open/Close Sidebar<Kbd>M</Kbd>
+                </div>
+              </TooltipContent>
+            </Tooltip>
         </div>
 
         <SideBarContext.Provider value={{expanded}}>
@@ -147,7 +159,7 @@ export const SideBarItem = ({icon, text,active, onClick}: {icon: React.ReactNode
             {text}
           </span>
             {expanded && (
-      <div className='absolute left-full rounded-sm px-2 py-1 bg-muted text-white invisible opacity-20 -translate-x-3 box-shadow-xl font-extralight ml-1   transition-all duration-300 ease-in-out  group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-50'>
+      <div className='absolute left-full rounded-sm px-2 py-1 bg-tool-tip text-white invisible opacity-20 -translate-x-3 box-shadow-xl font-extralight ml-1   transition-all duration-300 ease-in-out  group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-50'>
         {text}
       </div>
       )}

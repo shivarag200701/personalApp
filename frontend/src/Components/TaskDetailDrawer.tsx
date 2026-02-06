@@ -127,13 +127,13 @@ const TaskDetailDrawer = ({
 
   function getDateFromDate(date: string){
     if(!date) return "";
-    console.log(date,"=====123=====");
-    
-    if(!isAllDay){
+    if(!todo?.isAllDay){
       const dateObj = new Date(date);
+      console.log(dateObj);
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
+      
       return `${year}-${month}-${day}`;
     }else{
     return date.split("T")[0];
@@ -141,12 +141,16 @@ const TaskDetailDrawer = ({
   }
 
   useEffect(() => {
-
+    console.log(todo);
     if (todo) {
       setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
+      setIsAllDay(todo.isAllDay ?? true);
+    
       if(!todo.isAllDay){
-        setIsAllDay(false);
         setSelectedTime(getTimeFromDate(todo?.completeAt ?? ""));
+      }
+      else {
+        setSelectedTime(roundToNearest15Minutes(new Date()));
       }
     const initPriority = (todo.priority as "high" | "medium" | "low") ?? null;
     setPriority(initPriority);
@@ -329,9 +333,9 @@ const TaskDetailDrawer = ({
   const convertDateTime = (dateStr:string|null,time:string|null): string | null => {
     if (!dateStr) return null;
 
-    if(!isAllDay && !time) return null
+    if(!todo.isAllDay && !time) return null
 
-    if(!isAllDay){
+    if(!todo?.isAllDay){
       dateStr = dateStr.split("T")[0];
     }
     // Parse YYYY-MM-DD string as local date (not UTC)
@@ -357,19 +361,19 @@ const TaskDetailDrawer = ({
         const reccurencePatten = todo.recurrencePattern
         switch(reccurencePatten){
           case "daily":
-            reccurenceLabel = isAllDay ? 'every day' : `every day at ${formatTime(selectedTime)}`
+            reccurenceLabel = todo?.isAllDay ? 'every day' : `every day at ${formatTime(selectedTime)}`
             break;
           
           case "weekly":
-            reccurenceLabel = isAllDay ? `every ${day}` : `every ${day} at ${formatTime(selectedTime)}`
+            reccurenceLabel = todo?.isAllDay ? `every ${day}` : `every ${day} at ${formatTime(selectedTime)}`
             break;
           
           case "monthly":
-            reccurenceLabel = isAllDay ? `every ${dayOrdinal}` : `every ${dayOrdinal} at ${formatTime(selectedTime)}`
+            reccurenceLabel = todo?.isAllDay ? `every ${dayOrdinal}` : `every ${dayOrdinal} at ${formatTime(selectedTime)}`
             break;
           
           case "yearly":
-            reccurenceLabel = isAllDay ? `every ${dayOrdinal} ${month}` : `every ${dayOrdinal} ${month} at ${formatTime(selectedTime)}`
+            reccurenceLabel = todo?.isAllDay ? `every ${dayOrdinal} ${month}` : `every ${dayOrdinal} ${month} at ${formatTime(selectedTime)}`
             break;
 
         }
@@ -379,7 +383,7 @@ const TaskDetailDrawer = ({
 
   const formatTime = (time:string|null): string | null => {
       let timeLabel = ""
-      if(!isAllDay && time){
+      if(!todo?.isAllDay && time){
         const [hours, minutes] = time.split(":")
         const hour24 = parseInt(hours);
         const ampm = hour24 >= 12 ? "PM" : "AM";
@@ -393,10 +397,15 @@ const TaskDetailDrawer = ({
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
     if (!dateStr) return null;
 
-    if(!isAllDay && !time) return null
+    if(!dateStr && !time) return null
 
-
-    if(!isAllDay){
+    // console.log(dateStr);
+    // console.log("====")
+    // console.log(time);
+    ;
+    
+    
+    if(!todo?.isAllDay){
       dateStr = dateStr.split("T")[0];
     }
     // Parse YYYY-MM-DD string as local date (not UTC)
@@ -413,12 +422,12 @@ const TaskDetailDrawer = ({
     const timeLabel = formatTime(time)
     
     if (selectedDate.getTime() === today.getTime()) {
-      return !isAllDay ? `Today ${timeLabel}` : "Today";
+      return !todo?.isAllDay ? `Today ${timeLabel}` : "Today";
     } else if (selectedDate.getTime() === tomorrow.getTime()) {
-      return !isAllDay ? `Tomorrow ${timeLabel}` : "Tomorrow";
+      return !todo?.isAllDay ? `Tomorrow ${timeLabel}` : "Tomorrow";
     } else {
       // For other dates, return formatted date
-      return !isAllDay ? `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${timeLabel}` : selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return !todo?.isAllDay ? `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${timeLabel}` : selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
   };
 
@@ -448,7 +457,7 @@ const TaskDetailDrawer = ({
   const handleDateSelect = async (date:string,isQuickAction?:boolean)=>{
     if(!date) return
     let finalDate = date;
-    if (!isAllDay && selectedTime) {
+    if (!todo?.isAllDay && selectedTime) {
       finalDate = combineDateAndTime(date, selectedTime);
     }
     
@@ -1096,10 +1105,10 @@ const TaskDetailDrawer = ({
                     </button>
                     </TooltipTrigger>
                   <TooltipContent>
-                    <div className="text-muted-foreground gap-2">
+                    <div className="text-white gap-2">
                       <p className="text-[12px]">{convertDateTime(selectedDate,selectedTime)}</p>
                       <p>{dayLeft(selectedDate)}</p>
-                      <p className="text-[11px]">{getReccurenceLabel()}</p>
+                      <p className="text-[11px] mb-2">{getReccurenceLabel()}</p>
                       <div className="h-px bg-ring "/>
                     </div>
                   </TooltipContent>

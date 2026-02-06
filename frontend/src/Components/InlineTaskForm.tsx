@@ -364,7 +364,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   
   return (
     <>
-    <form onSubmit={handleSubmit} className={`p-2 ${backgroundColor} backdrop-blur-sm border border-border rounded-xl bg-transparent ${width} min-w-0 overflow-hidden `}>
+    <form onSubmit={handleSubmit} className={`px-2 py-3 ${backgroundColor} backdrop-blur-sm border border-border-hover rounded-xl bg-transparent ${width} min-w-0 overflow-hidden `}>
       {/* Category Tag */}
       {category && (
         <div className="mb-2">
@@ -392,7 +392,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           hasChangesRef.current = true;
         }}
         placeholder="Task name"
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-base md:text-sm outline-none focus:outline-none min-w-0"
+        className="w-full bg-transparent text-foreground placeholder:text-[#A2A2A9] text-base md:text-sm outline-none focus:outline-none min-w-0"
         autoFocus
       />
 
@@ -406,13 +406,13 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         }}
         placeholder="Description"
         rows={1}
-        className="w-full bg-transparent text-white placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
+        className="w-full bg-transparent text-foreground placeholder:text-[#A2A2A9] text-sm md:text-xs mb-2 outline-none focus:outline-none min-w-0 resize-none overflow-y-auto"
         style={{ minHeight: '20px', maxHeight: '200px' }}
       />
       </div>
 
       {/* Action Buttons Row */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
+      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
         {/* Date Button */}
         <div className="relative">
           <button
@@ -432,7 +432,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               {isRecurring && <RefreshCw className="w-2.5 h-2.5 shrink-0 text-gray-300" />}
               {selectedDate && (
                 <X
-                  className="w-3 h-3 text-white hover:text-gray-300 shrink-0"
+                  className="w-3 h-3 text-[#A2A2A9] shrink-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNoDate();
@@ -525,7 +525,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         {/* Reminder Button (placeholder) */}
         <button
           type="button"
-          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-white shrink-0"
+          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-[#A2A2A9] shrink-0"
         >
           <AlarmClock className="w-4 h-4" />
         </button>
@@ -535,13 +535,13 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         <button
           ref={moreOptionsButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-white shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-[#A2A2A9] shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           onClick={(e) => {
             e.preventDefault();
             setShowMoreOptionsPicker(!showMoreOptionsPicker);
           }}
         >
-          <MoreHorizontal className="w-6 h-6" />
+          <MoreHorizontal className="w-4 h-4" />
         </button>
         {showMoreOptionsPicker && (
           <MoreOptionsPicker
@@ -588,7 +588,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-2 rounded-md bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
+            className="p-2 rounded-md bg-accent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)]"
           >
             <SendHorizontal className="w-4 h-4 text-white" />
           </button>
@@ -599,7 +599,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
       isOpen={isWarningModalOpen}
       onClose={handleCancel}
       onDiscard={handleDiscard}
-      title="Discard unsaved changes"
+      title="Discard unsaved changes?"
       description="Your unsaved changes will be discarded."
       buttonText="Discard"
     />

@@ -534,7 +534,9 @@ const CalendarView = ({
       >
         {/* calender grid */}
         <div className="relative bg-card/80 backdrop-blur-xl overflow-hidden w-full">
-        <div className="grid grid-cols-7 w-full">
+        <div className="grid grid-cols-7 w-full"
+        style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}
+        >
           {calenderDays.map((date,index) => {
             const dayTasks = getTasksForDate(date)
             const isTodayDate = isToday(date)

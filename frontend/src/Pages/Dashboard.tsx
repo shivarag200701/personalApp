@@ -396,7 +396,7 @@ const Dashboard = () => {
           {isMobile && expanded && (
             <div className="fixed inset-0  z-40 bg-background/95 backdrop-blur-sm" onClick={() => setExpanded(false)} />
           )}
-          <div className="flex flex-col overflow-hidden h-screen">
+          <div className="flex flex-col overflow-hidden h-screen flex-1 min-w-0">
             <div className="flex justify-end items-center p-5 shrink-0">
               <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
                 setViewTypeActive(!viewTypeActive)

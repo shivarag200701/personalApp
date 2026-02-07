@@ -183,8 +183,6 @@ const CalendarView = ({
 
   },[visibleMonths,getMonthKey])
 
-  // console.log("visible months",visibleMonths);
-  
 
   const getTasksForDate = (date: Date): Todo[] => {
     const formatted = date.toLocaleDateString("en-CA");
@@ -335,8 +333,6 @@ const CalendarView = ({
       const observer = new IntersectionObserver((entries) => {
           const entry = entries[0]
           if(entry.isIntersecting){
-            console.log("called");
-            
             loadMoreMonths('down')
           }
           

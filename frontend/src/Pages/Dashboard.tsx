@@ -142,8 +142,6 @@ const Dashboard = () => {
     }
     
     const newCompletedStatus = !todoToUpdate?.completed;
-    console.log("newCompletedStatus", newCompletedStatus);
-
     if(newCompletedStatus === true){}
     //If the task is not recurring, update the task as completed in the UI
     if(!todoToUpdate.isRecurring){
@@ -179,7 +177,6 @@ const Dashboard = () => {
     newCompletedStatus) { 
 
         const baseDate = new Date(todoToUpdate.completeAt);
-        console.log("base date", baseDate);
         const nextOccurrenceDate = calculateNextOccurence(todoToUpdate.recurrencePattern as RecurrencePattern, todoToUpdate.recurrenceInterval, baseDate);
         //optimistic update to UI
         if(todoToUpdate.recurrenceEndDate && nextOccurrenceDate > new Date(todoToUpdate.recurrenceEndDate)){
@@ -194,7 +191,6 @@ const Dashboard = () => {
           });
         }
         else{
-          console.log("next occurrence date", nextOccurrenceDate);
           queryClient.setQueryData<Todo[]>(["todos"], (prev = []) => 
             prev.map((todo) => todo.id === todoId ? {...todo, completeAt: nextOccurrenceDate.toISOString()} : todo)
           );

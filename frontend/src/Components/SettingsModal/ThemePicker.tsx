@@ -27,8 +27,6 @@ const ThemePicker = () => {
       
       <div className="grid sm:grid-cols-3 gap-4">
         {Object.values(themes).map((themeOption) => {
-            console.log(themeOption);
-            
           const isSelected = currentTheme === themeOption.id;
           
           return (

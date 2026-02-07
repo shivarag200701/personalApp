@@ -52,7 +52,6 @@ const SignUpForm = () => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       const res = await api.post("/v1/user/signup", data);
-      console.log(res.data.msg);
       await refreshAuth();
       navigate("/dashboard");
     } catch (error) {

@@ -129,7 +129,6 @@ const TaskDetailDrawer = ({
     if(!date) return "";
     if(!todo?.isAllDay){
       const dateObj = new Date(date);
-      console.log(dateObj);
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
@@ -141,7 +140,6 @@ const TaskDetailDrawer = ({
   }
 
   useEffect(() => {
-    console.log(todo);
     if (todo) {
       setSelectedDate(getDateFromDate(todo?.completeAt ?? "")); 
       setIsAllDay(todo.isAllDay ?? true);
@@ -398,12 +396,6 @@ const TaskDetailDrawer = ({
     if (!dateStr) return null;
 
     if(!dateStr && !time) return null
-
-    // console.log(dateStr);
-    // console.log("====")
-    // console.log(time);
-    ;
-    
     
     if(!todo?.isAllDay){
       dateStr = dateStr.split("T")[0];

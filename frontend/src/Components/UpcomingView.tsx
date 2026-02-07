@@ -1035,10 +1035,6 @@ import { Kbd } from "./ui/kbd";
             }else{
               overDate = new Date(overTodo.completeAt).toLocaleDateString('en-CA')
             }    
-            // console.log("active",activeDate);
-            // console.log("over",overDate);
-            
-            
           
           if (activeDate !== overDate) {
             // Temporarily update the task's completeAt to show it in the new column
@@ -1196,8 +1192,6 @@ import { Kbd } from "./ui/kbd";
     
       // Handle reordering for untimed tasks using arrayMove
       if (todo.isAllDay && activeDate === overDate) {
-        console.log("here");
-        
         // Reordering within the same date - use arrayMove
         // Use cache data for immediate updates
         let untimedTasksForDate = todosFromCache.filter(t => 
@@ -1205,8 +1199,6 @@ import { Kbd } from "./ui/kbd";
           t.completeAt && 
           t.completeAt.split("T")[0] === overDate
         );
-        console.log(untimedTasksForDate);
-        
 
         untimedTasksForDate = sortTasksByDateAndOrder(untimedTasksForDate)
         
@@ -1215,9 +1207,6 @@ import { Kbd } from "./ui/kbd";
 
         const overIndex = untimedTasksForDate.findIndex(t => t.id === overData?.todo.id)
 
-        console.log("active Index",activeIndex);
-        console.log("over indezx",overIndex);
-        
         
         // Use arrayMove to reorder
         const reorderedTasks = arrayMove(untimedTasksForDate, activeIndex, overIndex);

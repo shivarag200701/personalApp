@@ -82,8 +82,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   if(!isAllDay){
     selectedDate = combineDateAndTime(selectedDate,selectedTime);
   }
-  console.log(isAllDay);
-  
   function getDateFromDate(date: string,isAllDayValue: boolean){
     if(!date) return "";
     if(!isAllDayValue){ 
@@ -252,8 +250,6 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const getDateLabel = (dateStr: string | null, time: string | null): string | null => {
     if (!dateStr || !time) return null;
     let localDateStr: string;
-    console.log(dateStr);
-    
   if(!isAllDay){
     const dateObj = new Date(dateStr);
     const year = dateObj.getFullYear();

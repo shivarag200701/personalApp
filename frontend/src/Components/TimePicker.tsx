@@ -213,8 +213,6 @@ const TimeOption = ({ onTimeSelect, onClose, buttonRef }: TimeOptionProps) => {
         return timeOptions;
       }
       let timeOptions: TimeOption[] = generateTimeOptions();
-      console.log(timeOptions);
-      
       return (
         <>
         <div className="fixed inset-0 z-80"

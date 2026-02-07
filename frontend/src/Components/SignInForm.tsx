@@ -63,7 +63,6 @@ const SignInForm = () => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       await api.post("/v1/user/signin", data);
-      console.log("signed in");
       await refreshAuth();
       navigate("/dashboard");
     } catch (error) {

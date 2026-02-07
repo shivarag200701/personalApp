@@ -300,8 +300,6 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
     }, 300);
     return () => clearTimeout(timeoutId);
   },[title])
-  console.log("width", width);
-
   useEffect(() => {
     const checkMobile = ()  => {
       setIsMobile(window.innerWidth < 768)

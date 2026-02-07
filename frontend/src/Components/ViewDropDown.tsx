@@ -30,8 +30,6 @@ export const ViewDropDown = ({viewType, setViewType, buttonRef, setShowViewDropd
             });
         }
     }, [buttonRef]);
-    console.log("position", position);
-    
   return (
     <>
     <div className='fixed inset-0 z-40 ' onClick={() => {setShowViewDropdown(false)

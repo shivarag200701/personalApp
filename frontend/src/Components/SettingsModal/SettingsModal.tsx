@@ -35,10 +35,6 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
 
     const currentTab = segments[0] || "account";
     const currentSubTab = segments[1] || "";
-    console.log(currentTab);
-    console.log(currentSubTab);
-
-
     const tabs = [
         {
             id: "account",
@@ -78,9 +74,6 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
             return res.data.user
         }
     })
-    console.log("user",user.isPasswordSet);
-    
-    
   return (
     <>
     <div className='fixed inset-0 z-40 bg-black/30' onClick={() => setShowSettingsModal(false)}/>

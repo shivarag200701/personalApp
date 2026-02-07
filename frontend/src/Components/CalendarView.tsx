@@ -532,8 +532,8 @@ const CalendarView = ({
         data-month-key={monthKey}
       >
         {/* calender grid */}
-        <div className="relative bg-card/80 backdrop-blur-xl overflow-hidden">
-        <div className="grid grid-cols-7">
+        <div className="relative bg-card/80 backdrop-blur-xl overflow-hidden w-full">
+        <div className="grid grid-cols-7 w-full">
           {calenderDays.map((date,index) => {
             const dayTasks = getTasksForDate(date)
             const isTodayDate = isToday(date)
@@ -668,9 +668,9 @@ const CalendarView = ({
   }
 
   return (
-    <div className="flex flex-col relative h-full">
+    <div className="flex flex-col relative h-full w-full">
       {/* Header - Sticky */}
-      <div className="flex justify-between items-center sticky top-0 z-30 mb-3">
+      <div className="flex justify-between items-center sticky top-0 z-30 mb-3 w-full">
         <div className="flex items-center gap-4">
           <div className="absolute left-0" ref={pickerRef}>
             <div
@@ -785,7 +785,7 @@ const CalendarView = ({
       {/* Scrollable Calendar Container */}
       <div 
         ref={scrollContainerRef}
-        className="overflow-x-hidden overflow-y-auto no-scrollbar h-[calc(100vh-190px)]"
+        className="overflow-x-hidden overflow-y-auto no-scrollbar h-[calc(100vh-190px)] w-full"
       >
         <div className="text-3xl text-white" ref={topRef}></div>
         <div className="">

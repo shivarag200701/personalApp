@@ -13,6 +13,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --width-70: 17.5rem;
   
   /* Color Mapping to CSS Variables */
   --color-background: var(--background);
@@ -80,6 +82,18 @@ body, html {
   input,
   textarea {
     caret-color: var(--foreground);
+  }
+}
+
+@layer utilities {
+  .w-70 {
+    width: 17.5rem; /* or 280px */
+  }
+  .min-w-70 {
+    min-width: 17.5rem;
+  }
+  .max-w-70 {
+    max-width: 17.5rem;
   }
 }
 

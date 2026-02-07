@@ -530,6 +530,7 @@ const CalendarView = ({
           }
         }} 
         data-month-key={monthKey}
+        className="w-full"
       >
         {/* calender grid */}
         <div className="relative bg-card/80 backdrop-blur-xl overflow-hidden w-full">
@@ -788,7 +789,7 @@ const CalendarView = ({
         className="overflow-x-hidden overflow-y-auto no-scrollbar h-[calc(100vh-190px)] w-full"
       >
         <div className="text-3xl text-white" ref={topRef}></div>
-        <div className="">
+        <div className="w-full">
           {visibleMonths.map((monthDate) => renderMonthCalender(monthDate))}
         </div>
         <div className="text-3xl text-white" ref={bottomRef}></div>

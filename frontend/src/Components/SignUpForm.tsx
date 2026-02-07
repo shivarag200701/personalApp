@@ -51,7 +51,7 @@ const SignUpForm = () => {
   }, [isAuthenticated]);
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const res = await api.post("/v1/user/signup", data);
+      await api.post("/v1/user/signup", data);
       await refreshAuth();
       navigate("/dashboard");
     } catch (error) {

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import ComingSoon from "./ComingSoon";
 import { useRef } from "react";
-import PathAnimation from "../pathAnimation";
+import PathAnimation from "@/Components/PathAnimation";
 
 interface Integration {
   name: string;

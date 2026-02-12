@@ -3,7 +3,7 @@ import { useEffect,useRef,useState } from "react";
 import { CheckCircle2, Brain,Calendar1, RefreshCcw} from "lucide-react";
 import { Auth } from "../Context/AuthContext";
 import { Calendar } from "@/Components/ui/calendar";
-import useScrollbarSize from 'react-scrollbar-size';
+import { useScrollbarWidth } from '../hooks/useScrollbarWidth';
 import { AuroraText } from "@/Components/ui/aurora-text"
 import {motion} from "motion/react"
 import { Highlighter } from "@/Components/ui/highlighter";
@@ -26,7 +26,7 @@ const Landing = () => {
   const [isVisibleSix,setIsVisibleSix] = useState(false)
   const [isSmallScreen,setIsSmallScreen] = useState(false)
   const [selectedDates,setSelectedDates] = useState<Date[]>([])
-  const { width } = useScrollbarSize()
+  const { width } = useScrollbarWidth()
   const containerRef = useRef<HTMLDivElement|null>(null)
 
 

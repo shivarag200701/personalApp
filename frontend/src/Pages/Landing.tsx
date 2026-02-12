@@ -1,13 +1,67 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Sparkles, Flame, TrendingUp } from "lucide-react";
+import { useEffect,useRef,useState } from "react";
+import { CheckCircle2, Brain,Calendar1, RefreshCcw} from "lucide-react";
 import { Auth } from "../Context/AuthContext";
+import { Calendar } from "@/Components/ui/calendar";
+import useScrollbarSize from 'react-scrollbar-size';
+import { AuroraText } from "@/Components/ui/aurora-text"
+import {motion} from "motion/react"
+import { Highlighter } from "@/Components/ui/highlighter";
+import ChatGPTIntegration from "@/Components/LandingPage/ChatGPTIntegration";
+import { AnimatedList } from "@/Components/ui/animated-list";
+import Notification from "@/Components/LandingPage/Notification";
+import type { NotificationProps } from "@/Components/LandingPage/Notification";
+
+
 
 const Landing = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, refreshAuth } = Auth();
   const [isScrolled, setIsScrolled] = useState(false);
-  
+  const [isVisibleOne,setIsVisibleOne] = useState(false)
+  const [isVisibleTwo,setIsVisibleTwo] = useState(false)
+  const [isVisibleThree,setIsVisibleThree] = useState(false)
+  const [isVisibleFour,setIsVisibleFour] = useState(false)
+  const [isVisibleFive,setIsVisibleFive] = useState(false)
+  const [isVisibleSix,setIsVisibleSix] = useState(false)
+  const [isSmallScreen,setIsSmallScreen] = useState(false)
+  const [selectedDates,setSelectedDates] = useState<Date[]>([])
+  const { width } = useScrollbarSize()
+  const containerRef = useRef<HTMLDivElement|null>(null)
+
+
+  useEffect(() => {
+    const delays = [100, 200, 300,400,500,600];
+    const setters = [setIsVisibleOne, setIsVisibleTwo, setIsVisibleThree,setIsVisibleFour,setIsVisibleFive,setIsVisibleSix];
+    const timeouts: number[] = [];
+    
+    setters.forEach((setter, index) => {
+      const timeout = setTimeout(() => {
+        setter(true);
+      }, delays[index]);
+      timeouts.push(timeout);
+    });
+    
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, []);
+
+  useEffect(()=>{
+    const checkmobile =()=>{
+      setIsSmallScreen(window.innerWidth<1024)
+    }
+    checkmobile()
+
+    window.addEventListener("resize",checkmobile)
+
+    return () => {
+      window.removeEventListener("resize",checkmobile)
+    }
+    
+  },[])
+
+
   // Refresh auth status when landing page loads
   useEffect(() => {
     refreshAuth();
@@ -19,21 +73,7 @@ const Landing = () => {
     }
     return false;
   });
-  
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 100 }).map((_, index) => ({
-        id: index,
-        left: Math.random() * 100,
-        bottom: Math.random() * 100, // Random starting position from 0-100vh
-        delay: 0, // Start immediately
-        duration: 10 + Math.random() * 8,
-        size: 2 + Math.random() * 4,
-        opacity: 0.3 + Math.random() * 1.5,
-      })),
-    []
-  );
-  
+    
   useEffect(() => {
     const updateHeight = () => {
       if (typeof window === "undefined" || typeof document === "undefined")
@@ -72,7 +112,7 @@ const Landing = () => {
         || document.documentElement.scrollTop 
         || document.body.scrollTop 
         || 0;
-      
+
       const shouldBeScrolled = scrollY > 30;
       setIsScrolled(shouldBeScrolled);
     };
@@ -102,6 +142,73 @@ const Landing = () => {
     };
   }, []);
 
+  let notifications:NotificationProps[] = [
+    {
+      name: "Conduct Interview for Backend role",
+      description: "Today 10:00",
+      time: "5m ago",
+      color: "#FF3D71",
+      icon: "💼",
+
+    },
+    {
+      name: "Do Yoga",
+      description: "Today 6:00",
+      time: "15m ago",
+      color: "#00C9A7",
+      icon: "🧘🏼‍♀️",
+    },
+    {
+      name: "Gym",
+      description: "Today 7:00",
+      time: "10m ago",
+      color: "#FFB800",
+      icon: "🏋🏼‍♀️",
+
+    },
+    {
+      name: "Buy milk",
+      description: "",
+      time: "2m ago",
+      color: "#1E86FF",
+      icon: "🗞️",
+
+    },
+  ]
+
+  const demoHeaderOffset = 200
+  const featureHeaderOffset = 150
+
+
+  const scrollToDemo = (e:React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+  const container = containerRef.current;
+  const target = document.getElementById("demo");
+  if (!container || !target) return;
+
+  const containerTop = container.getBoundingClientRect().top;
+  const targetTop = target.getBoundingClientRect().top;
+  const offset = targetTop - containerTop  - demoHeaderOffset;
+
+  document.body.scrollTo({ top: offset, behavior: "smooth" });
+  }
+
+
+  const scrollToFeatures = (e:React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+  const container = containerRef.current;
+  const target = document.getElementById("features");
+  if (!container || !target) return;
+
+  const containerTop = container.getBoundingClientRect().top;
+  const targetTop = target.getBoundingClientRect().top;
+  const offset = targetTop - containerTop  - featureHeaderOffset;
+
+  document.body.scrollTo({ top: offset, behavior: "smooth" });
+  }
+
+  notifications = Array.from({length:10},() => notifications).flat()
+
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -109,83 +216,37 @@ const Landing = () => {
     }
   }, [isAuthenticated, isLoading, navigate]);  
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-white flex flex-col">
-      <style>{`
-        @keyframes floatUp {
-          0% { transform: translateY(0) scale(0.9); opacity: 0.3; }
-          15% { opacity: 1; }
-          100% { transform: translateY(calc(-100vh - 100px)) scale(1.2); opacity: 0; }
-        }
-        @keyframes pulseOrbit {
-          0% { opacity: 0.35; transform: scale(0.98); }
-          50% { opacity: 0.7; transform: scale(1.02); }
-          100% { opacity: 0.35; transform: scale(0.98); }
-        }
-        /* Custom dark scrollbar */
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #0a0a0f;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #1a1a2e;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #2a2a3e;
-        }
-      `}</style>
-
-      {/* Grid backdrop */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-[#0a0a11]/60 to-[#05050a]" />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 60% 40%, rgba(168,85,247,0.25), transparent 55%)",
-        }}
-      />
-      {particles.map((particle) => (
-        <span
-          key={particle.id}
-          className="pointer-events-none absolute rounded-full bg-blue-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
-          style={{
-            left: `${particle.left}%`,
-            bottom: `${particle.bottom}%`,
-            width: particle.size * 1.5,
-            height: particle.size * 1.5,
-            opacity: particle.opacity,
-            animation: `floatUp ${particle.duration}s linear ${particle.delay}s infinite`,
-          }}
-        />
-      ))}
-
+    <div  className="relative  h-full overflow-y-auto bg-white text-white flex flex-col" ref={containerRef}>
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');`}
+      </style>
       {/* Header */}
-      <header className={`transition-all duration-300 ${isMobile ? (isScrolled ? 'bg-[#05050a]/95 backdrop-blur-md border-b border-white/5 fixed top-0 left-0 right-0 w-full z-50 ' : 'bg-transparent fixed top-0 left-0 right-0 w-full z-50 '):""
-      }`}>
-        <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
+      <header className={`transition-all duration-300  fixed bg-white z-50 top-0  border-b border-gray-200 shadow-sm  ${isMobile ? (isScrolled ? 'bg-white backdrop-blur-md border-b border-white/5 fixed top-0 left-0 right-0 w-full z-50 ' : 'bg-transparent fixed top-0 left-0 right-0 w-full z-50 '):""
+      }`} style={{width:`calc(100vw - ${width}px)`}} >
+        <div className="w-full max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center sm:justify-between justify-center">
-            <div className="flex items-center gap-3 transition-all duration-300 ease-in-out"
+            <div className="flex items-center gap-3 transition-all duration-300 ease-in-out cursor-pointer" onClick={() => {
+              document.body.scrollTo({ top: 0,behavior:'smooth'});
+            }}
             style={isMobile ? {
               display: isScrolled ? 'none' : 'flex',
             } : {}}
             >
-              <div className="w-12 h-12 rounded-2xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center">
-                <CheckCircle2 className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-purple-500">
+              <h1 className="text-2xl font-bold tracking-tight text-accent">
                 FlowTask
               </h1>
             </div>
+            {!isMobile && ( 
+              <div className="group relative flex  text-black p-1 rounded-lg w-50">
+                <a onClick={scrollToDemo} className="peer/one flex-1 text-center py-2 z-10 cursor-pointer select-none">Live Demo</a>
+                <a onClick={scrollToFeatures}  className="peer/two flex-1 text-center py-2 z-10 cursor-pointer select-none">Features</a>
+                <div className="absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-gray-100 rounded-xl transition-all duration-300 ease-in-out peer-hover/two:translate-x-full peer-hover/one:translate-x-0 opacity-0  group-hover:opacity-100">
+                </div>
+              </div>
+            )}
             <div 
               className="flex items-center gap-3 transition-all duration-300 ease-in-out sm:opacity-100 sm:translate-x-0 sm:pointer-events-auto"
               style={isMobile ? {
@@ -196,13 +257,13 @@ const Landing = () => {
             >
               <button
                 onClick={() => navigate("/signin")}
-                className="px-4 py-2 text-white/90 hover:text-white transition-colors border border-white/15 rounded-md bg-white/5 backdrop-blur cursor-pointer text-center text-sm font-medium"
+                className="px-4 py-2 text-black hover:bg-gray-200 transition-colors border border-black/20 rounded-md bg-white backdrop-blur cursor-pointer text-center text-sm font-medium"
               >
                 Sign In
               </button>
               <button
                 onClick={() => navigate("/signup")}
-                className="px-6 py-2 bg-linear-to-r from-purple-500 to-pink-400 text-white rounded-md hover:opacity-90 transition-opacity font-semibold text-sm cursor-pointer shadow-[0_12px_35px_rgba(168,85,247,0.3)]"
+                className="px-6 py-2 bg-accent text-white rounded-md hover:opacity-90 transition-opacity font-semibold text-sm cursor-pointer"
               >
                 Get Started
               </button>
@@ -210,172 +271,282 @@ const Landing = () => {
           </div>
         </div>
       </header>
+      <div className="h-px bg-gray-300 shadow-[0px_3px_3px_rgba(0,0,0,0.1)]"/>
 
       {/* Hero Section */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-4 pt-30 md:pt-16 pb-16 md:pb-24">
-        <div className="relative max-w-6xl w-full mx-auto grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center z-10">
-          <div>
+      <main className="relative bg-[#f9fafc] flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-20 lg:py-30 2xl:py-64">
+        <div className="relative max-w-7xl w-full mx-auto grid gap-12 lg:grid-cols-[0.8fr_1.1fr] items-center z-10">
+          <div className="flex flex-col lg:inline-block items-center">
             {/* Main Heading */}
-            <h2 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+            <h2 className={`text-5xl sm:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl transition-all duration-300 font-bold leading-tight mb-6 text-gray-900 text-center lg:text-left
+              ${isVisibleOne?"translate-y-0 opacity-100" : " translate-y-3 opacity-0 "} transition-all duration-300
+              `}>
               Build Faster.
               <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-400 via-pink-400 to-indigo-400">
-                Scale Together.
-              </span>
+              <AuroraText className={`${isVisibleTwo?"translate-y-0 opacity-100" : " translate-y-3 opacity-0 "} transition-all duration-500`}>
+                Scale Together
+              </AuroraText>
             </h2>
-
             {/* Subheading */}
-            <p className="text-xl text-[#C7C7D1] mb-10 max-w-xl">
+            <p className={`text-xl flex text-gray-500 mb-10 max-w-xl text-center lg:text-left ${isVisibleThree ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} transition-all duration-700`}>
               Join an elite workflow for personal productivity. FlowTask keeps
               your tasks aligned across focus areas, streaks, and progress
               insights so you never lose momentum.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className={`flex flex-col sm:flex-row gap-4 mb-10 ${isVisibleFour ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'} transition-all duration-1000`}>
               <button
                 onClick={() => navigate("/signup")}
-                className="px-8 py-4 bg-linear-to-r from-purple-500 to-pink-400 text-white rounded-xl hover:opacity-90 transition-opacity font-semibold text-lg shadow-[0_15px_45px_rgba(168,85,247,0.25)] cursor-pointer"
+                className="px-4 py-2 2xl:px-8 2xl:py-4 bg-linear-to-r from-accent to-accent/60 hover:bg-accent text-white rounded-xl hover:opacity-90 transition-all duration-200 font-semibold text-md 2xl:text-lg shadow-[0_5px_10px_rgba(0,0,0,0.2)] cursor-pointer"
               >
                 Start Coding Now
               </button>
-              <button
-                onClick={() => navigate("/signin")}
-                className="px-8 py-4 border border-white/20 text-white rounded-xl hover:border-white/50 transition-colors font-semibold text-lg cursor-pointer"
-              >
-                Explore Community
-              </button>
             </div>
-
-            <div className="flex flex-wrap gap-6 text-sm text-[#9EA0BB]">
-              <div className="flex flex-col">
-                <span className="text-3xl font-semibold text-white">
-                  120K+
-                </span>
-                Organizing tasks every day
+            <div className={`flex gap-5 text-xs lg-text-xs xl:text-sm text-gray-500 ${isVisibleFive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} transition-all duration-1500`}>
+              <div className="flex gap-1">
+                <div className="flex items-center justify-center">
+                <Brain className="w-4 h-4"/>
+                </div>
+                <p>Smart Scheduling</p>
               </div>
-              <div className="flex flex-col">
-                <span className="text-3xl font-semibold text-white">98%</span>
-                report higher completion rate
+              <div className="flex gap-1">
+                <div className="flex items-center justify-center">
+                <Calendar1 className="w-4 h-4"/>
+                </div>
+                <p>Calendar View</p>
+              </div>
+              <div className="flex gap-1">
+                <div className="flex items-center justify-center">
+                <RefreshCcw className="w-4 h-4"/>
+                </div>
+                <p>Auto Sync</p>
               </div>
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-purple-500/40 blur-[90px]" />
-            <div className="absolute -left-10 bottom-6 w-24 h-24 bg-pink-400/40 blur-[80px]" />
-            <div className="relative rounded-[28px] border border-white/5 bg-[#101018]/80 backdrop-blur-2xl p-8 shadow-[0_35px_120px_rgba(8,7,24,0.8)]">
-              <p className="text-xs uppercase tracking-[0.3em] text-purple-300 mb-2">
-                Organize your tasks
-              </p>
-              <h3 className="text-3xl font-semibold mb-6">
-                One command center to plan, prioritize, and celebrate wins.
-              </h3>
-              <div className="grid grid-cols-2 gap-4 text-left">
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-sm text-[#BCBCD3] mb-1">Today</p>
-                  <p className="text-lg font-semibold">6 tasks</p>
-                  <p className="text-xs text-[#8C8DA8]">Focus sprint</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-sm text-[#BCBCD3] mb-1">Streak</p>
-                  <p className="text-lg font-semibold">24 days</p>
-                  <p className="text-xs text-[#8C8DA8]">Flawless run</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4 col-span-2 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[#BCBCD3] mb-1">Completion</p>
-                    <p className="text-lg font-semibold">82%</p>
-                  </div>
-                  <TrendingUp className="w-10 h-10 text-pink-300" />
-                </div>
-              </div>
-              <div
-                className="absolute inset-0 rounded-[28px] pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(circle at 65% 20%, rgba(255,255,255,0.18), transparent 55%)",
-                  mixBlendMode: "screen",
-                }}
-              />
-            </div>
+          <div  className={`relative ${isVisibleSix ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} transition-all duration-1300 max-w-6xl px-4 sm:px-6`}>
+           <img src="hero.svg" alt="hero.svg" className="shadow-2xl bg-[#f9fafc] rounded-xl w-full " />
           </div>
         </div>
 
-        {/* Spotlighted grid section */}
-        <section className="relative w-full max-w-6xl mx-auto mt-20 z-10">
-          <div className="absolute inset-0 rounded-[40px] border border-purple-500/20 bg-linear-to-r from-purple-500/5 to-pink-500/5 blur-3xl" />
-          <div className="relative rounded-[32px] border border-white/10 bg-[#0E0E16]/80 backdrop-blur-3xl p-10 shadow-[0_45px_120px_rgba(5,5,15,0.85)]">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
-              <div>
-                <p className="text-sm uppercase tracking-[0.4em] text-purple-300">
-                  Flow dashboard
-                </p>
-                <h3 className="text-3xl font-semibold mt-3">
-                  Organize tasks across every horizon
-                </h3>
+        {/* Arcade Demo Section */}
+        <div id="demo" className="flex flex-col items-center relative w-full max-w-7xl mx-auto mt-50 lg:mt-50 2xl:mt-90 z-10">
+          
+          <section className="w-full relative">
+            <div className="absolute -top-1/6 flex">
+              <div className="-rotate-5" style={{fontFamily: '"Caveat",cursive'}}>
+                <p className="text-xl sm:text-2xl lg:text-3xl text-center text-slate-600 leading-tight">Take a peek!</p>
+                <Highlighter action="underline" color="#87CEFA" strokeWidth={1} isView={true} padding={0} iterations={2}>
+                <p className="text-xl sm:text-2xl lg:text-3xl text-slate-600 leading-tight">See Flowtask in action!</p>
+                </Highlighter>
               </div>
-              <button
-                onClick={() => navigate("/signup")}
-                className="px-6 py-3 bg-white text-black rounded-xl font-semibold text-sm hover:bg-purple-100 transition-colors cursor-pointer"
+              <div className="mt-1 w-16 sm:w-25 lg:w-[120px] h-auto">
+              <svg
+                viewBox="0 0 120 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="overflow-visible w-full h-auto"
+                preserveAspectRatio="xMidYMid meet"
               >
-                Try it live
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#151522] p-6 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(5,5,15,0.7)]">
-                <div className="w-12 h-12 rounded-xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center mb-4 mx-auto md:mx-0">
-                  <Sparkles className="w-6 h-6 text-white" />
+                  <motion.path
+                    d="M10 5 C 40 5, 100 5, 100 40 C 100 70, 60 70, 70 45 C 75 30, 110 50, 110 90"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    transition={{ 
+                      duration: 1, 
+                      ease: "easeInOut",
+                      delay: 0.3 
+                    }}
+                  />
+
+                  <motion.path
+                    d="M102 82 L110 92 L118 82"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  />
+                </svg>
+              </div>
+              </div>
+              <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+                <ArcadeEmbed/>
+              </div>
+          </section>
+        </div>
+
+        {/* Spotlighted grid section */}
+        <section id="features" className="relative w-full max-w-[900px] lg:max-w-[1000px] xl:max-w-[1200px] mx-auto p-8 mt-30 lg:mt-50 2xl:mt-60 z-10">
+          <div className="mb-20 text-center">
+              <h1 className="text-gray-900 text-3xl sm:text-4xl lg:text-4xl xl:text-5xl  font-bold mb-3 lg:mb-6">
+                Your productivity, simplified
+              </h1>
+              <p className="text-lg lg:text-lg xl:text-xl text-slate-500 font-medium">
+                Focus on what matters while we handle the rest
+              </p>
+          </div>
+          <div className="hidden lg:grid grid-cols-7 grid-rows-4 h-[650px] xl:h-[800px]  text-black gap-4 xl:gap-6 items-stretch">
+            <div className="lg:col-span-4 row-span-2 w-full py-12  bg-blue-50/50 shadow-md border border-gray-200 rounded-2xl flex flex-col lg:flex-row lg:gap-10 p-4">
+              <div className="flex flex-col lg:justify-center">
+                <h3 className="text-sm xl:text-base mb-1 text-gray-800 text-left font-medium ">Visual Planning</h3>
+                <p className="text-base xl:text-xl text-accent font-medium mb-8">See your entire schedule at a glance</p>
+              </div>
+              <div className="flex justify-center items-center w-full lg:w-auto ">
+                <div className="w-full max-w-xs lg:min-w-xs flex justify-center">
+                <Calendar className="w-full"
+                mode="multiple"
+                selected={selectedDates}
+                onSelect={(dates) => {
+                  setSelectedDates(dates || [])
+                }}
+                />
                 </div>
-                <h4 className="text-white font-semibold text-xl mb-2">
-                  Smart Organization
-                </h4>
-                <p className="text-[#A2A2A9] text-sm">
-                  Group tasks by focus areas, timeline, or energy so your next
-                  move is obvious.
-                </p>
+              </div>
+            </div>
+            <div className="lg:col-span-3 lg:row-span-2 w-full py-12 lg:p-10 bg-red-50/50 shadow-md border border-gray-200 rounded-2xl flex flex-col p-4 relative overflow-hidden">
+              <div className="flex flex-col">
+                <h3 className="text-[14px] mb-1 text-gray-800 text-left font-medium">Never miss a beat</h3>
+                <p className="text-[16px] text-accent font-medium mb-4">Stay updated with real-time notifications</p>
+              </div>
+              <div className="flex-1 flex items-center justify-center overflow-hidden w-full">
+                <AnimatedList
+                  delay={1000}
+                  className="w-full h-full overflow-y-auto no-scrollbar flex items-center"
+                >
+                  {notifications.map((notification, idx) => (
+                    <Notification key={idx} {...notification} />
+                  ))}
+                </AnimatedList>
               </div>
 
-              <div className="bg-[#151522] p-6 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(5,5,15,0.7)] relative overflow-hidden">
-                <div className="w-12 h-12 rounded-xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center mb-4 mx-auto md:mx-0">
-                  <Flame className="w-6 h-6 text-white" />
-                </div>
-                <h4 className="text-white font-semibold text-xl mb-2">
-                  Build Streaks
-                </h4>
-                <p className="text-[#A2A2A9] text-sm">
-                  Visual streak tracking keeps you accountable with gentle
-                  nudges and badges.
-                </p>
-                <div className="absolute -right-10 bottom-0 w-32 h-32 bg-pink-400/20 blur-[50px]" />
-              </div>
+            {/* Bottom gradient fade */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-red-50/90 to-transparent" />
+          </div>
+            <div className="lg:col-span-3 row-span-2 rounded-2xl border border-gray-300 relative shadow-md">
+            <video loop 
+                         autoPlay 
+                        muted 
+                        playsInline 
+                        crossOrigin="anonymous" 
+                        src="demo.mp4" 
+                        className="w-full h-full object-cover rounded-2xl overflow-hidden">
+                  </video>
+            </div>
+            <div className="lg:col-span-4 lg:row-span-2 bg-red-50/50 p-4 rounded-2xl shadow-md border border-gray-300 relative">
+                  <ChatGPTIntegration/>
+            </div>
+          </div>
 
-              <div className="bg-[#151522] p-6 rounded-2xl border border-white/5 shadow-[0_20px_60px_rgba(5,5,15,0.7)]">
-                <div className="w-12 h-12 rounded-xl bg-linear-to-r from-purple-500 to-pink-400 flex items-center justify-center mb-4 mx-auto md:mx-0">
-                  <TrendingUp className="w-6 h-6 text-white" />
+          <div className="block text-slate-800 lg:hidden space-y-4">
+            <div className="w-full py-12 md:p-4 bg-blue-50/50 shadow-md border border-gray-200 rounded-2xl flex flex-col p-4">
+              <div className="flex flex-col lg:justify-center">
+                <h3 className="text-sm mb-1 text-gray-800 text-left font-medium ">Visual Planning</h3>
+                <p className="text-lg text-accent font-semibold mb-8">See your entire schedule at a glance</p>
+              </div>
+              <div className="flex justify-center items-center w-full lg:w-auto ">
+                <div className="w-full max-w-xs lg:min-w-xs flex justify-center">
+                <Calendar className="w-full"
+                mode="multiple"
+                selected={selectedDates}
+                onSelect={(dates) => {
+                  setSelectedDates(dates || [])
+                }}
+                />
                 </div>
-                <h4 className="text-white font-semibold text-xl mb-2">
-                  Track Progress
-                </h4>
-                <p className="text-[#A2A2A9] text-sm">
-                  Know your completion rate, average pace, and bottlenecks at a
-                  glance.
-                </p>
               </div>
             </div>
+
+            <div className="h-[400px] w-full py-12 md:py-4 lg:p-10 bg-red-50/50 shadow-md border border-gray-200 rounded-2xl flex flex-col items-center justify-center p-4 relative overflow-hidden">
+              <div className="flex flex-col text-left mb-2 w-full">
+                <h3 className="text-sm mb-1 text-gray-800 text-left font-medium">Never miss a beat</h3>
+                <p className="text-lg text-accent font-semibold mb-4">Stay updated with real-time notifications</p>
+              </div>
+              {isSmallScreen && (
+              <div className="flex-1 flex items-center justify-center overflow-hidden">
+                <AnimatedList
+                  delay={1500}
+                  className="w-full h-full overflow-y-auto no-scrollbar"
+                >
+                  {notifications.map((notification, idx) => (
+                    <Notification key={idx} {...notification} />
+                  ))}
+                </AnimatedList>
+              </div>
+              )}
+
+            {/* Bottom gradient fade */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-red-50/90 to-transparent" />
+          </div>
+            
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="w-full max-w-6xl mx-auto p-4 md:p-8 text-center relative z-10">
-        <p className="text-[#A2A2A9] text-sm">
-          © 2025 FlowTask. Organize your life, one task at a time.
+      <div className="min-h-[60vh] bg-linear-to-br from-indigo-950 via-slate-900 to-blue-950 text-white flex items-center">
+  <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 md:flex-row md:items-center md:justify-between">
+    {/* Left: headline */}
+    <div className="space-y-4">
+      <p className="text-5xl md:text-6xl font-semibold tracking-tight">
+        <span className="block">Plan.</span>
+        <span className="block">Focus.</span>
+        <span className="block text-accent">Complete.</span>
+      </p>
+      <p className="max-w-md text-slate-200">
+        Your personal command center for tasks, projects, and habits.
+      </p>
+    </div>
+
+    {/* Right: card */}
+    <div className="relative">
+      <div className="absolute inset-0 -z-10 opacity-40">
+        {/* mount your PathAnimation here */}
+      </div>
+      <div className="bg-white text-slate-900 rounded-2xl shadow-xl p-8 max-w-sm">
+        <h2 className="text-xl font-semibold mb-2">
+          Turn chaos into a clear daily plan.
+        </h2>
+        <p className="text-sm text-slate-600 mb-6">
+          Let AI sort, schedule, and prioritize so you can just execute.
         </p>
-      </footer>
+        <button onClick={() => {navigate('/signup')}} className="w-full rounded-full bg-linear-to-r from-accent to-accent/60 hover:bg-emerald-600 text-white py-3 text-sm font-medium">
+          Get started in 30 seconds
+        </button>
+        <p className="mt-3 text-xs text-slate-500 text-center">
+          Free for everyone
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
   );
 };
+
+export function ArcadeEmbed() {
+  return (
+    <div className="w-full shadow-2xl rounded-xl" style={{ position: 'relative', paddingBottom: 'calc(55.73099415204679% + 41px)', height: '0', width: '100%', minHeight: '500px' }}>
+      <iframe
+        src="https://demo.arcade.software/ilYXUSzOd93pCY04qLz6?embed&embed_mobile=tab&embed_desktop=inline&show_copy_link=true"
+        title="Schedule tasks with dates, times, and repeats in Upcoming and Calendar views"
+        frameBorder="0"
+        loading="lazy"
+        allowFullScreen
+        allow="clipboard-write"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', colorScheme: 'light' }}
+      />
+    </div>
+  )
+}
+
 
 export default Landing;
 

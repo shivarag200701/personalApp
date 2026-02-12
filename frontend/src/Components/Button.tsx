@@ -9,8 +9,8 @@ const Button = ({ isSubmitting, Initial, Loading }: ButtonProps) => {
     <button
       type="submit"
       disabled={isSubmitting}
-      className="w-full py-2 text-white font-semibold rounded-md
-                 bg-linear-to-r from-purple-500 to-pink-400
+      className="w-full py-3 text-white font-medium rounded-xl
+                 bg-accent hover:shadow-lg shadow-sm
                  hover:opacity-90 transition-opacity cursor-pointer
                  disabled:opacity-50 disabled:cursor-not-allowed"
     >

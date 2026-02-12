@@ -1,20 +1,58 @@
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef,useCallback } from 'react';
 import { themes, type ThemeId } from '@/utils/themes';
 import { Check } from 'lucide-react';
+import { flushSync } from "react-dom"
+
 
 const ThemePicker = () => {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  
-
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const currentTheme = theme
+  const duration = 300
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
-  if (!mounted) return null;
+  const toggleTheme = useCallback(async (themeId:ThemeId) => {
+    console.log(!buttonRef.current);
+    
+    if (!buttonRef.current || !mounted) return
+    console.log(themeId);
+    
 
-  const currentTheme = theme as ThemeId || 'dark';
+    const newTheme = themeId
+
+    await document.startViewTransition(() => {
+      flushSync(() => {
+        setTheme(newTheme)
+      })
+    }).ready
+
+    const { top, left, width, height } =
+      buttonRef.current.getBoundingClientRect()
+    const x = left + width / 2
+    const y = top + height / 2
+    const maxRadius = Math.hypot(
+      Math.max(left, window.innerWidth - left),
+      Math.max(top, window.innerHeight - top)
+    )
+
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${maxRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    )
+  }, [duration, setTheme, mounted])
 
   return (
     <div className="space-y-4">
@@ -32,7 +70,10 @@ const ThemePicker = () => {
           return (
             <button
               key={themeOption.id}
-              onClick={() => setTheme(themeOption.id)}
+              onClick={() => {
+                toggleTheme(themeOption.id)
+              }}
+              ref={buttonRef}
             >
               {/* Theme Preview */}
               <div 

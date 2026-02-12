@@ -1,10 +1,10 @@
 import { isAxiosError } from "axios";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState} from "react";
 import InputBox from "./InputBox";
 import LogoCard from "./LogoCard";
 import { User } from "lucide-react";
 import { Mail } from "lucide-react";
-import { Lock } from "lucide-react";
+import { Lock, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import Button from "./Button";
@@ -30,19 +30,6 @@ const SignUpForm = () => {
   const navigate = useNavigate();
   const { isAuthenticated, refreshAuth } = Auth();
 
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 50 }).map((_, index) => ({
-        id: index,
-        left: Math.random() * 100,
-        bottom: Math.random() * 100, // Random starting position from 0-100vh
-        delay: 0, // Start immediately
-        duration: 10 + Math.random() * 8,
-        size: 2 + Math.random() * 4,
-        opacity: 0.2 + Math.random() * 0.8,
-      })),
-    []
-  );
 
   useEffect(() => {
     if(isAuthenticated){
@@ -66,67 +53,20 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-white flex items-center justify-center px-4">
-      <style>{`
-        @keyframes floatUp {
-          0% { transform: translateY(0) scale(0.9); opacity: 0.2; }
-          15% { opacity: 1; }
-          100% { transform: translateY(calc(-100vh - 100px)) scale(1.2); opacity: 0; }
-        }
-      `}</style>
-
-      {/* Grid backdrop */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-[#0a0a11]/60 to-[#05050a]" />
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 60% 40%, rgba(168,85,247,0.25), transparent 55%)",
-        }}
-      />
-      {particles.map((particle) => (
-        <span
-          key={particle.id}
-          className="pointer-events-none absolute rounded-full bg-blue-500 shadow-[0_0_15px_rgba(236,72,153,0.4)]"
-          style={{
-            left: `${particle.left}%`,
-            bottom: `${particle.bottom}%`,
-            width: particle.size * 1.5,
-            height: particle.size * 1.5,
-            opacity: particle.opacity,
-            animation: `floatUp ${particle.duration}s linear ${particle.delay}s infinite`,
-          }}
-        />
-      ))}
-
-      <div className="relative z-10 w-full max-w-md">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-white flex items-center justify-center px-4">
+      <button onClick={() => {navigate('/')}} className="text-slate-600 hover:text-slate-900 absolute top-10 left-10 flex gap-2 px-4 py-3 rounded-xl border border-slate-200/50 hover:border-slate-300/50 shadow-sm backdrop-blur-2xl cursor-pointer bg-white/10 hover:bg-white hover:shadow-md">
+        <div className="flex items-center justify-center">
+        <ArrowLeft className="w-4 h-4"/>
+        </div>
+        <p className="font-medium">Back to home</p>
+      </button>
+      <div className="relative z-10 w-full max-w-xl">
         <div className="mb-8 flex justify-center">
           <LogoCard />
         </div>
-        <div className="relative rounded-[28px] border border-border bg-card/80 backdrop-blur-2xl p-8 shadow-[0_35px_120px_rgba(8,7,24,0.8)]">
-          {/* Gradient overlay */}
-          <div
-            className="absolute inset-0 rounded-[28px] pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle at 65% 20%, rgba(255,255,255,0.08), transparent 55%)",
-              mixBlendMode: "screen",
-            }}
-          />
-          
+        <div className="relative rounded-[28px] border border-border bg-card/80 backdrop-blur-2xl p-8 sm:p-10 shadow-xl">
           <div className="relative z-10">
-            <div className="text-3xl font-semibold text-white mb-2">Get Started</div>
-            <div className="mt-2 text-muted-foreground mb-6">
-              Create your account to start organizing
-            </div>
+            <h2 className="text-3xl text-center tracking-tight leading-tight font-medium text-gray-800 mb-10">Get productivity</h2>
             {/* Google Sign-In Button */}
             <div className="mb-6">
               <GoogleSignInButton />
@@ -135,19 +75,21 @@ const SignUpForm = () => {
             {/* Divider */}
             <div className="flex items-center my-6">
               <div className="flex-1 border-t border-border"></div>
-              <span className="px-4 text-[#9EA0BB] text-sm">OR</span>
+              <span className="px-4 text-[#9EA0BB] text-sm font-medium">Or Continue with email</span>
               <div className="flex-1 border-t border-border"></div>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <InputBox
                 label="Name"
-                placeholder="Your name"
+                placeholder="Full name"
                 Type="text"
                 register={register("username", {
                   required: "username is required",
                 })}
               >
-                <User className="absolute left-3 top-13.5 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB]" />
+                <div className="text-[#9EA0BB]">
+                  <User className="absolute left-3 top-6 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB] z-10" />
+                </div>
               </InputBox>
               {errors.username && (
                 <p className="text-red-400 text-sm mt-1">{errors.username.message}</p>
@@ -158,20 +100,20 @@ const SignUpForm = () => {
                 Type="email"
                 register={register("email", { required: "email is required" })}
               >
-                <Mail className="absolute left-3 top-13.5 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB]" />
+                <Mail className="absolute left-3 top-6 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB] z-10" />
               </InputBox>
               {errors.email && (
                 <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
               )}
               <InputBox
                 label="Password"
-                placeholder="••••••••"
+                placeholder="password"
                 Type="password"
                 register={register("password", {
                   required: "password is required",
                 })}
               >
-                <Lock className="absolute left-3 top-13.5 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB]" />
+                <Lock className="absolute left-3 top-6 -translate-y-1/2 w-4.5 h-4.5 text-[#9EA0BB] z-10" />
               </InputBox>
               {errors.password && (
                 <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
@@ -185,11 +127,11 @@ const SignUpForm = () => {
             <div className="text-center text-red-400 mt-2 min-h-[20px] mb-4">
               {error ? error : ""}
             </div>
-            <div className="text-center text-muted-foreground mt-8 font-light">
+            <div className="text-center text-muted-foreground mt-4 font-light">
               Already have an account?{" "}
-              <a href="/signin" className="text-purple-400 hover:text-purple-300 transition-colors underline">
+              <button onClick={() => {navigate('/signin')}} className="text-purple-400 hover:text-purple-300 transition-colors underline cursor-pointer">
                 Sign in
-              </a>
+              </button>
             </div>
           </div>
         </div>

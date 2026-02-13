@@ -1,6 +1,6 @@
   import { useState, useMemo, useRef, useEffect } from "react";
   import { createPortal } from "react-dom";
-  import { ChevronLeft, ChevronRight, ChevronDown, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat, Calendar, AlarmClock} from "lucide-react";
+  import { ChevronLeft, ChevronRight, Plus, MoreHorizontal, PencilLine, Trash2, CopyPlus, Flag, Tag, Repeat, Calendar, AlarmClock, KanbanSquare, List, CalendarDays} from "lucide-react";
   import type { Todo } from "./Modal";
   import { Checkbox } from "./ui/checkbox";
   import { getUpcomingDateRange, formatUpcomingDateHeader} from "@shiva200701/todotypes";
@@ -34,6 +34,7 @@
 import { Tooltip, TooltipTrigger } from "./ui/tooltip";
 import { TooltipContent } from "./ui/tooltip";
 import { Kbd } from "./ui/kbd";
+import { getBorderColorClass } from "@/lib/utils";
 
 
 
@@ -218,6 +219,8 @@ import { Kbd } from "./ui/kbd";
             hour12: true
           })
         }
+        console.log("todo colour",todo.color);
+        
         return (
           <>
           {isEditing ? (
@@ -241,7 +244,7 @@ import { Kbd } from "./ui/kbd";
         {...listeners}
         {...attributes}
         className={`p-3 ${isDragging ? 'bg-muted' : 'bg-task'} 
-          ${isDragging ? 'h-[100px]' : ''} backdrop-blur-sm border border-border rounded-xl relative cursor-pointer active:cursor-grabbing dark:shadow-[0_8px_6px_-1px_rgba(0,0,0,0.3)] hover:shadow-[0_0_6px_-1px_rgba(0,0,0,0.3)] dark:hover:none hover:border-border-hover mb-3 ${openDropdownId === todo.id ? "z-50": ""}`}
+          ${isDragging ? 'h-[100px]' : ''} backdrop-blur-sm border border-border border-l-5 ${getBorderColorClass(todo.color)} rounded-xl relative cursor-pointer active:cursor-grabbing shadow-md hover:shadow-[0_0_6px_-1px_rgba(0,0,0,0.3)] dark:hover:none hover:border-border-hover mb-3 ${openDropdownId === todo.id ? "z-50": ""}`}
         onMouseEnter={() => todo.id && setHoveredTodoId(todo.id)}
         onMouseLeave={() => setHoveredTodoId(null)}
         onClick={() => {onViewDetails(todo)}}
@@ -636,6 +639,7 @@ import { Kbd } from "./ui/kbd";
     onDuplicateTask,
     onTaskUpdated,
     viewType: externalViewType,
+    onViewTypeChange,
   }: UpcomingViewProps) => {
     const [startDate, setStartDate] = useState<Date>(() => {
       const today = new Date();
@@ -648,8 +652,10 @@ import { Kbd } from "./ui/kbd";
     const [openDropdownId, setOpenDropdownId] = useState<number | string | null>(null);
     const [hoveredTodoId, setHoveredTodoId] = useState<number | string | null>(null);
     const [activeTodo, setActiveTodo] = useState<Todo | null>(null);
-    const [originalCompleteAt, setOriginalCompleteAt] = useState<string | null>(null);
-    const [openFormDate, setOpenFormDate] = useState<string | null>(null);
+      const [originalCompleteAt, setOriginalCompleteAt] = useState<string | null>(null);
+      const [openFormDate, setOpenFormDate] = useState<string | null>(null);
+      const [hoveredView, setHoveredView] = useState<string | null>(null)
+
 
     const { theme } = useAppTheme()
 
@@ -1405,131 +1411,185 @@ import { Kbd } from "./ui/kbd";
     }
 
     
-
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex justify-between items-end mb-4 border-b-[0.5px]  border-secondary pb-4 px-10">
-          {viewType === "board" && (
+        <div className="flex justify-between items-end mb-4 border-b-[0.5px]  border-secondary pb-4 px-15 pt-10">
             <>
             <div className="flex flex-col gap-2">
-            <h1 className="text-foreground text-2xl md:text-3xl font-bold ">Upcoming</h1>
-            <div className="relative" ref={pickerRef}>
-              <div
-                className="flex items-center gap-2 text-foreground cursor-pointer hover:bg-hover rounded-r-md transition-colors py-1.5 select-none"
-                onClick={handleShowMonthYearPicker}
-              >
-                <span className="text-sm">{getCurrentMonthYear()}</span>
-                <ChevronDown
-                  className={`w-5 h-5 transition-transform ${showMonthYearPicker ? "rotate-180" : ""}`}
-                />
+              <div className="flex gap-2">
+                <h1 className="text-foreground text-2xl md:text-3xl font-bold">Upcoming Tasks</h1>
+                  <div className="relative" ref={pickerRef}>
+                    {viewType === "board" && (
+                    <div
+                      className="hidden sm:flex items-center justify-center gap-2 p-2 text-foreground shadow-sm hover:shadow-md cursor-pointer hover:bg-hover rounded-md border border-border dark:hover:bg-options-hover  transition-colors h-full select-none"
+                      onClick={handleShowMonthYearPicker}
+                    >
+                      <span className="text-sm">{getCurrentMonthYear()}</span>
+                    </div>
+                      )}
+                    {/* Month/Year Picker Dropdown */}
+                    {showMonthYearPicker && (
+                      <div className="absolute top-full left-0 mt-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-9999 min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
+                        <div className="grid grid-cols-2 gap-6">
+                          {/* Month Selector */}
+                          <div>
+                            <div className="text-white text-sm font-semibold mb-3 text-center">Month</div>
+                            <div className="grid grid-cols-3 gap-2 overflow-hidden">
+                              {getMonths(startDate.getFullYear()).map((month) => {
+                                const isSelected = startDate.getMonth() === month.value;
+                                const isDisabled = isPastDate(startDate.getFullYear(), month.value);
+
+                                return (
+                                  <button
+                                    key={month.value}
+                                    onClick={() => {
+                                      if (!isDisabled) {
+                                        handleMonthYearSelect(startDate.getFullYear(), month.value, false);
+                                      }
+                                    }}
+                                    disabled={isDisabled}
+                                    className={`px-3 py-2.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center cursor-pointer select-none ${
+                                      isSelected
+                                        ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
+                                        : isDisabled
+                                        ? "text-[#4A4A4A] cursor-not-allowed opacity-40"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground hover:scale-105 active:scale-95"
+                                    }`}
+                                  >
+                                    {month.label.slice(0, 3)}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Year Selector */}
+                          <div>
+                            <div className="text-white text-sm font-semibold mb-3 text-center">Year</div>
+                            <div className="max-h-56 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-1">
+                              {getYears().map((year) => {
+                                const isSelected = startDate.getFullYear() === year;
+                                const isCurrentYear = year === new Date().getFullYear();
+
+                                return (
+                                  <button
+                                    key={year}
+                                    onClick={() => {
+                                      // If selecting current year, ensure we don't go to past months
+                                      const today = new Date();
+                                      const monthToUse = isCurrentYear
+                                        ? Math.max(startDate.getMonth(), today.getMonth())
+                                        : startDate.getMonth();
+                                      handleMonthYearSelect(year, monthToUse, true);
+                                    }}
+                                    className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer select-none ${
+                                      isSelected
+                                        ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-1"
+                                    }`}
+                                  >
+                                    {year}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <div className="text-[#9EA0BB] text-xs text-center">
+                            Only future dates are available
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
               </div>
-
-              {/* Month/Year Picker Dropdown */}
-              {showMonthYearPicker && (
-                <div className="absolute top-full left-0 mt-2 bg-card/95 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-9999 min-w-[280px] max-w-[90vw] sm:min-w-[320px] select-none">
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Month Selector */}
-                    <div>
-                      <div className="text-white text-sm font-semibold mb-3 text-center">Month</div>
-                      <div className="grid grid-cols-3 gap-2 overflow-hidden">
-                        {getMonths(startDate.getFullYear()).map((month) => {
-                          const isSelected = startDate.getMonth() === month.value;
-                          const isDisabled = isPastDate(startDate.getFullYear(), month.value);
-
-                          return (
-                            <button
-                              key={month.value}
-                              onClick={() => {
-                                if (!isDisabled) {
-                                  handleMonthYearSelect(startDate.getFullYear(), month.value, false);
-                                }
-                              }}
-                              disabled={isDisabled}
-                              className={`px-3 py-2.5 text-xs font-medium rounded-lg transition-all flex items-center justify-center cursor-pointer select-none ${
-                                isSelected
-                                  ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 cursor-pointer"
-                                  : isDisabled
-                                  ? "text-[#4A4A4A] cursor-not-allowed opacity-40"
-                                  : "text-muted-foreground hover:bg-muted hover:text-foreground hover:scale-105 active:scale-95"
-                              }`}
-                            >
-                              {month.label.slice(0, 3)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Year Selector */}
-                    <div>
-                      <div className="text-white text-sm font-semibold mb-3 text-center">Year</div>
-                      <div className="max-h-56 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-1">
-                        {getYears().map((year) => {
-                          const isSelected = startDate.getFullYear() === year;
-                          const isCurrentYear = year === new Date().getFullYear();
-
-                          return (
-                            <button
-                              key={year}
-                              onClick={() => {
-                                // If selecting current year, ensure we don't go to past months
-                                const today = new Date();
-                                const monthToUse = isCurrentYear
-                                  ? Math.max(startDate.getMonth(), today.getMonth())
-                                  : startDate.getMonth();
-                                handleMonthYearSelect(year, monthToUse, true);
-                              }}
-                              className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all text-left cursor-pointer select-none ${
-                                isSelected
-                                  ? "bg-purple-500 text-white shadow-md shadow-purple-500/30 font-semibold"
-                                  : "text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-1"
-                              }`}
-                            >
-                              {year}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <div className="text-[#9EA0BB] text-xs text-center">
-                      Only future dates are available
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+              <span className="text-md text-slate-500 font-medium">Organize and track your tasks effortlessly</span>
             </div>
           </>
-          )}
-          <div className="flex items-center  border border-border rounded-sm ">
-            {viewType === "board" && (
-              <>
-            <button
-              onClick={navigatePrevious}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
+          <div className="flex gap-5">
+            {/* View Selector - Desktop */}
+            <div className="hidden sm:block">
+              <div 
+                className="flex items-center py-1 px-1 bg-options-hover/30 border border-border rounded-md relative select-none h-10"
+                role="tablist"
+                aria-label="View selector"
+              >
+                {[
+                  { id: "board", label: "Board", icon: KanbanSquare },
+                  { id: "list", label: "List", icon: List },
+                  { id: "calendar", label: "Calendar", icon: CalendarDays },
+                ].map((view) => {
+                  const Icon = view.icon;
+                  const isActive = viewType === view.id;
+                  const isHovered = hoveredView === view.id;
+                  
+                  return (
+                    <button
+                      key={view.id}
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`${view.label} view`}
+                      className={`
+                        flex items-center justify-center gap-1.5 rounded-md
+                        w-[120px] px-3 py-1.5 text-sm
+                        cursor-pointer select-none z-10
+                        transition-all duration-200
+                        ${isActive 
+                          ? "bg-accent text-white shadow-sm" 
+                          : "text-muted-foreground"
+                        }
+                        ${isHovered && !isActive ? "bg-muted text-foreground" : ""}
+                      `}
+                      onClick={() => onViewTypeChange?.(view.id)}
+                      onMouseEnter={() => setHoveredView(view.id)}
+                      onMouseLeave={() => setHoveredView(null)}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{view.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* View Selector - Mobile (simplified dropdown) */}
+            <select 
+              className="sm:hidden bg-options-hover/30 rounded-md px-3 py-2 text-sm border border-border focus:outline-none focus:ring-2 focus:ring-accent"
+              value={viewType}
+              onChange={(e) => onViewTypeChange?.(e.target.value)}
+              aria-label="Select view"
             >
-              <ChevronLeft className="w-4  h-4" />
-            </button>
-            <div className="w-px h-4 bg-muted"/>
-            <button
-              onClick={navigateToToday}
-              className="text-muted-foreground hover:text-foreground transition-colors px-2 sm:px-4 py-1  hover:bg-muted text-x font-sm cursor-pointer"
-            >
-              Today
-            </button>
-            <div className="w-px h-4 bg-muted"/>
+              <option value="board">Board</option>
+              <option value="list">List</option>
+              <option value="calendar">Calendar</option>
+            </select>
+            { viewType === "board" && (
+              <div className="hidden sm:flex  border border-border rounded-sm ">
+                <button
+                  onClick={navigatePrevious}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
+                >
+                  <ChevronLeft className="w-4  h-4" />
+                </button>
+                <div className="w-px h-full bg-muted"/>
+                <button
+                  onClick={navigateToToday}
+                  className="text-muted-foreground hover:text-foreground transition-colors px-2 sm:px-4 py-1  hover:bg-muted text-x font-sm cursor-pointer"
+                >
+                  Today
+                </button>
+                <div className="w-px h-full bg-muted"/>
 
-            <button
-              onClick={navigateNext}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-              </>
-            )}
+                <button
+                  onClick={navigateNext}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1  hover:bg-muted cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )} 
           </div>
         </div>
 
@@ -1545,7 +1605,7 @@ import { Kbd } from "./ui/kbd";
             
           
         {/* Calendar Columns */}
-        <div className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar whitespace-nowrap flex-1 pb-4 px-10">
+        <div className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar whitespace-nowrap flex-1 pb-4 px-15">
           {/* Overdue Section */}
           {(() => {
             const overDueTasks = getOverDueTasks();

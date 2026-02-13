@@ -577,7 +577,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
                 onCancel();
               }
             }}
-            className="p-1.5 rounded-md bg-muted hover:bg-muted transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
+            className="p-1.5 rounded-md bg-muted hover:bg-options-hover transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
           >
             <X className="w-5 h-5 text-white" />
           </button>

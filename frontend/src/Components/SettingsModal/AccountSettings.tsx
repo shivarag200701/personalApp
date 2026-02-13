@@ -100,7 +100,7 @@ const AccountSettings = ({
             <span className="text-[14px] font-medium">Plan</span>
             <span className="text-[17px] font-bold">Beginner</span>
           </div>
-          <button className="text-[14px] px-3 py-1.5 h-full bg-button-subtle text-foreground  rounded-sm opacity-50 cursor-not-allowed">
+          <button className="text-[14px] px-3 py-1.5 h-full bg-button-subtle text-foreground  rounded-lg opacity-50 cursor-not-allowed">
             Manage Plan (Coming soon)
           </button>
         </div>
@@ -127,7 +127,7 @@ const AccountSettings = ({
                 />
                 <div className="flex flex-col">
                   <div className="flex items-start gap-2 text-[14px] text-white/70">
-                    <button className="px-3 py-1.5 bg-button-subtle rounded-sm text-foreground cursor-pointer hover:bg-button-subtle-hover transition-all duration-300">
+                    <button className="px-3 py-1.5 bg-button-subtle rounded-lg text-foreground cursor-pointer hover:bg-button-subtle-hover transition-all duration-300">
                       Change photo
                     </button>
                     <button className="px-3 py-1.5 border border-red-500 rounded-sm text-red-500 cursor-pointer hover:text-red-600 hover:border-red-600 transition-all duration-300">

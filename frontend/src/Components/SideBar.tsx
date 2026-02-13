@@ -1,5 +1,5 @@
 import api from '@/utils/api';
-import { ChevronDown, LogOut} from 'lucide-react';
+import { LogOut} from 'lucide-react';
 import React, { createContext, useContext,useRef, useState } from 'react'
 import { PanelLeft, Settings } from 'lucide-react';
 import DropDown from './DropDown'
@@ -10,6 +10,7 @@ import { Spinner } from './ui/spinner';
 import { Tooltip, TooltipTrigger } from './ui/tooltip';
 import { TooltipContent } from './ui/tooltip';
 import { Kbd } from './ui/kbd';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const SideBarContext = createContext<{expanded: boolean}>({expanded: false});
 const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode, expanded: boolean, setExpanded: (expanded: boolean) => void }) => {
@@ -62,36 +63,67 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
         <nav className={`h-full flex flex-col bg-sidebar shadow-sm
           ${!expanded ? "pointer-events-none":""
           }`}>
-        <div className='flex py-4 px-3 justify-between items-center min-w-0'>
+        <div className='flex flex-col py-4 px-3 gap-2 min-w-0'>
+          <div className='flex justify-between items-center'>
+            {expanded && (
+              <>
+                <span className="text-xs font-semibold text-muted-foreground px-2">MENU</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      className="p-1.5 rounded-md hover:bg-secondary transition-colors cursor-pointer"
+                      onClick={() => setExpanded(false)}
+                      aria-label="Close sidebar"
+                    >
+                      <PanelLeft className="text-muted-foreground font-light w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="pr-1.5">
+                    <div className="flex items-center gap-2">
+                      Close Sidebar<Kbd>M</Kbd>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </>
+            )}
+          </div>
           {expanded && (
           <button ref={buttonRef} onClick={() => {
             setShowDropDown(!showDropDown)
             setMoreOptionsActive(!moreOptionsActive)
-          }}  className={`flex items-center gap-2 hover:bg-options-hover rounded-sm p-1 cursor-pointer transition-all duration-300 ease-in-out w-auto ${moreOptionsActive ? "bg-options-hover text-foreground" : ""}`}>
-          <img
-            src={user?.pictureUrl}
-            alt="Profile"
-            className="rounded-full border-2 border-border object-cover transition-all duration-300 ease-in-out w-7 h-7"
-          />    
-          <span className="text-xs font-medium text-foreground transition-all text-left   duration-300 ease-in-out w-auto">
-            {user?.username.split(" ")[0]}
+          }}  className={`flex items-center gap-2 hover:bg-options-hover rounded-md p-3 w-full cursor-pointer transition-all duration-300 ease-in-out border border-border bg-options-hover/30`}>
+          <div className='relative'>
+            <Avatar>
+              <AvatarImage
+                src={user?.pictureUrl}
+                alt="@profile"
+                className='grayscale'
+              />
+              <AvatarFallback>{user?.username.slice(0,2)}</AvatarFallback>
+            </Avatar>
+            <div className='absolute flex items-center justify-center -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-white '>
+              <div className='bg-emerald-500 h-2.5 w-2.5 rounded-full '/>
+            </div>
+          </div>
+          <div className='flex flex-col leading-4'>
+            <span className="text-md font-semibold text-foreground transition-all text-left duration-300 ease-in-out w-auto">
+              {user?.username}
             </span>
-          <ChevronDown className='w-4 h-4 text-muted-foreground' />
+            <span className='text-[10px] text-left text-slate-500 font-medium'>Basic Plan</span>
+          </div> 
           </button>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className={`p-2 rounded-md hover:bg-hover transition-colors hover:bg-secondary cursor-pointer
-              ${expanded ? "relative" : " absolute top-4 left-4 z-50"}
-              ${!expanded ? "pointer-events-auto" : ""}
-              `}
-              onClick={() => setExpanded(!expanded)}
-              aria-label={expanded ? "Close sidebar" : "Open sidebar"}
-              >
-              <PanelLeft className="text-muted-foreground font-light transition-all duration-300 ease-in-out w-5 h-5" 
-              style={{transform: expanded ? "rotate(0deg)" : "rotate(180deg)"}}
-              />
-              </button>
+          {!expanded && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-2 rounded-md hover:bg-hover transition-colors hover:bg-secondary cursor-pointer absolute top-3 left-3 z-50 pointer-events-auto"
+                onClick={() => setExpanded(!expanded)}
+                aria-label="Open sidebar"
+                >
+                <PanelLeft className="text-muted-foreground font-light transition-all duration-300 ease-in-out w-4 h-4" 
+                style={{transform: "rotate(180deg)"}}
+                />
+                </button>
               </TooltipTrigger>
               <TooltipContent className="pr-1.5">
                 <div className="flex items-center gap-2 ">
@@ -99,6 +131,7 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
                 </div>
               </TooltipContent>
             </Tooltip>
+          )}
         </div>
 
         <SideBarContext.Provider value={{expanded}}>
@@ -106,23 +139,26 @@ const SideBar = ({ children ,expanded, setExpanded}: { children: React.ReactNode
             {children}
         </ul>
         </SideBarContext.Provider>
+        
+        {expanded && (
+          <div className='px-3 pb-4 border-t border-border pt-3'>
+            <button 
+              className="p-2 rounded-md hover:bg-secondary transition-colors cursor-pointer w-full flex items-center gap-2"
+              onClick={() => {
+                setShowSettingsModal(true)
+                navigate("#settings/account")
+              }}
+              aria-label="Settings"
+            >
+              <Settings className="text-muted-foreground font-light w-5 h-5" strokeWidth={1.5} />
+              <span className="text-sm text-muted-foreground">Settings</span>
+            </button>
+          </div>
+        )}
         </nav>
         {showDropDown && <DropDown buttonRef={buttonRef} setShowDropDown={setShowDropDown} setOptionsActive={setMoreOptionsActive} 
         width='w-64' >
               <div className='flex flex-col'>
-                <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px]   p-1.5 m-1.5 cursor-pointer hover:bg-options-hover transition-all duration-300 '
-                onClick={() => {
-                  setShowSettingsModal(true)
-                  setShowDropDown(false)
-                  setMoreOptionsActive(false)
-                  navigate("#settings/account")
-                }}
-                >
-                    <Settings className='w-4.5 h-4.5' strokeWidth={1}
-                     />
-                    <span className='text-[13px] font-medium'>Settings</span>
-                </button>
-                <div className='h-px bg-border' />
                   <button className='flex justify-start items-center gap-4 hover:bg-hover rounded-[4px] p-1.5 m-1.5 cursor-pointer hover:bg-options-hover transition-all duration-300 '
                   onClick={handleLogout}
                   >

@@ -70,7 +70,7 @@ const SignInForm = () => {
         <p className="font-medium">Back to home</p>
       </button>
       <div className="relative z-10 w-full max-w-xl">
-        <div className="relative rounded-[28px] border border-border bg-card/80 backdrop-blur-2xl p-8 sm:p-10 shadow-xl">
+        <div className="relative rounded-[28px] border border-border bg-white/90 backdrop-blur-2xl p-8 sm:p-10 shadow-xl">
           {/* Gradient overlay */}
           <div
             className="absolute inset-0 rounded-[28px] pointer-events-none"

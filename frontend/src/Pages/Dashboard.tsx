@@ -8,7 +8,7 @@ import api from "../utils/api";
 import { Auth } from "@/Context/AuthContext";
 import { calculateNextOccurence, type RecurrencePattern } from "@shiva200701/todotypes";
 import TaskDetailDrawer from "@/Components/TaskDetailDrawer";
-import { CalendarDays, Plus,SquareKanban, Calendar1, CircleCheck } from "lucide-react";
+import { CalendarDays, Plus,Calendar1, CircleCheck } from "lucide-react";
 import AddTaskCalendar from "../Components/AddTaskCalender";
 import SideBar, { SideBarItem } from "@/Components/SideBar";
 import { ViewDropDown } from "@/Components/ViewDropDown";
@@ -36,7 +36,6 @@ const Dashboard = () => {
   const viewDropdownButtonRef = useRef<HTMLButtonElement | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [expanded, setExpanded] = useState(true);
-  const [viewTypeActive, setViewTypeActive] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState(false);
   const { refreshAuth } = Auth();
 
@@ -350,14 +349,14 @@ const Dashboard = () => {
       <div className="relative w-full flex">
           <SideBar expanded={expanded} setExpanded={setExpanded}>
             {expanded && (
-            <button className="relative flex gap-2 mb-5 hover:bg-accent/10 p-2 rounded-sm cursor-pointer w-full group"
+            <button className="relative flex gap-2 mb-5 py-3 rounded-lg bg-accent text-center text-white cursor-pointer w-full group shadow-sm hover:shadow-lg hover:opacity-95 transition-opacity"
             onClick= {() => openModal()}
             >
-              <div className="p-1 rounded-full w-6 h-6 flex items-center justify-center bg-purple-500 overflow-hidden">
-              <Plus className="w-5 h-5 text-background"/>
+              <div className="p-1 rounded-md w-6 h-6 flex items-center justify-center overflow-hidden absolute top-2.5 left-16 bg-accent-foreground/20 dark:bg-accent-foreground/15">
+              <Plus className="w-5 h-5 text-accent-foreground dark:text-white"/>
               </div>
-              <div className="flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden">
-              <span className="text-sm font-medium text-accent">Add Task</span>
+              <div className="flex items-center justify-center transition-all duration-300 ease-in-out overflow-hidden w-full">
+              <span className="text-sm font-medium text-white">Add Task</span>
               </div>
               <div className='absolute left-full rounded-sm px-2 py-1 bg-tool-tip text-white invisible opacity-20 -translate-x-3 box-shadow-xl font-extralight ml-1   transition-all duration-300 ease-in-out whitespace-nowrap group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-50'>
               Add task
@@ -397,7 +396,7 @@ const Dashboard = () => {
             <div className="fixed inset-0  z-40 bg-background/95 backdrop-blur-sm" onClick={() => setExpanded(false)} />
           )}
           <div className="flex flex-col overflow-hidden h-screen flex-1 min-w-0">
-            <div className="flex justify-end items-center p-5 shrink-0">
+            {/* <div className="flex justify-end items-center p-5 shrink-0">
               <button ref={viewDropdownButtonRef} onClick={() => {setShowViewDropdown(!showViewDropdown)
                 setViewTypeActive(!viewTypeActive)
               }}>
@@ -410,7 +409,7 @@ const Dashboard = () => {
                 </div>
                 )}
               </button> 
-            </div>
+            </div> */}
               {activeTab === "today" && (
                 <TodayView
                   todos={todos}
@@ -475,7 +474,7 @@ const Dashboard = () => {
       />
     )}
       {showViewDropdown && (
-        <ViewDropDown viewType={viewType} setViewType={setViewType} buttonRef={viewDropdownButtonRef} setShowViewDropdown={setShowViewDropdown} setViewTypeActive={setViewTypeActive} />
+        <ViewDropDown viewType={viewType} setViewType={setViewType} buttonRef={viewDropdownButtonRef} setShowViewDropdown={setShowViewDropdown} />
       )}
     </>
   );

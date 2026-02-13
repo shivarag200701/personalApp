@@ -320,7 +320,7 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
   return createPortal(
     <>
     <div className="fixed inset-0 z-40" onClick={handleClose}></div>
-    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 bg-task fixed z-50 backdrop-blur-sm border border-border rounded-sm transition-all duration-300 ${isMobile ? "w-100" : width} min-w-0 shadow-[0px_4px_25px_rgba(0,0,0,1)] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+    <form onSubmit={handleSubmit} className={`px-4 pt-4 pb-2 bg-task fixed z-50 backdrop-blur-sm border border-border rounded-xl transition-all duration-300 ${isMobile ? "w-100" : width} min-w-0 shadow-2xl ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
     style={{
       top: '50px',
       left: '50%',
@@ -547,14 +547,14 @@ const AddTaskCalender = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate,
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-md text-white bg-muted hover:bg-muted transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
+            className="p-1.5 rounded-md text-foreground bg-muted shadow-sm hover:bg-options-hover transition-colors cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 border border-border"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!title.trim() || isSubmitting}
-            className="p-1.5 rounded-sm bg-linear-to-r from-purple-500 to-pink-400 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.3)] text-white"
+            className="p-1.5 rounded-sm bg-accent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity cursor-pointer shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 shadow-sm text-white"
           >
             {isEditMode ? "Save" : "Add Task"}
           </button>

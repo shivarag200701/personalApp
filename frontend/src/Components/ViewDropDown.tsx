@@ -6,10 +6,9 @@ interface ViewDropDownProps {
     setViewType: (viewType: string) => void;
     buttonRef: React.RefObject<HTMLButtonElement | null>;
     setShowViewDropdown: (showViewDropdown: boolean) => void;
-    setViewTypeActive: (viewTypeActive: boolean) => void;
 }
 
-export const ViewDropDown = ({viewType, setViewType, buttonRef, setShowViewDropdown, setViewTypeActive}: ViewDropDownProps) => {
+export const ViewDropDown = ({viewType, setViewType, buttonRef, setShowViewDropdown}: ViewDropDownProps) => {
     const initialPosition = () => {
         if (buttonRef?.current){
             const rect = buttonRef.current.getBoundingClientRect();
@@ -32,9 +31,7 @@ export const ViewDropDown = ({viewType, setViewType, buttonRef, setShowViewDropd
     }, [buttonRef]);
   return (
     <>
-    <div className='fixed inset-0 z-40 ' onClick={() => {setShowViewDropdown(false)
-        setViewTypeActive(false)
-    }}/>
+    <div className='fixed inset-0 z-40 ' onClick={() => setShowViewDropdown(false)}/>
     <div className="absolute bg-card border border-border rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 min-w-[160px]" style={{top: position.bottom, left: position.left, transform: "translateX(-100%)" }}>
                     <div className="text-white text-sm font-semibold px-4 pt-2">Layout</div>
                     <div className="p-2">

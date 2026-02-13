@@ -77,7 +77,7 @@ export const SettingsModal = ({setShowSettingsModal}: SettingModalProps) => {
   return (
     <>
     <div className='fixed inset-0 z-40 bg-black/30' onClick={() => setShowSettingsModal(false)}/>
-    <div className='fixed left-1/2 top-1/2 z-50 bg-sidebar text-foreground rounded-md shadow-md border border-border max-w-5xl w-full h-[90vh] max-h-[90vh] overflow-hidden'
+    <div className='fixed left-1/2 top-1/2 z-50 bg-sidebar text-foreground rounded-2xl shadow-md border border-border max-w-5xl w-full h-[90vh] max-h-[90vh] overflow-hidden'
     style={{
         transform: 'translate(-50%, -50%)',
     }}

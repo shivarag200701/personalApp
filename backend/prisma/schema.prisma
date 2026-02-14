@@ -15,18 +15,77 @@ datasource db {
 
 
 model User {
-  id            Int             @id @default(autoincrement())
-  username      String          @unique
-  email         String          @unique
+  id              Int             @id @default(autoincrement())
+  username        String          @unique
+  email           String          @unique
   hashedPassword      String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  todos         Todo[]
-  isPasswordSet Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  todos           Todo[]
+  isPasswordSet   Boolean         @default(false)
 
-  oauthAccounts OAuthAccount[]
+  oauthAccounts   OAuthAccount[]
+  preference      UserPrefrence?
+  notfications    Notifications[]
 }
 
+
+model UserPrefrence {
+  id            Int             @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int      @unique
+
+  // Notifications Channel preferences
+  emailEnabled    Boolean @default(true)
+  smsEnabled      Boolean @default(true)
+  pushEnabled     Boolean @default(true)
+  inAppEnabled    Boolean @default(true)
+
+  //notification remainders
+  taskRemainders  Boolean @default(true)
+
+  //Timing preferences
+  reminderBefore  Int     @default(30) //miutes before due time
+  dailyDigest     Boolean  @default(false)
+  digestTime      String?  // "09:00" for 9 AM
+
+  // Contact info
+  phoneNumber     String?
+  pushToken       String?  // FCM token for mobile
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+}
+
+model Notifications {
+  id            Int             @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int      @unique
+
+  type          String  //"for now only task_remainder"
+  title         String
+  message       String
+
+  //Related entites
+  todoId        Int?
+  todo          Todo?    @relation(fields: [todoId],references: [id])
+
+  // Delivery status
+  channels        String[] // ["EMAIL", "PUSH", "IN_APP"]
+  status          String   @default("PENDING") // PENDING, SENT, FAILED
+  sentAt          DateTime?
+  readAt          DateTime?
+  
+  // Metadata
+  metadata        Json?    // Additional data
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId,readAt])      //useful for geting all unread notifications for a user
+  @@index([status])             //useful for the pending notification jobs to be added in the queue
+}
 
 model Todo {
   id            Int         @id @default(autoincrement())
@@ -53,6 +112,8 @@ model Todo {
   nextOccurrence DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
+
+  notifications Notifications[]
 }
 
 model OAuthAccount {

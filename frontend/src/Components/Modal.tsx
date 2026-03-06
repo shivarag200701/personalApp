@@ -23,6 +23,7 @@ export interface Todo {
   color?: string | null;
   order?: number | null;
   createdAt: string | null
+  reminder?: boolean;
 }
 
 interface ModalProps {

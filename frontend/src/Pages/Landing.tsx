@@ -300,7 +300,7 @@ const Landing = () => {
                 onClick={() => navigate("/signup")}
                 className="px-4 py-2 2xl:px-8 2xl:py-4 bg-linear-to-r from-accent to-accent/60 hover:bg-accent text-white rounded-xl hover:opacity-90 transition-all duration-200 font-semibold text-md 2xl:text-lg shadow-[0_5px_10px_rgba(0,0,0,0.2)] cursor-pointer"
               >
-                Start Coding Now
+                Start Tracking
               </button>
             </div>
             <div className={`flex gap-5 text-xs lg-text-xs xl:text-sm text-gray-500 ${isVisibleFive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'} transition-all duration-1500`}>

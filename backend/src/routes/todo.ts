@@ -4,12 +4,13 @@ import { requireLogin } from "../middleware.js";
 import prisma from "../db/index.js";
 import { todoSchema, convertCompleteAtToDate, type RecurrencePattern } from "@shiva200701/todotypes";
 import { calculateNextOccurence } from "../utils/recurringTasks.js";
-import { log } from "console";
+import NotificationService from "../services/notification/NotificationService.js"
 
 const todoRouter = express();
 
 todoRouter.post("/", requireLogin, async (req, res) => {
   const { data, success, error } = todoSchema.safeParse(req.body);
+  const notificationService = new NotificationService()
   if (!success) {
     return res.status(400).json({
       msg: "Send proper data",
@@ -22,7 +23,7 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       msg: "unauthorized",
     });
   }
-  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay } = data;
+  const { title, description, priority, completeAt, category, isRecurring, recurrencePattern, recurrenceInterval, recurrenceEndDate, color, isAllDay, reminder } = data;
   const completeAtDate = convertCompleteAtToDate(completeAt ?? undefined);
   try {
      let todo = await prisma.todo.create({
@@ -51,8 +52,6 @@ todoRouter.post("/", requireLogin, async (req, res) => {
 
       const baseDate = completeAtDate || new Date();
       const nextOccurrence = calculateNextOccurence(recurrencePattern, recurrenceInterval || 1, baseDate);
-      console.log("next occurrence", nextOccurrence);
-
       todo =await prisma.todo.update({
         where: {
           id: todo.id,
@@ -62,6 +61,19 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         },
       });
     }
+    if(reminder && completeAt){
+      const notificationPayload = {
+        userId:userId,
+        type:"task remainder",
+        title:title,
+        message:todo.description,
+        todoId:todo.id,
+        scheduledFor:completeAt
+      }
+      notificationService.createNotification(notificationPayload)
+    }
+
+
 
     return res.status(200).json({
       msg: "Todo added sucessfully",

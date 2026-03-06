@@ -170,6 +170,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
           isAllDay,
+          reminder:true
         });
           await api.put(`/v1/todo/${todo.id}`, {
           title,
@@ -182,6 +183,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrencePattern: recurrencePattern ?? null,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
+          reminder:true
         });
       } else {
          // Create temporary todo for instant UI update

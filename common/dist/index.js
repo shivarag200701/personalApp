@@ -22,6 +22,7 @@ export const todoSchema = z.object({
     nextOccurrence: z.string().nullish(),
     color: z.string().nullish(),
     order: z.number().int().nullish(),
+    reminder: z.boolean().default(false)
 });
 /**
  * Converts "Today"/"Tomorrow"/"This Week" to actual Date object (end of period)

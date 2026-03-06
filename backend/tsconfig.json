@@ -47,6 +47,7 @@
     "**/*.spec.ts",
     // Prisma config is used by the CLI, not compiled into the app
     "prisma.config.ts",
-    "prisma.config.ts.bak"
+    "prisma.config.ts.bak",
+    "scripts"
   ]
 }

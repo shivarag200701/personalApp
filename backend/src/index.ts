@@ -13,6 +13,7 @@ import { requireLogin } from "./middleware.js";
 import { processRecurringTasks } from "./utils/recurringTasks.js";
 import cron from "node-cron";
 import oauthRouter from "./routes/oauth.js";
+import QueueService from "./services/notification/QueueService.js";
 
 const app = express();
 const redisConnectionString = process.env.REDIS_URL || "";
@@ -27,6 +28,9 @@ const PORT = process.env.PORT || 3000;
 export const redisClient = createClient({
   url: redisConnectionString,
 });
+
+//create queue as a singlelton
+export const queueService = new QueueService()
 
 //creating store for client to talk with session
 const redisStore = new RedisStore({
@@ -111,29 +115,11 @@ app.use("/v1/todo", todoRouter);
 app.use("/v1/oauth", oauthRouter);
 app.listen(3000, () => {
   console.log("running in port 3000");
+  console.log("Queue serive initialized");
+  
 });
 
-//cron job to process recurring tasks every day at 12:00 AM
 
-
-// cron.schedule("0 0 * * *", async()=>{
-//   console.log("Processing recurring tasks");
-//   try{
-//     await processRecurringTasks();
-//   }catch(error){
-//     console.error("Error processing recurring tasks", error);
-//   }
-// },{
-//   timezone: "UTC"
-// });
-
-// processRecurringTasks()
-//   .then(()=>{
-//     console.log("Recurring tasks processed successfully");
-//   })
-//   .catch((error)=>{
-//     console.error("Error processing recurring tasks", error);
-//   });
 
 
 

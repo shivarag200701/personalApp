@@ -25,6 +25,7 @@ export const todoSchema = z.object({
   nextOccurrence: z.string().nullish(),
   color: z.string().nullish(),
   order: z.number().int().nullish(),
+  reminder: z.boolean().default(false)
 });
 
 export type SignUp = z.infer<typeof signUpSchema>;

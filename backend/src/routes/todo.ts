@@ -11,6 +11,7 @@ const todoRouter = express();
 todoRouter.post("/", requireLogin, async (req, res) => {
   const { data, success, error } = todoSchema.safeParse(req.body);
   const notificationService = new NotificationService()
+  
   if (!success) {
     return res.status(400).json({
       msg: "Send proper data",

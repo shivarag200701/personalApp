@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "prisma migrate deploy",
     "build": "npx prisma generate --schema=./prisma/schema.prisma && tsc -b",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "email:preview": "email dev --dir src/services/notification/email-templates --port 3001"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.1",
     "@prisma/client": "^6.19.0",
+    "@react-email/components": "1.0.8",
+    "@react-email/render": "2.0.4",
     "@shiva200701/todotypes": "^1.31.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
@@ -34,13 +37,20 @@
     "node-cron": "^4.2.1",
     "pg": "^8.16.3",
     "prisma": "^6.19.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "redis": "^5.9.0",
+    "resend": "^6.9.3",
     "typescript": "^5.9.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@react-email/preview-server": "^5.2.9",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.10.0",
-    "@types/node-cron": "^3.0.11"
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react-email": "^5.2.9"
   }
 }

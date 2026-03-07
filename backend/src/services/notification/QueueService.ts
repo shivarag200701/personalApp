@@ -5,6 +5,8 @@ const connectionOptions = {
     maxRetriesPerRequest: null,
   };
   
+console.log("--conection options in queuessservice",connectionOptions);
+
 
 class QueueService{
     queues = new Map<string,Queue>()
@@ -24,11 +26,7 @@ class QueueService{
     }
 
     async addToQueue(channel:string,data:any, delayMs:number =0){
-        console.log("----------control flow reached here------------");
-        
         const queue = this.queues.get(channel)
-        console.log("-----delay------",delayMs);
-        
         if (!queue) {
             throw new Error(`Queue for channel ${channel} not found`);
           }

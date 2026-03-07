@@ -48,7 +48,7 @@ class NotificationService {
         //get channels from user preference
         const channels = getChannels()
 
-        //store in database
+        //store in database for redundancy
         const notification = await prisma?.notifications.create({
             data: {
                 userId,

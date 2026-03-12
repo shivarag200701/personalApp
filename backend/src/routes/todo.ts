@@ -124,50 +124,13 @@ todoRouter.get("/", requireLogin, async (req, res) => {
     const todos = await prisma.todo.findMany({
       where: {
         userId,
-        // OR: [
-        //   // Non-recurring tasks
-        //   { isRecurring: false },
-        //   // Child instances (actual recurring tasks to do)
-        //   { isRecurring: true, parentRecurringId: { not: null } },
-        //   // Parent templates created today
-        //   {
-        //     isRecurring: true,
-        //     parentRecurringId: null,
-        //     completeAt: {
-        //       gte: today,
-        //       lt: tomorrow
-        //     }
-        //   }
-        // ]
       },
+      include:{
+        notifications:true
+      }
     });
 
 
-    // Filter out parent templates that already have instances (in-memory filtering)
-    // const childInstanceParentIds = new Set(
-    //   todos
-    //     .filter(t => t.isRecurring && t.parentRecurringId !== null)
-    //     .map(t => t.parentRecurringId)
-    //     .filter(id => id !== null)
-    // );
-
-    // const filteredTodos = todos.filter(todo => {
-    //   // If it's a parent template, only show if no instance exists yet
-    //   if (todo.isRecurring && todo.parentRecurringId === null) {
-    //     return !childInstanceParentIds.has(todo.id);
-    //   }
-    //   // Show all other tasks (non-recurring and child instances)
-    //   return true;
-    // });
-
-
-
-    // if (!filteredTodos || filteredTodos.length === 0) {
-    //   return res.status(200).json({
-    //     msg: "No todo found",
-    //     todos: [],
-    //   });
-    // }
     return res.status(200).json({
       todos: todos.map(todo => ({
         ...todo,
@@ -180,6 +143,7 @@ todoRouter.get("/", requireLogin, async (req, res) => {
         updatedAt: todo.updatedAt ? todo.updatedAt.toISOString() : null,
         color: todo.color ?? null,
         order: todo.order ?? null,
+        reminder: todo.notifications.length > 0? true : false
       })),
     });
   } catch (error) {

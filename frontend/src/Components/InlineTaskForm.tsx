@@ -7,6 +7,7 @@ import PriorityPicker from "./PriorityPicker";
 import { parseNaturalLanguageDate} from "../utils/nlpDateParser";
 import WarningModal from "./WarningModal";
 import MoreOptionsPicker, { CategoryPicker } from "./MoreOptionsPicker";
+import ReminderDropdown from "./ReminderDropdown";
 interface InlineTaskFormProps {
   todo?: Todo;
   preselectedDate: Date;
@@ -51,16 +52,19 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
   const [category, setCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [reminder,setReminder] = useState(false)
   const [recurrencePattern, setRecurrencePattern] = useState<"daily" | "weekly" | "monthly" | "yearly" | null>(null);
   const [recurrenceInterval, setRecurrenceInterval] = useState<number | null>(null);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPriorityPicker, setShowPriorityPicker] = useState(false);
+  const [showReminderPicker,setShowReminderPicker] = useState(false);
   const [showMoreOptionsPicker, setShowMoreOptionsPicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const dateButtonRef = useRef<HTMLButtonElement>(null);
   const priorityButtonRef = useRef<HTMLButtonElement>(null);
   const moreOptionsButtonRef = useRef<HTMLButtonElement | null>(null);
+  const reminderButtonRef = useRef<HTMLButtonElement | null>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
@@ -170,7 +174,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
           isAllDay,
-          reminder:true
+          reminder:reminder
         });
           await api.put(`/v1/todo/${todo.id}`, {
           title,
@@ -183,7 +187,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrencePattern: recurrencePattern ?? null,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
-          reminder:true
+          reminder:reminder
         });
       } else {
          // Create temporary todo for instant UI update
@@ -202,7 +206,8 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceEndDate: recurrenceEndDate ? new Date(recurrenceEndDate).toISOString() : null,
           parentRecurringId: todo?.parentRecurringId || null,
           isAllDay,
-          createdAt: null
+          createdAt: null,
+          reminder:reminder
         };
         
         // Update UI instantly
@@ -221,6 +226,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           recurrenceInterval: recurrenceInterval ?? null,
           recurrenceEndDate: recurrenceEndDate ?? null,
           color: 'bg-purple-500',
+          reminder:reminder
         });
 
         // Update the todo with the ID from backend
@@ -493,7 +499,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
               e.preventDefault();
               setShowPriorityPicker(!showPriorityPicker);
             }}
-            className={`p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
+            className={`p-1.5 rounded-sm border border-border hover:border-white/20 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 cursor-pointer shrink-0`}
           >
             <Flag 
               className={`w-4 h-4 ${priority ? priorityColors[priority] : "text-gray-500"}`}
@@ -520,20 +526,35 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
           )}
         </div>
 
-        {/* Reminder Button (placeholder) */}
+        {/* Reminder Button*/}
         <button
+          ref={reminderButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-[#A2A2A9] shrink-0"
+          className="p-1.5 rounded-sm border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400 text-[#A2A2A9] shrink-0"
+          onClick={(e) => {
+            e.preventDefault()
+            setShowReminderPicker(!showReminderPicker)
+          }}
         >
-          <AlarmClock className="w-4 h-4" />
+          <div className="flex gap-1">
+            <AlarmClock className="w-4 h-4" />
+            {reminder && <div className="whitespace-nowrap max-w-[100px] text-[12px]">At time of task</div>}
+          </div>
         </button>
+        {showReminderPicker && (
+          <ReminderDropdown
+            buttonRef={reminderButtonRef}
+            onClose={() => setShowReminderPicker(false)}
+            setReminder={setReminder}
+          />
+        )}
 
         {/* More Options Button */}
         <div className="relative">
         <button
           ref={moreOptionsButtonRef}
           type="button"
-          className="p-1.5 rounded-md border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-[#A2A2A9] shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
+          className="p-1 rounded-sm border border-border hover:border-white/20 hover:bg-muted transition-colors cursor-pointer text-[#A2A2A9] shrink-0 focus:outline-none focus-visible:ring-3 focus-visible:ring-purple-400"
           onClick={(e) => {
             e.preventDefault();
             setShowMoreOptionsPicker(!showMoreOptionsPicker);

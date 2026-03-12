@@ -403,7 +403,7 @@ import { getBorderColorClass } from "@/lib/utils";
                 </div>
               </div>
             )}
-            {!todo.isAllDay && (
+            {todo.reminder && (
               <div className="mt-2 w-fit  rounded-md text-xs flex gap-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                   <div className="flex justify-center items-center">
                     <AlarmClock className="w-3 h-3" />

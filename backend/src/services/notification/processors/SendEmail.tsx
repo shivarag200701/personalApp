@@ -42,7 +42,7 @@ export async function sendEmail({notificationId,userId,type,message,todoId,title
         const {data} = await resend.emails.send({
             from: "Acme <onboarding@resend.dev>",
             to: "shivaraghav200701@gmail.com",
-            subject: "hello world",
+            subject: "Reminder from FlowTask about Task",
             html: html,
         })
         

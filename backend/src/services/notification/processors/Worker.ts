@@ -14,9 +14,10 @@ console.log(connectionOptions);
 
 
 const emailWorker = new Worker('notification-email', async (job:Job)=>{
-    console.log("job",job);
-    const data = await sendEmail()
-    console.log(data);
+    console.log(job.data);
+    
+    const data = await sendEmail(job.data)
+    // console.log(data);
 
 },{connection: connectionOptions})
 

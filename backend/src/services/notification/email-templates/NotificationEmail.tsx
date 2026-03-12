@@ -1,77 +1,128 @@
 import {
-    Body,
-    Container,
-    Head,
-    Heading,
-    Html,
-    Img,
-    Link,
-    Section,
-    Tailwind,
-    Text,
-    pixelBasedPreset
-  } from '@react-email/components';
+  Body,
+  Button,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Tailwind,
+  Text,
+  pixelBasedPreset,
+} from "@react-email/components";
 
-export function NotificationEmail() {
-    return (
-        <Html>
-        <Head />
-        <Tailwind 
-             config={{
-                presets: [pixelBasedPreset],
-                theme: {
-                  extend: {
-                    colors: {
-                      brand: "#007291",
-                    },
-                  },
-                },
+interface NotificationProps {
+  title: string;
+  message: string;
+  badgeLabel?: string;
+  dueLabel?: string;
+  appBaseUrl?: string;
+  todoId?: string;
+  scheduledFor: string
+}
+
+export function NotificationEmail({
+  title,
+  message,
+  badgeLabel = "REMINDER",
+  dueLabel = "Due now",
+  appBaseUrl = "#",
+  todoId,
+  scheduledFor
+}: NotificationProps) {
+  const markCompleteUrl = todoId ? `${appBaseUrl}/todos/${todoId}/complete` : appBaseUrl;
+  const snoozeUrl = todoId ? `${appBaseUrl}/todos/${todoId}/snooze` : appBaseUrl;
+  const manageUrl = appBaseUrl === "#" ? "#" : `${appBaseUrl}/settings/reminders`;
+
+  console.log(scheduledFor);
+  
+
+  return (
+    <Html>
+      <Head />
+      <Tailwind
+        config={{
+          presets: [pixelBasedPreset],
+          theme: {
+            extend: {
+              colors: {
+                brand: "#007291",
+              },
+            },
+          },
+        }}
+      >
+        <Body className="bg-[#f5f5f5] font-sans">
+          <Container className="mx-auto my-0 max-w-[420px] px-4 py-8">
+            <Container
+              className="bg-white px-6 py-6"
+              style={{
+                borderRadius: "12px",
+                border: "1px solid #e5e7eb",
               }}
-        >
-          <Body className="bg-white">
-            <Container className="bg-white border border-solid border-[#eee] rounded-2xl shadow-[rgba(20,50,70,.2)] shadow-md mt-5 max-w-[360px] mx-auto my-0 pt-[68px] px-0 pb-[130px]">
-              <Img
-                src={'src/favicon.png'}
-                width="212"
-                height="88"
-                alt="Plaid"
-                className="mx-auto my-0"
-              />
-              <Text className="text-[#0a85ea] text-[11px] font-bold h-4 tracking-[0] leading-[16px] mt-4 mb-2 mx-2 uppercase text-center">
-                Verify Your Identity
+            >
+              {/* Header: bell + REMINDER */}
+              <Text className="text-xs font-medium text-gray-400 uppercase tracking-wide m-0">
+                🔔 {badgeLabel}
               </Text>
-              <Heading className="text-black font-medium font-[HelveticaNeue-Medium,Helvetica,Arial,sans-serif] inline-block text-[20px] leading-[24px] my-0 text-center">
-                Enter the following code to finish linking Venmo.
+              <Heading as="h1" className="text-xl font-bold text-black mt-2 mb-1">
+                {title}
               </Heading>
-              <Section className="bg-[rgba(0,0,0,.05)] rounded mx-auto font-[HelveticaNeue-Bold] mt-4 mb-3.5 align-middle w-[280px]">
-                <Text className="text-black text-[32px] font-bold tracking-[6px] leading-10 py-2 mx-auto my-0 block text-center">
-                    1 2 3 4 5 6
-                </Text>
-              </Section>
-              <Text className="text-[#444] text-[15px] leading-[23px] tracking-[0] py-0 px-10 m-0 text-center">
-                Not expecting this email?
+              <Text
+                className="text-sm font-medium m-0"
+                style={{ color: "#dc2626" }}
+              >
+                {dueLabel}
               </Text>
-              <Text className="text-[#444] text-[15px] leading-[23px] tracking-[0] py-0 px-10 m-0 text-center">
-                Contact{' '}
-                <Link
-                  href="mailto:login@plaid.com"
-                  className="text-[#444] underline"
+
+              {message ? (
+                <>
+                  <Text className="text-sm text-gray-600 mt-3 mb-0">
+                    {message}
+                  </Text>
+                </>
+              ) : null}
+
+              <Hr className="border-gray-200 my-5" style={{ borderColor: "#e5e7eb" }} />
+
+              {/* Action buttons */}
+              <Container className="p-0">
+                <Button
+                  href={markCompleteUrl}
+                  className="inline-block rounded-lg px-4 py-2.5 text-sm font-semibold text-white no-underline"
+                  style={{
+                    backgroundColor: "#dc2626",
+                  }}
                 >
-                  login@plaid.com
-                </Link>{' '}
-                if you did not request this code.
-              </Text>
+                  Mark complete
+                </Button>
+              </Container>
             </Container>
-            <Text className="text-gray-400 text-sm  tracking-[0] leading-[23px] m-0 mt-5 text-center ">
-            You're receiving this because you enabled email reminders.
 
+            {/* Footer links */}
+            <Text className="text-center text-sm mt-6 m-0">
+              <Link
+                href={manageUrl}
+                className="no-underline font-medium"
+                style={{ color: "#dc2626" }}
+              >
+                Manage reminders
+              </Link>
+              <span className="text-gray-400 mx-2">·</span>
+              <Link
+                href={`${appBaseUrl}/unsubscribe`}
+                className="no-underline text-gray-500"
+              >
+                Unsubscribe
+              </Link>
             </Text>
-          </Body>
-        </Tailwind>
-      </Html>
-    );
-  }
-  
-  export default NotificationEmail;
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+}
 
-  
+export default NotificationEmail;

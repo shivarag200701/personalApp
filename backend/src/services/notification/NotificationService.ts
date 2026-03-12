@@ -70,7 +70,8 @@ class NotificationService {
                 type:type,
                 message:message,
                 todoId:todoId,
-                scheduledFor:scheduledFor
+                title:title,
+                scheduledFor: scheduledFor
             },delayMs
         )
         }

@@ -64,16 +64,22 @@ todoRouter.post("/", requireLogin, async (req, res) => {
       });
     }
     //triggered using feature flag
-    if(reminder && completeAt  && flags.notificationService){
+    if(reminder && completeAt  && flags.notificationService && notificationService){
       const notificationPayload = {
         userId:userId,
-        type:"task remainder",
+        type:"task reminder",
         title:title,
         message:todo.description,
         todoId:todo.id,
         scheduledFor:completeAt
       }
-      notificationService.createNotification(notificationPayload)
+      try{
+        await notificationService.createNotification(notificationPayload)
+      }
+      catch(error){
+        console.error("Failed to create notification", error)
+        throw error
+      }
     }
 
 

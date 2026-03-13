@@ -1,4 +1,7 @@
 import { queueService } from "../../index.js";
+import prisma from "../../db/index.js";
+import { number } from "zod";
+
 
 interface NotificationPayload{
     userId: number;
@@ -13,19 +16,21 @@ class NotificationService {
     async createNotification(payload:NotificationPayload){
 
     const {userId,type,title,message,todoId,scheduledFor} = payload
-
-    let delayMs;
+    let delayMs:number;
     if(scheduledFor){
         const targetDate = new Date(scheduledFor)
+        if (isNaN(targetDate.getTime())) {
+            throw new Error('Invalid scheduledFor date format')
+        }
         const currentTime = Date.now()
-
-        delayMs = targetDate.getTime() - currentTime 
+        delayMs = Math.max(0, targetDate.getTime() - currentTime)
     }
+    
 
 
     try{
         //get user perferences
-        const preferences = await prisma?.userPrefrence.findUnique({
+        const preferences = await prisma.userPrefrence.findUnique({
             where: {
                 userId
             }
@@ -33,7 +38,7 @@ class NotificationService {
 
         
         //get email id
-        const user = await prisma?.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: {
                 id:userId
             },
@@ -41,6 +46,10 @@ class NotificationService {
                 email: true
             }
         })
+
+        if(!user || !user.email){
+            throw new Error("user not found or email is not present")
+        }
 
         if(!preferences){
             console.log(`No preferences found for user ${payload.userId}`);
@@ -61,7 +70,7 @@ class NotificationService {
         const channels = getChannels()
 
         //store in database for redundancy
-        const notification = await prisma?.notifications.create({
+        const notification = await prisma.notifications.create({
             data: {
                 userId,
                 type,
@@ -74,9 +83,12 @@ class NotificationService {
             }
         })
 
-        //enque to the notifications in each channel
-        for (const channel of channels){
-            await queueService.addToQueue(channel,{
+        if(!notification){
+            throw new Error("failed to create a notification record")
+        }
+
+        await Promise.all(channels.map((channel) => 
+            queueService.addToQueue(channel,{
                 notificationId:notification?.id,
                 userId: userId,
                 type:type,
@@ -85,9 +97,9 @@ class NotificationService {
                 title:title,
                 scheduledFor: scheduledFor,
                 email: user?.email,
-            },delayMs
-        )
-        }
+            },delayMs)
+        ))
+
 
         }
         catch(error){

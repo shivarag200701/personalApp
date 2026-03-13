@@ -41,7 +41,7 @@ const ReminderDropdown = ({buttonRef,onClose,setReminder}:ReminderDropdownProps)
         }}>
             <div className="p-4">
                 <div className="text-foreground font-semibold pb-4">
-                    Remianders
+                    Reminders
                 </div>
                 <div className="p-1 border border-border rounded-sm">
                     <div className="flex gap-2">

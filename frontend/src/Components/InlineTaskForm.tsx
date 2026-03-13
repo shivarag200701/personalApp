@@ -527,6 +527,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
         </div>
 
         {/* Reminder Button*/}
+        <div className="relative">
         <button
           ref={reminderButtonRef}
           type="button"
@@ -541,6 +542,7 @@ const InlineTaskForm = ({ todo, preselectedDate, onCancel, onSuccess, onUpdate ,
             {reminder && <div className="whitespace-nowrap max-w-[100px] text-[12px]">At time of task</div>}
           </div>
         </button>
+        </div>
         {showReminderPicker && (
           <ReminderDropdown
             buttonRef={reminderButtonRef}

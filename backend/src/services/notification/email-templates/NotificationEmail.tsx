@@ -21,7 +21,7 @@ dotenv.config()
 
 interface NotificationProps {
   title: string;
-  todoId?: string;
+  todoId: string;
 }
 
 export function NotificationEmail({
@@ -31,6 +31,10 @@ export function NotificationEmail({
   
 
   const frontendUrl = process.env.NODE_ENV === "development" ? "http://localhost:5173" : process.env.FRONTEND_URL
+
+  if(!frontendUrl){
+    throw new Error("frontend URL is undefined")
+  }
 
   return (
     <Html>

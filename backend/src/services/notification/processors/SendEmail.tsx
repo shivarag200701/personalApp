@@ -7,6 +7,10 @@ import NotificationEmail from "../email-templates/NotificationEmail.js";
 dotenv.config()
 
 //instantitate the resend
+if (!process.env.RESEND_API_KEY) {
+  throw new Error('Missing required environment variable: RESEND_API_KEY');
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
  export interface sendEmailProps {
@@ -48,6 +52,7 @@ export async function sendEmail({notificationId,userId,type,message,todoId,title
     }
     catch(error){
         console.error("Failed to send email",error)
+        throw error
     }
 
     

@@ -1,7 +1,11 @@
 import prisma from "../src/db/index.js";
+import dotenv from "dotenv";
+
+dotenv.config()
 
 async function createDefaultPerfernces(){
-    const users = await prisma?.user.findMany({
+try{
+    const users = await prisma.user.findMany({
         where:{
         preference:null
         },
@@ -11,7 +15,6 @@ async function createDefaultPerfernces(){
         }
     })
 
-    try{
     for(const user of users){
         const prefernces = await prisma.userPrefrence.create({
             data:{
@@ -31,12 +34,13 @@ async function createDefaultPerfernces(){
         }
     }
     catch(error){
-        console.error("error upading prefences for user",error);
-        return
+        console.error("error updating prefences for user",error);
+        process.exit(1)
         
     }
 
     console.log("migration complete");
+    await prisma.$disconnect()
     
 }
 

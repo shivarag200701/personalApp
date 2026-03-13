@@ -113,9 +113,9 @@ app.get("/v1/auth-check", requireLogin, (req, res) => {
 app.use("/v1/user", userRouter);
 app.use("/v1/todo", todoRouter);
 app.use("/v1/oauth", oauthRouter);
-app.listen(3000, () => {
-  console.log("running in port 3000");
-  console.log("Queue serive initialized");
+app.listen(PORT, () => {
+  console.log(`running in port ${PORT}`);
+  console.log("Queue service initialized");
   
 });
 

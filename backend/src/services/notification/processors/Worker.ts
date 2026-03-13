@@ -10,11 +10,10 @@ const connectionOptions = {
   };
   
 
-console.log(connectionOptions);
 
 
 const emailWorker = new Worker('notification-email', async (job:Job)=>{
-    const data = await sendEmail(job.data)
+    await sendEmail(job.data)
 },{connection: connectionOptions})
 
 const smsWorker = new Worker('notification-sms', async (job:Job)=>{
@@ -35,17 +34,17 @@ emailWorker.on('error', (err) => {
 })
 
 smsWorker.on('error', (err) => {
-    console.log('Error in email worker',err);
+    console.log('Error in sms worker',err);
     
 })
 
 pushWorker.on('error', (err) => {
-    console.log('Error in email worker',err);
+    console.log('Error in push worker',err);
     
 })
 
 inAppWorker.on('error', (err) => {
-    console.log('Error in email worker',err);
+    console.log('Error in inApp worker',err);
     
 })
 console.log("Email worker has started");

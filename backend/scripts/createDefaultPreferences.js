@@ -1,6 +1,6 @@
 import prisma from "../src/db/index.js";
 async function createDefaultPerfernces() {
-    const users = await prisma?.user.findMany({
+    const users = await prisma.user.findMany({
         where: {
             preference: null
         },
@@ -11,7 +11,7 @@ async function createDefaultPerfernces() {
     });
     try {
         for (const user of users) {
-            const prefernces = await prisma.userPrefrence.create({
+            await prisma.userPrefrence.create({
                 data: {
                     userId: user.id,
                     emailEnabled: true,

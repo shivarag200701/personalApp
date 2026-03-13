@@ -15,8 +15,6 @@ console.log(connectionOptions);
 
 const emailWorker = new Worker('notification-email', async (job:Job)=>{
     const data = await sendEmail(job.data)
-    console.log(data);
-
 },{connection: connectionOptions})
 
 const smsWorker = new Worker('notification-sms', async (job:Job)=>{

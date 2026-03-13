@@ -15,31 +15,22 @@ import {
   pixelBasedPreset,
 } from "@react-email/components";
 
+import dotenv from "dotenv"
+
+dotenv.config()
+
 interface NotificationProps {
   title: string;
-  message: string;
-  badgeLabel?: string;
-  dueLabel?: string;
-  appBaseUrl?: string;
   todoId?: string;
-  scheduledFor: string
 }
 
 export function NotificationEmail({
   title,
-  message,
-  badgeLabel = "REMINDER",
-  dueLabel = "Due now",
-  appBaseUrl = "#",
   todoId,
-  scheduledFor
 }: NotificationProps) {
-  const markCompleteUrl = todoId ? `${appBaseUrl}/todos/${todoId}/complete` : appBaseUrl;
-  const snoozeUrl = todoId ? `${appBaseUrl}/todos/${todoId}/snooze` : appBaseUrl;
-  const manageUrl = appBaseUrl === "#" ? "#" : `${appBaseUrl}/settings/reminders`;
-
-  const localDate = new Date(scheduledFor)
   
+
+  const frontendUrl = process.env.NODE_ENV === "development" ? "http://localhost:5173" : process.env.FRONTEND_URL
 
   return (
     <Html>
@@ -87,7 +78,7 @@ export function NotificationEmail({
             </Text>
             <Hr className="my-[16px] border-gray-200 border-t" />
             <Button className="rounded-lg p-3 bg-[#284ea7] text-white text-sm cursor-pointer"
-            href={`http://localhost:5173/dashboard?task=${todoId}`}>
+            href={`${frontendUrl}/dashboard?task=${todoId}`}>
               Mark as Complete
             </Button>
         </Container>  

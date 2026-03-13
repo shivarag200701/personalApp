@@ -24,9 +24,21 @@ class NotificationService {
 
 
     try{
+        //get user perferences
         const preferences = await prisma?.userPrefrence.findUnique({
             where: {
                 userId
+            }
+        })
+
+        
+        //get email id
+        const user = await prisma?.user.findUnique({
+            where: {
+                id:userId
+            },
+            select: {
+                email: true
             }
         })
 
@@ -71,7 +83,8 @@ class NotificationService {
                 message:message,
                 todoId:todoId,
                 title:title,
-                scheduledFor: scheduledFor
+                scheduledFor: scheduledFor,
+                email: user?.email,
             },delayMs
         )
         }

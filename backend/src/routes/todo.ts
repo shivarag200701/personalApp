@@ -5,6 +5,7 @@ import prisma from "../db/index.js";
 import { todoSchema, convertCompleteAtToDate, type RecurrencePattern } from "@shiva200701/todotypes";
 import { calculateNextOccurence } from "../utils/recurringTasks.js";
 import NotificationService from "../services/notification/NotificationService.js"
+import { flags } from "../flags.js";
 
 const todoRouter = express();
 
@@ -62,7 +63,8 @@ todoRouter.post("/", requireLogin, async (req, res) => {
         },
       });
     }
-    if(reminder && completeAt){
+    //triggered using feature flag
+    if(reminder && completeAt  && flags.notificationService){
       const notificationPayload = {
         userId:userId,
         type:"task remainder",

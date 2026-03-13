@@ -17,31 +17,28 @@ const resend = new Resend(process.env.RESEND_API_KEY)
     todoId: string
     title:string
     scheduledFor: string
+    email:string
  }
 
 
-export async function sendEmail({notificationId,userId,type,message,todoId,title,scheduledFor}:sendEmailProps){
-    console.log("title is",title);
-    console.log("message is",message);
+export async function sendEmail({notificationId,userId,type,message,todoId,title,scheduledFor,email}:sendEmailProps){
 
-    
+  if(!process.env.EMAIL){
+    throw new Error('Missing required environment variable: EMAIL')
+  }
+  const from = process.env.NODE_ENV === "development" ? "Acme <onboarding@resend.dev>" : process.env.EMAIL
     try{
         const html = await pretty(
           await render(
             <NotificationEmail
-              message={message}
               title={title}
-              badgeLabel="REMINDER"
-              dueLabel="Due now"
-              appBaseUrl={process.env.FRONTEND_URL ?? "#"}
               todoId={String(todoId)}
-              scheduledFor={scheduledFor}
             />
           )
         );
         const {data} = await resend.emails.send({
-            from: "Acme <onboarding@resend.dev>",
-            to: "shivaraghav200701@gmail.com",
+            from:from,
+            to: email,
             subject: "Reminder from FlowTask about Task",
             html: html,
         })

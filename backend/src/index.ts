@@ -35,14 +35,14 @@ export const queueService = new QueueService()
 //creating store for client to talk with session
 const redisStore = new RedisStore({
   client: redisClient,
-  prefix: "upstash client",
+  prefix: "Railway client",
 });
 
 redisClient
   .connect()
   .catch((error) => console.error("unable to connect to redis client", error));
 
-redisClient.on("connect", () => console.log("connected to upstash"));
+redisClient.on("connect", () => console.log("connected to railway redis client"));
 redisClient.on("error", (error) =>
   console.error("Error connecting to upstash", error)
 );

@@ -102,9 +102,6 @@ app.get("/", (req, res) => {
 
 //routes
 app.get("/v1/auth-check", requireLogin, (req, res) => {
-  console.log("auth-check cookie:", req.headers.cookie);
-  console.log("auth-check sessionID:", req.sessionID);
-  console.log("auth-check session:", req.session);
   res.status(200).json({
     isAuthenticated: "true",
   });
